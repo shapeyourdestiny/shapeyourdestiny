@@ -1,0 +1,27 @@
+.intro { background: var(--tint); padding: 8px 0 60px; text-align: center; }
+.heading { font-size: clamp(28px, 4vw, 44px); max-width: 760px; margin: 0 auto 26px; }
+.b1 { color: var(--ink); }
+.b2 { color: var(--navy); }
+.b3 { color: var(--orange-dark); }
+.quote {
+  margin: 0 auto;
+  max-width: 600px;
+  text-align: left;
+  background: var(--paper);
+  border-radius: 20px;
+  padding: 26px 30px;
+  box-shadow: var(--shadow);
+  border-left: 6px solid var(--gold);
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 500;
+  font-size: 16.5px;
+  color: var(--ink-soft);
+}
+.quote cite {
+  display: block;
+  margin-top: 10px;
+  font-size: 13.5px;
+  color: var(--navy);
+  font-style: normal;
+  font-weight: 700;
+}
