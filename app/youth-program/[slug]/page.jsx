@@ -9,8 +9,9 @@ export function generateStaticParams() {
   return getAllTopicSlugs().map((slug) => ({ slug }));
 }
 
-export function generateMetadata({ params }) {
-  const topic = RESEARCH_TOPICS[params.slug];
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const topic = RESEARCH_TOPICS[slug];
   if (!topic) return {};
   return {
     title: `${topic.title} - The Research | Shape Your Destiny`,
@@ -18,14 +19,15 @@ export function generateMetadata({ params }) {
   };
 }
 
-export default function ResearchTopicPage({ params }) {
-  const topic = RESEARCH_TOPICS[params.slug];
+export default async function ResearchTopicPage({ params }) {
+  const { slug } = await params;
+  const topic = RESEARCH_TOPICS[slug];
   if (!topic) notFound();
 
   return (
     <>
       <Header />
-      <ResearchArticle topic={topic} allSlugs={getAllTopicSlugs().filter((s) => s !== params.slug)} />
+      <ResearchArticle topic={topic} allSlugs={getAllTopicSlugs().filter((s) => s !== slug)} />
       <Footer />
     </>
   );
