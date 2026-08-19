@@ -9,6 +9,7 @@ export default function Footer() {
         </svg>
       </div>
       <footer className={styles.footer}>
+        <img src="/Images/footer_logo_gold.webp" alt="Shape Your Destiny" className={styles.logo} />
         <div className={styles.social}>
           <a href="https://www.facebook.com/profile.php?id=100084441627855" aria-label="Facebook">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">

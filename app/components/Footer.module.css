@@ -1,4 +1,5 @@
 .footer { padding: 46px 0 38px; text-align: center; color: var(--on-navy-soft); font-size: 14px; background: var(--navy-deep); }
+.logo { max-width: 180px; height: auto; margin-bottom: 24px; }
 .social { display: flex; justify-content: center; gap: 16px; margin-bottom: 16px; }
 .social a {
   width: 38px; height: 38px; border-radius: 50%;
