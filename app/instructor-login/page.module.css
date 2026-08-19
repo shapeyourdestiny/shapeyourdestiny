@@ -1,0 +1,79 @@
+.section {
+  background: var(--tint);
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+}
+
+.card {
+  background: var(--paper);
+  border-radius: 24px;
+  max-width: 480px;
+  width: 100%;
+  padding: 48px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.iconBadge {
+  width: 64px;
+  height: 64px;
+  background: var(--navy);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+.iconBadge svg {
+  width: 28px;
+  height: 28px;
+  color: #fff;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--navy);
+  background: rgba(31,63,145,0.08);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.card h1 {
+  font-size: clamp(24px, 3.5vw, 32px);
+  color: var(--ink);
+  margin: 0 0 16px;
+}
+
+.body {
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0 0 28px;
+}
+
+.card .btn {
+  margin-bottom: 24px;
+}
+
+.secondary {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.secondary a {
+  color: var(--navy);
+  font-weight: 600;
+  text-decoration: none;
+}
+.secondary a:hover {
+  text-decoration: underline;
+}
