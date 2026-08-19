@@ -86,27 +86,30 @@ export default function CorporateTraining() {
         </div>
       </section>
 
-      {/* 2. Why It Matters - burnout stats */}
+      {/* 2. The ROI Case - stats */}
       <section className={styles.why}>
         <div className="wrap">
           <div className={styles.sectionHead}>
-            <span className={styles.eyebrowAlt}>Why It Matters</span>
-            <h2>Burnout is not a mood. It is a staffing crisis</h2>
-            <p>The people shaping your students&apos; futures are running on empty, and it is costing districts more than morale.</p>
+            <span className={styles.eyebrowAlt}>The ROI Case</span>
+            <h2>Investing in staff pays for itself</h2>
+            <p>Keeping a great teacher costs less than replacing one, and supporting staff wellbeing is one of the more direct ways schools protect that investment.</p>
           </div>
 
           <div className={styles.statRow}>
+            <div className={`${styles.statCard} ${styles.statCardPrimary}`}>
+              <span className={styles.statTagPrimary}>The Hook</span>
+              <div className={styles.statNumPrimary}>$11.9k&ndash;$24.9k</div>
+              <div className={styles.statLabelPrimary}>average cost to replace a single teacher, per the Learning Policy Institute (2024)</div>
+            </div>
             <div className={styles.statCard}>
+              <span className={styles.statTag}>Context</span>
               <div className={styles.statNum}>53%</div>
-              <div className={styles.statLabel}>of K-12 teachers report burnout, per RAND&apos;s 2025 State of the American Teacher survey</div>
+              <div className={styles.statLabel}>of K-12 teachers nationally report burnout, per RAND&apos;s 2025 State of the American Teacher survey</div>
             </div>
             <div className={styles.statCard}>
+              <span className={styles.statTag}>Context</span>
               <div className={styles.statNum}>46% vs 13%</div>
-              <div className={styles.statLabel}>of teachers say work leaves no room for a private life, compared to similar working adults (RAND, 2025)</div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statNum}>$11.9k&ndash;$24.9k</div>
-              <div className={styles.statLabel}>average cost to replace a single teacher, per the Learning Policy Institute (2024)</div>
+              <div className={styles.statLabel}>of teachers say work leaves no room for a private life, compared to similar working adults nationally</div>
             </div>
           </div>
           <p className={styles.statSource}>
