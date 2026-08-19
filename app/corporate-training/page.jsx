@@ -97,17 +97,15 @@ export default function CorporateTraining() {
 
           <div className={styles.statRow}>
             <div className={`${styles.statCard} ${styles.statCardPrimary}`}>
-              <span className={styles.statTagPrimary}>The Hook</span>
+              <span className={styles.statTagPrimary}>The Bottom Line</span>
               <div className={styles.statNumPrimary}>$11.9k&ndash;$24.9k</div>
               <div className={styles.statLabelPrimary}>average cost to replace a single teacher, per the Learning Policy Institute (2024)</div>
             </div>
             <div className={styles.statCard}>
-              <span className={styles.statTag}>Context</span>
               <div className={styles.statNum}>53%</div>
               <div className={styles.statLabel}>of K-12 teachers nationally report burnout, per RAND&apos;s 2025 State of the American Teacher survey</div>
             </div>
             <div className={styles.statCard}>
-              <span className={styles.statTag}>Context</span>
               <div className={styles.statNum}>46% vs 13%</div>
               <div className={styles.statLabel}>of teachers say work leaves no room for a private life, compared to similar working adults nationally</div>
             </div>
