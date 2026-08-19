@@ -36,8 +36,8 @@
   to { transform: translateX(-50%); }
 }
 .logo {
-  height: 56px;
-  width: 150px;
+  height: 70px;
+  width: 140px;
   flex: none;
   display: flex;
   align-items: center;

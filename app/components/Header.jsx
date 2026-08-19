@@ -18,12 +18,7 @@ export default function Header() {
     <header className={styles.header}>
       <nav className={styles.nav}>
         <a href="/" className={styles.logo}>
-          <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
-            <circle cx="24" cy="24" r="23" fill="none" stroke="#D8AE4B" strokeWidth="2" />
-            <path d="M24 12c-3 4-7 7-7 12a7 7 0 0014 0c0-5-4-8-7-12z" fill="#D8AE4B" />
-            <circle cx="24" cy="30" r="2.6" fill="#122349" />
-          </svg>
-          <span className={styles.logoWord}>Shape Your <span>Destiny</span></span>
+          <img src="/Images/footer_logo_gold.webp" alt="Shape Your Destiny" />
         </a>
 
         <div className={styles.navLinks}>

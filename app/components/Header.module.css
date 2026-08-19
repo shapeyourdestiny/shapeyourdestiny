@@ -13,9 +13,8 @@
   max-width: 1180px;
   margin: 0 auto;
 }
-.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.logoWord { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 19px; color: #fff; }
-.logoWord span { color: var(--gold); }
+.logo { display: flex; align-items: center; text-decoration: none; }
+.logo img { height: 70px; width: auto; }
 .navLinks {
   display: none;
   align-items: center;

@@ -1,19 +1,18 @@
 import styles from "./SplitSection.module.css";
 
 /**
- * Reusable photo-cluster + copy section.
+ * Reusable photo + copy section.
  * Used for both "Our Whole Child Approach" and "Before & After School".
- * Pass reverse={true} to put the photo cluster on the left instead of the right.
+ * Pass reverse={true} to put the photo on the left instead of the right.
+ * Images already have decorative frames built in, so we display them simply.
  */
 export default function SplitSection({
   reverse = false,
   eyebrow,
   heading,
   paragraphs = [],
-  mainSrc,
-  mainAlt,
-  insetSrc,
-  insetAlt,
+  imageSrc,
+  imageAlt,
 }) {
   return (
     <section className={styles.split}>
@@ -29,14 +28,7 @@ export default function SplitSection({
         </div>
 
         <div className={styles.media} style={{ order: reverse ? 1 : 2 }}>
-          <div className={`${styles.blob} ${styles.blobA} ${reverse ? styles.blobALeft : ""}`} />
-          <div className={`${styles.blob} ${styles.blobB} ${reverse ? styles.blobBLeft : ""}`} />
-          <div className={styles.mainPhoto}>
-            <img src={mainSrc} alt={mainAlt} />
-          </div>
-          <div className={`${styles.insetPhoto} ${reverse ? styles.insetRight : ""}`}>
-            <img src={insetSrc} alt={insetAlt} />
-          </div>
+          <img src={imageSrc} alt={imageAlt} className={styles.designedImage} />
         </div>
       </div>
     </section>

@@ -27,10 +27,8 @@ export default function Home() {
             "At Shape Your Destiny, we know kids need more than fitness or nutrition alone. True growth happens when children connect the dots. They see that moving their bodies and eating well also shapes how they feel emotionally.",
             "This approach makes them more engaged, confident, and resilient.",
           ]}
-          mainSrc="/Images/whole-child-main.png"
-          mainAlt="Instructor leading kids through a mindfulness activity"
-          insetSrc="/Images/whole-child-inset.webp"
-          insetAlt="Program instructor"
+          imageSrc="/Images/whole-child-main.png"
+          imageAlt="Instructor leading kids through a mindfulness activity"
         />
 
         <SplitSection
@@ -41,10 +39,8 @@ export default function Home() {
             "Our programs help children stay active while also learning skills that support them at school, at home, and in life. They connect movement, breathing, and social-emotional learning (SEL) so kids understand the link between how their bodies feel and how their emotions work.",
             "Our instructors are trained to create a safe, encouraging space for every child, whether shy, full of energy, or somewhere in between, meeting them where they are and helping them grow.",
           ]}
-          mainSrc="/images/before-after-main.jpg"
-          mainAlt="Kids doing yoga outdoors"
-          insetSrc="/images/before-after-inset.jpg"
-          insetAlt="Instructor teaching a stretch"
+          imageSrc="/Images/whole-child-inset.webp"
+          imageAlt="Kids doing yoga outdoors with instructor"
         />
 
         <ProgramActivities />
