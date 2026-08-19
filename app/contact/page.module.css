@@ -1,5 +1,6 @@
 .hero { background: var(--navy); padding: 20px 0 0; position: relative; }
 .heroInner { max-width: 720px; margin: 0 auto; padding: 56px 28px 64px; text-align: center; }
+@media (max-width: 600px) { .heroInner { padding: 40px 24px 48px; } }
 .eyebrow {
   display: inline-flex; font-family: 'Baloo 2', sans-serif; font-weight: 700;
   font-size: 13px; letter-spacing: .05em; text-transform: uppercase; color: var(--gold);
@@ -12,6 +13,7 @@
 @media (min-width: 700px) { .wave svg { height: 90px; } }
 
 .content { padding: 60px 0 80px; background: var(--tint); margin-top: -5px; position: relative; z-index: 2; }
+@media (max-width: 600px) { .content { padding: 40px 0 60px; } }
 
 .grid {
   display: grid;
@@ -19,9 +21,10 @@
   gap: 48px;
   align-items: start;
 }
-@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; gap: 32px; } }
 
 .formSection { background: var(--paper); border-radius: 24px; padding: 36px; box-shadow: 0 8px 30px rgba(20,44,107,0.08); }
+@media (max-width: 480px) { .formSection { padding: 28px 22px; border-radius: 20px; } }
 
 .form { display: flex; flex-direction: column; gap: 20px; }
 
@@ -138,6 +141,7 @@
   padding: 28px;
   box-shadow: 0 6px 20px rgba(20,44,107,0.06);
 }
+@media (max-width: 480px) { .contactCard { padding: 22px; } }
 .contactCard h3 {
   font-size: 18px;
   margin-bottom: 16px;
@@ -150,7 +154,8 @@
   text-decoration: none;
   font-size: 15px;
   font-weight: 600;
-  padding: 10px 0;
+  padding: 12px 0;
+  min-height: 44px;
   transition: color 0.2s ease;
 }
 .contactLink:hover {
@@ -167,6 +172,7 @@
   padding: 28px;
   box-shadow: 0 6px 20px rgba(20,44,107,0.06);
 }
+@media (max-width: 480px) { .stepsCard { padding: 22px; } }
 .stepsCard h3 {
   font-size: 18px;
   margin-bottom: 20px;

@@ -1,4 +1,5 @@
 .hero { position: relative; background: var(--navy); padding: 56px 0 0; }
+@media (max-width: 600px) { .hero { padding: 36px 0 0; } }
 .heroGrid {
   max-width: 1180px;
   margin: 0 auto;
@@ -9,7 +10,10 @@
   align-items: center;
 }
 @media (max-width: 860px) {
-  .heroGrid { grid-template-columns: 1fr; text-align: center; padding-bottom: 40px; }
+  .heroGrid { grid-template-columns: 1fr; text-align: center; padding-bottom: 40px; gap: 32px; }
+}
+@media (max-width: 480px) {
+  .heroGrid { padding: 0 20px 32px; }
 }
 .eyebrow {
   font-family: 'Baloo 2', sans-serif;

@@ -1,5 +1,7 @@
 .intro { background: var(--tint); padding: 0 0 60px; text-align: center; margin-top: -5px; position: relative; z-index: 2; }
-.heading { font-size: clamp(28px, 4vw, 44px); max-width: 760px; margin: 0 auto 26px; }
+@media (max-width: 600px) { .intro { padding: 0 0 44px; } }
+.heading { font-size: clamp(24px, 4vw, 44px); max-width: 760px; margin: 0 auto 26px; }
+@media (max-width: 600px) { .heading { margin-bottom: 20px; } }
 .b1 { color: var(--ink); }
 .b2 { color: var(--navy); }
 .b3 { color: var(--orange-dark); }
@@ -17,6 +19,7 @@
   font-size: 16.5px;
   color: var(--ink-soft);
 }
+@media (max-width: 600px) { .quote { padding: 22px 24px; font-size: 15px; border-radius: 16px; } }
 .quote cite {
   display: block;
   margin-top: 10px;

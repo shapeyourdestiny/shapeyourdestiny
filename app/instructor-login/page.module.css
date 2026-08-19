@@ -6,6 +6,7 @@
   justify-content: center;
   padding: 80px 24px;
 }
+@media (max-width: 480px) { .section { padding: 48px 20px; } }
 
 .card {
   background: var(--paper);
@@ -16,6 +17,7 @@
   box-shadow: var(--shadow);
   text-align: center;
 }
+@media (max-width: 480px) { .card { padding: 36px 24px; border-radius: 20px; } }
 
 .iconBadge {
   width: 64px;

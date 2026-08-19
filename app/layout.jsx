@@ -16,6 +16,11 @@ export const metadata = {
   description: "Holistic youth wellness programs combining fitness, mindfulness, and nutrition to help children build confidence and thrive.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html

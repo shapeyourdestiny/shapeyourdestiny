@@ -1,5 +1,7 @@
 .section { background: var(--paper); padding: 64px 0; margin-top: -1px; }
+@media (max-width: 600px) { .section { padding: 44px 0; } }
 .head { max-width: 640px; margin: 0 auto 44px; text-align: center; }
+@media (max-width: 600px) { .head { margin-bottom: 32px; } }
 .eyebrow {
   display: inline-flex;
   font-family: 'Baloo 2', sans-serif;

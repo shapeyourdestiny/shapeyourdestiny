@@ -161,17 +161,20 @@
 
 .close {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 30px;
-  height: 30px;
+  top: 10px;
+  right: 10px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: #eaf1fc;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
   cursor: pointer;
   color: #16193b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .illustration {
@@ -187,4 +190,12 @@
   color: #4a5170;
   line-height: 1.55;
   text-align: left;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .front { padding: 44px 22px 28px; }
+  .title { font-size: 21px; }
+  .summary { font-size: 14px; margin: 12px 0 20px; }
+  .back { padding: 28px 20px; }
 }
