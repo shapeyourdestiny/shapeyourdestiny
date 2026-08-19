@@ -26,6 +26,7 @@ const PROGRAMS = [
     color: "var(--teal-dark)",
     title: "Customized App-Based Programs",
     body: "Accessible wellness tailored to individual schedules and goals, so staff who cannot make an in-person session still get a program built around their own time and priorities.",
+    badge: "In Development",
   },
 ];
 
@@ -107,7 +108,10 @@ export default function CorporateTraining() {
                   <ProgramIcon type={p.icon} />
                 </div>
                 <div>
-                  <h3>{p.title}</h3>
+                  <h3>
+                    {p.title}
+                    {p.badge && <span className={styles.badge}>{p.badge}</span>}
+                  </h3>
                   <p>{p.body}</p>
                 </div>
               </div>
