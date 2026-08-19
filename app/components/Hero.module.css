@@ -26,6 +26,6 @@
 .photoWrap { position: relative; display: flex; justify-content: center; }
 .heroImage { width: 100%; max-width: 520px; height: auto; }
 
-.wave { background: var(--navy); margin-bottom: -1px; }
+.wave { background: var(--navy); margin-bottom: -3px; position: relative; z-index: 1; }
 .wave svg { width: 100%; height: 70px; display: block; }
 @media (min-width: 900px) { .wave svg { height: 110px; } }
