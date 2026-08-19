@@ -1,5 +1,5 @@
-.wave { background: var(--paper); }
-.wave svg { width: 100%; height: 90px; display: block; vertical-align: bottom; }
+.wave { background: var(--paper); margin-bottom: -1px; }
+.wave svg { width: 100%; height: 90px; display: block; }
 
 .footer {
   background: var(--navy-deep);
