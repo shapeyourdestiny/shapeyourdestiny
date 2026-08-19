@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Footer.module.css";
 
 const DONATE_URL = "https://www.paypal.com/donate/?hosted_button_id=263FBTTYYBNLY";
