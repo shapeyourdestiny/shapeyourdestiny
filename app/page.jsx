@@ -27,9 +27,9 @@ export default function Home() {
             "At Shape Your Destiny, we know kids need more than fitness or nutrition alone. True growth happens when children connect the dots. They see that moving their bodies and eating well also shapes how they feel emotionally.",
             "This approach makes them more engaged, confident, and resilient.",
           ]}
-          mainSrc="/images/whole-child-main.jpg"
+          mainSrc="/Images/whole-child-main.png"
           mainAlt="Instructor leading kids through a mindfulness activity"
-          insetSrc="/images/whole-child-inset.jpg"
+          insetSrc="/Images/whole-child-inset.webp"
           insetAlt="Program instructor"
         />
 

@@ -2,13 +2,13 @@ import styles from "./TrustMarquee.module.css";
 
 // Replace each src below with the real logo file path once you have them.
 const PARTNERS = [
-  "/images/partner-1.png",
-  "/images/partner-2.png",
-  "/images/partner-3.png",
-  "/images/partner-4.png",
-  "/images/partner-5.png",
-  "/images/partner-6.png",
-  "/images/partner-7.png",
+  "/Images/partner3.png",
+  "/Images/partner4.png",
+  "/Images/partner5.png",
+  "/Images/Garden-City-Community-College-NSKS.jpg",
+  "/Images/partner7.png",
+  "/Images/partner9.png",
+  "/Images/partner10.png",
 ];
 
 export default function TrustMarquee() {
