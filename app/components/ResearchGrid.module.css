@@ -1,4 +1,4 @@
-.section { background: var(--tint); padding: 64px 0; }
+.section { background: var(--tint); padding: 64px 0; margin-top: -1px; }
 .head { max-width: 640px; margin: 0 auto 44px; text-align: center; }
 .eyebrow {
   display: inline-flex;
