@@ -17,7 +17,9 @@ export default function TrustMarquee() {
   return (
     <section className={styles.trust}>
       <div className={`wrap ${styles.head}`}>
-        <span className={styles.eyebrow}>School Affiliates That Trust Us</span>
+        <span className={styles.eyebrow}>Trusted Partners</span>
+        <h2>Schools & Organizations We Work With</h2>
+        <p>From elementary schools to universities, we bring wellness programs to institutions across California.</p>
       </div>
 
       <div className={styles.marquee} role="region" aria-label="Partner school and organization logos">

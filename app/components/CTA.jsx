@@ -4,13 +4,18 @@ export default function CTA() {
   return (
     <section className={styles.wrapSection}>
       <div className={`wrap ${styles.band}`}>
-        <h2>Want to see your child thrive?</h2>
+        <h2>Help us shape more destinies</h2>
         <p>
-          Partner with us to bring whole-child wellness programs into your school,
-          at home, in the classroom, and everywhere in between.
+          Your donation helps us bring whole-child wellness programs to more schools,
+          empowering young people to build resilience, confidence, and purpose.
         </p>
-        <a className="btn btnPrimary" href="/inquiry-form">
-          Bring This Program to My School
+        <a
+          className="btn btnPrimary"
+          href="https://www.paypal.com/donate/?hosted_button_id=263FBTTYYBNLY"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Donate to Shape Your Destiny
         </a>
       </div>
     </section>

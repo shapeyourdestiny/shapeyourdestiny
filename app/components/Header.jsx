@@ -7,8 +7,8 @@ const NAV_LINKS = [
   { href: "/", label: "Children's Wellness Program" },
   { href: "http://campshape.org", label: "Camp Shape Summer Camp" },
   { href: "/corporate-training", label: "Corporate Training" },
-  { href: "https://www.paypal.com/donate/?hosted_button_id=263FBTTYYBNLY", label: "Donate to Shape" },
   { href: "/contact", label: "Contact" },
+  { href: "/instructor-login", label: "Instructor Sign In" },
 ];
 
 export default function Header() {
@@ -27,8 +27,13 @@ export default function Header() {
           ))}
         </div>
 
-        <a className={`btn btnPrimary ${styles.navCta}`} href="/instructor-login">
-          Instructor Sign In
+        <a
+          className={`btn btnPrimary ${styles.navCta}`}
+          href="https://www.paypal.com/donate/?hosted_button_id=263FBTTYYBNLY"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Donate to Shape
         </a>
 
         <button
@@ -48,7 +53,7 @@ export default function Header() {
           {NAV_LINKS.map((l) => (
             <a key={l.label} href={l.href}>{l.label}</a>
           ))}
-          <a href="/instructor-login">Instructor Sign In</a>
+          <a href="https://www.paypal.com/donate/?hosted_button_id=263FBTTYYBNLY" target="_blank" rel="noopener noreferrer">Donate to Shape</a>
         </div>
       )}
     </header>

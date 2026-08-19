@@ -38,65 +38,68 @@ export default function ResearchArticle({ topic, allSlugs }) {
           <h1>{topic.title}</h1>
           <p className={styles.dek}>{topic.dek}</p>
         </div>
-        <div className={styles.wave}>
-          <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
-            <path fill="#EAF1FC" d="M0,60 C240,110 480,10 720,45 C960,80 1200,20 1440,55 L1440,100 L0,100 Z" />
-          </svg>
-        </div>
       </section>
 
-      <div className="wrap">
-        <div className={styles.tldr} style={{ borderTop: `5px solid ${topic.color}` }}>
-          <h2 style={{ color: topic.colorDark }}>The 30 Second Version</h2>
-          <ul>
-            {topic.tldr.map((line, i) => (
-              <li key={i}>
-                <svg viewBox="0 0 24 24" fill="none" stroke={topic.color} strokeWidth="2.4" strokeLinecap="round">
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                {line}
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div className={styles.wave}>
+        <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+          <path fill="#EAF1FC" d="M0,60 C240,110 480,10 720,45 C960,80 1200,20 1440,55 L1440,100 L0,100 Z" />
+        </svg>
+      </div>
 
-        <article className={styles.article}>
-          <div className={styles.statRow}>
-            {topic.stats.map((s, i) => (
-              <div className={styles.statCard} key={i}>
-                <div className={styles.statNum} style={{ color: topic.colorDark }}>{s.num}</div>
-                <div className={styles.statLabel}>{s.label}</div>
+      <section className={styles.content}>
+        <div className="wrap">
+          <div className={styles.tldr} style={{ borderTop: `5px solid ${topic.color}` }}>
+            <h2 style={{ color: topic.colorDark }}>The 30 Second Version</h2>
+            <ul>
+              {topic.tldr.map((line, i) => (
+                <li key={i}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke={topic.color} strokeWidth="2.4" strokeLinecap="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <article className={styles.article}>
+            <div className={styles.statRow}>
+              {topic.stats.map((s, i) => (
+                <div className={styles.statCard} key={i}>
+                  <div className={styles.statNum} style={{ color: topic.colorDark }}>{s.num}</div>
+                  <div className={styles.statLabel}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {topic.sections.map((section, i) => (
+              <div key={i}>
+                <h2>{section.heading}</h2>
+                <p>{section.body}</p>
+                {topic.pullQuote && i === 0 && (
+                  <p className={styles.pullQuote}>{topic.pullQuote}</p>
+                )}
               </div>
             ))}
-          </div>
+          </article>
 
-          {topic.sections.map((section, i) => (
-            <div key={i}>
-              <h2>{section.heading}</h2>
-              <p>{section.body}</p>
-              {topic.pullQuote && i === 0 && (
-                <p className={styles.pullQuote}>{topic.pullQuote}</p>
-              )}
+          <details className={styles.sources}>
+            <summary>
+              View Sources
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </summary>
+            <div className={styles.sourcesList}>
+              <ol>
+                {topic.sources.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ol>
             </div>
-          ))}
-        </article>
-
-        <details className={styles.sources}>
-          <summary>
-            View Sources
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </summary>
-          <div className={styles.sourcesList}>
-            <ol>
-              {topic.sources.map((s, i) => (
-                <li key={i}>{s}</li>
-              ))}
-            </ol>
-          </div>
-        </details>
-      </div>
+          </details>
+        </div>
+      </section>
 
       <section className={styles.nextTopics}>
         <div className={`wrap ${styles.inner}`}>

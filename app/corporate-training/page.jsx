@@ -30,6 +30,25 @@ const PROGRAMS = [
   },
 ];
 
+const SEL_ITEMS = [
+  {
+    icon: <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />,
+    iconExtra: <><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></>,
+    title: "SEL training workshops",
+    body: "that give educators practical tools for emotional regulation, empathy, and positive classroom culture",
+  },
+  {
+    icon: <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></>,
+    title: "Classroom reinforcement strategies",
+    body: "so staff can support and extend the lessons we teach students in our youth program",
+  },
+  {
+    icon: <><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" /></>,
+    title: "A unified approach",
+    body: "where students and staff speak the same wellness language, creating consistency across the school day",
+  },
+];
+
 function ProgramIcon({ type }) {
   const icons = {
     yoga: <><circle cx="12" cy="5" r="2" /><path d="M5 21c0-4 3-6 7-6s7 2 7 6" /></>,
@@ -49,6 +68,7 @@ export default function CorporateTraining() {
     <>
       <Header />
 
+      {/* 1. Hero */}
       <section className={styles.hero}>
         <div className={styles.heroInner}>
           <span className={styles.eyebrow}>Corporate Training</span>
@@ -57,19 +77,20 @@ export default function CorporateTraining() {
           <p className={styles.lede}>
             Staff wellness matters. When educators are balanced and energized, students benefit too.
           </p>
-          <a className="btn btnPrimary" href="/inquiry-form">Bring Wellness to My Staff</a>
+          <a className="btn btnPrimary" href="/contact">Bring Wellness to My Staff</a>
         </div>
-        <div className={styles.wave}>
+        <div className={styles.heroWave}>
           <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
             <path fill="#EAF1FC" d="M0,60 C240,110 480,10 720,45 C960,80 1200,20 1440,55 L1440,100 L0,100 Z" />
           </svg>
         </div>
       </section>
 
+      {/* 2. Why It Matters - burnout stats */}
       <section className={styles.why}>
         <div className="wrap">
           <div className={styles.sectionHead}>
-            <span className={styles.eyebrow}>Why It Matters</span>
+            <span className={styles.eyebrowAlt}>Why It Matters</span>
             <h2>Burnout is not a mood. It is a staffing crisis</h2>
             <p>The people shaping your students&apos; futures are running on empty, and it is costing districts more than morale.</p>
           </div>
@@ -94,10 +115,47 @@ export default function CorporateTraining() {
         </div>
       </section>
 
+      {/* 3. SEL Training - the flagship, answer to the problem */}
+      <section className={styles.selSection}>
+        <div className="wrap">
+          <div className={styles.selBox}>
+            <span className={styles.selBadge}>Our Flagship Training</span>
+            <h2>Social-Emotional Learning for Educators</h2>
+
+            <p className={styles.selIntro}>
+              Most wellness vendors stop at yoga and a stress ball. We go further: staff learn the same emotional regulation skills we teach your students, so the whole school is speaking one language, not two.
+            </p>
+
+            <div className={styles.selItems}>
+              {SEL_ITEMS.map((item, i) => (
+                <div className={styles.selItem} key={i}>
+                  <div className={styles.selItemIcon}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      {item.icon}
+                      {item.iconExtra}
+                    </svg>
+                  </div>
+                  <div>
+                    <strong>{item.title}</strong> {item.body}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.selQuote}>
+              <p>Research shows SEL is most effective when the entire school community practices the same skills. Our integrated approach means teachers aren&apos;t just delivering curriculum, they&apos;re modeling the habits themselves.</p>
+            </div>
+
+            <a className="btn btnPrimary" href="/contact">Bring SEL Training to My School</a>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Programs grid - supporting content */}
       <section className={styles.programs}>
         <div className="wrap">
           <div className={styles.sectionHead}>
-            <span className={styles.eyebrow}>Programs Offered</span>
+            <span className={styles.eyebrowAlt}>Rounding Out The Program</span>
             <h2>Built for real school schedules</h2>
             <p>Every program is designed to fit around planning periods, after-school hours, and the reality of a school calendar, not against it.</p>
           </div>
@@ -120,10 +178,11 @@ export default function CorporateTraining() {
         </div>
       </section>
 
+      {/* 5. How It Works */}
       <section className={styles.how}>
         <div className="wrap">
           <div className={styles.sectionHead}>
-            <span className={styles.eyebrow}>How It Works</span>
+            <span className={styles.eyebrowAlt}>How It Works</span>
             <h2>Simple to bring in, easy to sustain</h2>
           </div>
           <div className={styles.howSteps}>
@@ -157,6 +216,7 @@ export default function CorporateTraining() {
         </div>
       </section>
 
+      {/* 6. Closing CTA */}
       <div className={styles.ctaWrap}>
         <div className="wrap">
           <div className={styles.ctaBand}>
@@ -165,7 +225,7 @@ export default function CorporateTraining() {
               Bring a wellness program to your school or district that is built for the reality of the job,
               not a one-off workshop that fades by winter break.
             </p>
-            <a className="btn btnPrimary" href="/inquiry-form">Bring Wellness to My Staff</a>
+            <a className="btn btnPrimary" href="/contact">Bring Wellness to My Staff</a>
           </div>
         </div>
       </div>

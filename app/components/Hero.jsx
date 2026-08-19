@@ -8,7 +8,7 @@ export default function Hero() {
           <p className={styles.eyebrow}>Children&apos;s Youth Programs</p>
           <h1 className={styles.title}>Wellness and Confidence for Every Child</h1>
           <div className={styles.ctas}>
-            <a className="btn btnPrimary" href="/inquiry-form">
+            <a className="btn btnPrimary" href="/contact">
               Bring this program to my school
             </a>
           </div>
