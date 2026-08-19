@@ -2,6 +2,7 @@
   perspective: 1400px;
   cursor: pointer;
   aspect-ratio: 3 / 4;
+  padding-top: 32px; /* space for overlapping icon badge */
 }
 
 .card {
@@ -13,35 +14,134 @@
 }
 
 .isFlipped {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) !important;
 }
 
+/* FRONT FACE */
 .face {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
-  border-radius: 16px;
-  padding: 32px 24px;
+  border-radius: 26px;
+  padding: 48px 24px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  background: var(--card-color);
+  border: 4px solid #fff;
+  box-shadow:
+    0 10px 0 var(--card-color-dark),
+    0 18px 30px rgba(20, 44, 107, 0.18);
+  transform: rotate(var(--card-rotation));
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  overflow: hidden;
 }
 
-.back {
-  transform: rotateY(180deg);
+.scene:hover .face:not(.back) {
+  transform: rotate(0deg) translateY(-4px) scale(1.03);
+  box-shadow:
+    0 14px 0 var(--card-color-dark),
+    0 24px 40px rgba(20, 44, 107, 0.22);
+}
+
+.dotOverlay {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.16) 2px, transparent 2px);
+  background-size: 26px 26px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.iconBadge {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 64px;
   background: #fff;
-  box-shadow: 0 14px 34px rgba(20, 44, 107, 0.14);
-  justify-content: flex-start;
-  overflow-y: auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(20, 44, 107, 0.15);
+  z-index: 10;
+}
+
+.stopTag {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.24);
+  color: #fff;
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-top: 12px;
+  margin-bottom: 8px;
 }
 
 .title {
+  position: relative;
+  z-index: 1;
   font-family: "Baloo 2", sans-serif;
   font-weight: 700;
   font-size: 22px;
-  color: #16193b;
-  margin-top: 40px;
+  color: #fff;
+  margin-top: 12px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.summary {
+  position: relative;
+  z-index: 1;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 12px 0 20px;
+  line-height: 1.5;
+}
+
+.cta {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  background: #fff;
+  color: var(--card-color-dark);
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.2s ease;
+}
+
+.scene:hover .cta {
+  transform: scale(1.05);
+}
+
+/* BACK FACE */
+.back {
+  transform: rotateY(180deg) rotate(0deg) !important;
+  background: #fff !important;
+  border: none !important;
+  box-shadow: 0 14px 34px rgba(20, 44, 107, 0.14) !important;
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding: 32px 24px;
+}
+
+.scene:hover .back {
+  transform: rotateY(180deg) rotate(0deg) translateY(0) scale(1) !important;
 }
 
 .titleDark {
@@ -50,25 +150,6 @@
   font-size: 19px;
   color: #16193b;
   margin: 12px 0 10px;
-}
-
-.summary {
-  font-size: 15px;
-  color: #16193b;
-  margin: 12px 0 20px;
-}
-
-.cta {
-  margin-top: auto;
-  background: #142c6b;
-  color: #fff;
-  font-family: "Baloo 2", sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 10px 18px;
-  border-radius: 999px;
 }
 
 .close {

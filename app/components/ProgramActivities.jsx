@@ -4,6 +4,10 @@ import ActivityCard from "./ActivityCard";
 const ACTIVITIES = [
   {
     color: "#3FC0E8",
+    colorDark: "#1FA0CB",
+    icon: "yoga",
+    stopTag: "Stop 1 · Calm",
+    rotation: -2.5,
     title: "Yoga & Breathwork",
     summary: "Yoga and breathwork give kids practical tools to calm their minds and regulate emotions.",
     fullText:
@@ -12,6 +16,10 @@ const ACTIVITIES = [
   },
   {
     color: "#6FCB55",
+    colorDark: "#4FA347",
+    icon: "movement",
+    stopTag: "Stop 2 · Energy",
+    rotation: 1.8,
     title: "Group Fitness & Movement Games",
     summary: "Kids learn best when movement feels fun!",
     fullText:
@@ -20,6 +28,10 @@ const ACTIVITIES = [
   },
   {
     color: "#F2A65E",
+    colorDark: "#E08A3C",
+    icon: "team",
+    stopTag: "Stop 3 · Belonging",
+    rotation: -1.2,
     title: "Team Sports",
     summary:
       "Team sports teach life skills. Through soccer, basketball, pickleball, and more, kids practice communication, cooperation, and handling wins and losses with confidence.",

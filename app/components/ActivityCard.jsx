@@ -3,13 +3,55 @@
 import { useState } from "react";
 import styles from "./ActivityCard.module.css";
 
+const ICONS = {
+  yoga: (color) => (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="16" cy="6" r="3" />
+      <path d="M16 11v6M16 17l-6 8M16 17l6 8M8 14l8 3 8-3" />
+    </svg>
+  ),
+  movement: (color) => (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="16" cy="16" r="10" />
+      <line x1="16" y1="6" x2="16" y2="26" />
+      <line x1="6" y1="16" x2="26" y2="16" />
+      <circle cx="16" cy="16" r="3" fill={color} stroke="none" />
+    </svg>
+  ),
+  team: (color) => (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="10" cy="10" r="4" />
+      <circle cx="22" cy="10" r="4" />
+      <circle cx="16" cy="22" r="4" />
+      <line x1="13" y1="12" x2="14" y2="19" />
+      <line x1="19" y1="12" x2="18" y2="19" />
+      <line x1="13" y1="10" x2="19" y2="10" />
+    </svg>
+  ),
+};
+
 /**
  * Flip card matching the live site's interaction:
  * front = colored summary card, click flips to back = illustration + full copy + close (x).
- * Drop this in app/components/ActivityCard.jsx
  */
-export default function ActivityCard({ color, title, summary, fullText, illustrationSrc }) {
+export default function ActivityCard({
+  color,
+  colorDark,
+  title,
+  summary,
+  fullText,
+  illustrationSrc,
+  icon,
+  stopTag,
+  rotation = 0,
+}) {
   const [flipped, setFlipped] = useState(false);
+
+  const cardStyle = {
+    '--card-color': color,
+    '--card-color-dark': colorDark,
+    '--card-rotation': `${rotation}deg`,
+  };
 
   return (
     <div
@@ -26,12 +68,25 @@ export default function ActivityCard({ color, title, summary, fullText, illustra
         }
       }}
     >
-      <div className={`${styles.card} ${flipped ? styles.isFlipped : ""}`}>
+      <div
+        className={`${styles.card} ${flipped ? styles.isFlipped : ""}`}
+        style={cardStyle}
+      >
         {/* FRONT */}
-        <div className={styles.face} style={{ background: color }}>
+        <div className={styles.face}>
+          <div className={styles.dotOverlay} />
+          <div className={styles.iconBadge}>
+            {ICONS[icon] && ICONS[icon](colorDark)}
+          </div>
+          {stopTag && <span className={styles.stopTag}>{stopTag}</span>}
           <h3 className={styles.title}>{title}</h3>
           <p className={styles.summary}>{summary}</p>
-          <span className={styles.cta}>How We Help</span>
+          <span className={styles.cta}>
+            How We Help
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M6 3v6M3 7l3 3 3-3" />
+            </svg>
+          </span>
         </div>
 
         {/* BACK */}
@@ -56,45 +111,3 @@ export default function ActivityCard({ color, title, summary, fullText, illustra
     </div>
   );
 }
-
-/* Example usage in app/page.tsx or a ProgramActivities.jsx section:
-
-import ActivityCard from "./components/ActivityCard";
-
-const activities = [
-  {
-    color: "#3FC0E8",
-    title: "Yoga & Breathwork",
-    summary: "Yoga and breathwork give kids practical tools to calm their minds and regulate emotions.",
-    fullText: "Our instructors teach kids gentle poses and simple breathing techniques to help reduce stress, improve focus, and boost self-confidence. Studies show that even short, consistent practice can lower anxiety and improve classroom performance. For children, these skills provide a foundation of emotional regulation they can use every day.",
-    illustrationSrc: "/images/yoga-illustration.png",
-  },
-  {
-    color: "#6FCB55",
-    title: "Group Fitness & Movement Games",
-    summary: "Kids learn best when movement feels fun!",
-    fullText: "With group fitness and interactive games led by our instructors, children build strength, coordination, and resilience while also practicing teamwork and communication. These activities give them a healthy outlet for stress and energy, teaching that physical movement is directly connected to how they feel emotionally.",
-    illustrationSrc: "/images/movement-illustration.png",
-  },
-  {
-    color: "#F2A65E",
-    title: "Team Sports",
-    summary: "Team sports teach life skills. Through soccer, basketball, pickleball, and more, kids practice communication, cooperation, and handling wins and losses with confidence.",
-    fullText: "These activities strengthen not only the body, but also social-emotional skills like resilience, empathy, and leadership. By working toward shared goals, children build a sense of belonging and discover the confidence that comes from being part of something bigger than themselves.",
-    illustrationSrc: "/images/team-illustration.png",
-  },
-];
-
-export default function ProgramActivities() {
-  return (
-    <section>
-      <h2>Program Activities</h2>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
-        {activities.map((a) => (
-          <ActivityCard key={a.title} {...a} />
-        ))}
-      </div>
-    </section>
-  );
-}
-*/
