@@ -15,12 +15,7 @@ export default function Hero() {
         </div>
 
         <div className={styles.photoWrap}>
-          <div className={`${styles.blob} ${styles.blobOrange}`} />
-          <div className={`${styles.blob} ${styles.blobTeal}`} />
-          {/* Replace with the real hero photo */}
-          <div className={styles.photoFrame}>
-            <img src="/Images/hero-kids.webp" alt="Kids in the Shape Your Destiny wellness program" />
-          </div>
+          <img src="/Images/hero-kids.webp" alt="Kids in the Shape Your Destiny wellness program" className={styles.heroImage} />
         </div>
       </div>
 
