@@ -1,4 +1,5 @@
-.wave svg { width: 100%; height: 90px; display: block; margin-top: -6px; }
+.wave { background: var(--paper); }
+.wave svg { width: 100%; height: 90px; display: block; vertical-align: bottom; }
 
 .footer {
   background: var(--navy-deep);
