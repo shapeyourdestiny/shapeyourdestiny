@@ -1,4 +1,4 @@
-.split { background: var(--tint); padding: 64px 0; margin-top: -3px; position: relative; z-index: 2; }
+.split { background: var(--tint); padding: 64px 0; margin-top: -5px; position: relative; z-index: 3; }
 .inner {
   display: grid;
   grid-template-columns: 1fr 1fr;
