@@ -5,7 +5,7 @@ import styles from "./ActivityCard.module.css";
 
 const ICONS = {
   yoga: (color) => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style={{ stroke: color }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="4" r="2" />
       <path d="M12 8v4" />
       <path d="M8 14l4-2 4 2" />
@@ -14,19 +14,19 @@ const ICONS = {
     </svg>
   ),
   movement: (color) => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <line x1="12" y1="3" x2="12" y2="21" />
-      <line x1="3" y1="12" x2="21" y2="12" />
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style={{ stroke: color }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="8" />
+      <line x1="12" y1="4" x2="12" y2="20" />
+      <line x1="4" y1="12" x2="20" y2="12" />
     </svg>
   ),
   team: (color) => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="8" cy="8" r="3" />
-      <circle cx="16" cy="8" r="3" />
-      <circle cx="12" cy="16" r="3" />
-      <path d="M10 10l2 4" />
-      <path d="M14 10l-2 4" />
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style={{ stroke: color }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="7" r="2.5" />
+      <circle cx="16" cy="7" r="2.5" />
+      <circle cx="12" cy="16" r="2.5" />
+      <path d="M9.5 9l2.5 5" />
+      <path d="M14.5 9l-2.5 5" />
     </svg>
   ),
 };
