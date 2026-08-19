@@ -33,7 +33,7 @@
     0 20px 40px rgba(20, 44, 107, 0.15);
   transform: rotate(var(--card-rotation));
   transition: transform 0.22s ease, box-shadow 0.22s ease;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .scene:hover .front {
