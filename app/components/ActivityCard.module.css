@@ -1,14 +1,13 @@
 .scene {
   perspective: 1400px;
   cursor: pointer;
-  aspect-ratio: 3 / 4;
-  padding-top: 32px; /* space for overlapping icon badge */
+  padding-top: 36px;
 }
 
 .card {
   position: relative;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 3 / 4;
   transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
   transform-style: preserve-3d;
 }
@@ -18,12 +17,12 @@
 }
 
 /* FRONT FACE */
-.face {
+.front {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
-  border-radius: 26px;
-  padding: 48px 24px 32px;
+  border-radius: 24px;
+  padding: 50px 28px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -31,79 +30,82 @@
   background: var(--card-color);
   border: 4px solid #fff;
   box-shadow:
-    0 10px 0 var(--card-color-dark),
-    0 18px 30px rgba(20, 44, 107, 0.18);
+    0 8px 0 0 var(--card-color-dark),
+    0 12px 0 0 rgba(255,255,255,0.5),
+    0 20px 40px rgba(20, 44, 107, 0.15);
   transform: rotate(var(--card-rotation));
   transition: transform 0.22s ease, box-shadow 0.22s ease;
   overflow: hidden;
 }
 
-.scene:hover .face:not(.back) {
-  transform: rotate(0deg) translateY(-4px) scale(1.03);
+.scene:hover .front {
+  transform: rotate(0deg) translateY(-6px) scale(1.02);
   box-shadow:
-    0 14px 0 var(--card-color-dark),
-    0 24px 40px rgba(20, 44, 107, 0.22);
+    0 12px 0 0 var(--card-color-dark),
+    0 16px 0 0 rgba(255,255,255,0.5),
+    0 28px 50px rgba(20, 44, 107, 0.2);
 }
 
 .dotOverlay {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.16) 2px, transparent 2px);
-  background-size: 26px 26px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.2) 2px, transparent 2px);
+  background-size: 20px 20px;
   pointer-events: none;
   z-index: 0;
 }
 
 .iconBadge {
   position: absolute;
-  top: -32px;
+  top: -28px;
   left: 50%;
   transform: translateX(-50%);
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   background: #fff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(20, 44, 107, 0.15);
+  box-shadow: 0 4px 16px rgba(20, 44, 107, 0.12);
   z-index: 10;
 }
 
 .stopTag {
   position: relative;
   z-index: 1;
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.28);
   color: #fff;
   font-family: "Baloo 2", sans-serif;
   font-weight: 700;
   font-size: 11px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 999px;
-  margin-top: 12px;
-  margin-bottom: 8px;
+  margin-top: 8px;
+  margin-bottom: 12px;
 }
 
 .title {
   position: relative;
   z-index: 1;
   font-family: "Baloo 2", sans-serif;
-  font-weight: 700;
-  font-size: 22px;
+  font-weight: 800;
+  font-size: 24px;
   color: #fff;
-  margin-top: 12px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  margin-top: 4px;
+  line-height: 1.2;
 }
 
 .summary {
   position: relative;
   z-index: 1;
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.92);
-  margin: 12px 0 20px;
-  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 14px 0 24px;
+  line-height: 1.55;
+  flex: 1;
 }
 
 .cta {
@@ -115,33 +117,41 @@
   font-family: "Baloo 2", sans-serif;
   font-weight: 700;
   font-size: 13px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 10px 18px;
+  padding: 12px 24px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: transform 0.2s ease;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .scene:hover .cta {
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
 /* BACK FACE */
-.back {
-  transform: rotateY(180deg) rotate(0deg) !important;
-  background: #fff !important;
-  border: none !important;
-  box-shadow: 0 14px 34px rgba(20, 44, 107, 0.14) !important;
-  justify-content: flex-start;
-  overflow-y: auto;
+.face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 24px;
   padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-.scene:hover .back {
-  transform: rotateY(180deg) rotate(0deg) translateY(0) scale(1) !important;
+.back {
+  transform: rotateY(180deg);
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(20, 44, 107, 0.14);
+  justify-content: flex-start;
+  overflow-y: auto;
 }
 
 .titleDark {

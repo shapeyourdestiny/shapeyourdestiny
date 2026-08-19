@@ -5,35 +5,32 @@ import styles from "./ActivityCard.module.css";
 
 const ICONS = {
   yoga: (color) => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="16" cy="6" r="3" />
-      <path d="M16 11v6M16 17l-6 8M16 17l6 8M8 14l8 3 8-3" />
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="4" r="2" />
+      <path d="M12 8v4" />
+      <path d="M8 14l4-2 4 2" />
+      <path d="M6 20l4-6" />
+      <path d="M18 20l-4-6" />
     </svg>
   ),
   movement: (color) => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="16" cy="16" r="10" />
-      <line x1="16" y1="6" x2="16" y2="26" />
-      <line x1="6" y1="16" x2="26" y2="16" />
-      <circle cx="16" cy="16" r="3" fill={color} stroke="none" />
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <line x1="12" y1="3" x2="12" y2="21" />
+      <line x1="3" y1="12" x2="21" y2="12" />
     </svg>
   ),
   team: (color) => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="10" cy="10" r="4" />
-      <circle cx="22" cy="10" r="4" />
-      <circle cx="16" cy="22" r="4" />
-      <line x1="13" y1="12" x2="14" y2="19" />
-      <line x1="19" y1="12" x2="18" y2="19" />
-      <line x1="13" y1="10" x2="19" y2="10" />
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="3" />
+      <circle cx="16" cy="8" r="3" />
+      <circle cx="12" cy="16" r="3" />
+      <path d="M10 10l2 4" />
+      <path d="M14 10l-2 4" />
     </svg>
   ),
 };
 
-/**
- * Flip card matching the live site's interaction:
- * front = colored summary card, click flips to back = illustration + full copy + close (x).
- */
 export default function ActivityCard({
   color,
   colorDark,
@@ -73,7 +70,7 @@ export default function ActivityCard({
         style={cardStyle}
       >
         {/* FRONT */}
-        <div className={styles.face}>
+        <div className={styles.front}>
           <div className={styles.dotOverlay} />
           <div className={styles.iconBadge}>
             {ICONS[icon] && ICONS[icon](colorDark)}
@@ -83,8 +80,8 @@ export default function ActivityCard({
           <p className={styles.summary}>{summary}</p>
           <span className={styles.cta}>
             How We Help
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M6 3v6M3 7l3 3 3-3" />
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M2 4l3 3 3-3" />
             </svg>
           </span>
         </div>
