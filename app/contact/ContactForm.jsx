@@ -19,6 +19,7 @@ export default function ContactForm() {
     phone: "",
     org: "",
     message: "",
+    website: "", // Honeypot field - bots will fill this, humans won't see it
   });
 
   const currentReason = REASONS.find((r) => r.value === reason) || REASONS[0];
@@ -35,12 +36,12 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, reason }),
+        body: JSON.stringify({ ...form, reason, _ts: Date.now() }),
       });
 
       if (res.ok) {
         setStatus("success");
-        setForm({ name: "", email: "", phone: "", org: "", message: "" });
+        setForm({ name: "", email: "", phone: "", org: "", message: "", website: "" });
       } else {
         setStatus("error");
       }
@@ -149,6 +150,20 @@ export default function ContactForm() {
           required
           rows={5}
           placeholder={currentReason.messagePlaceholder}
+        />
+      </div>
+
+      {/* Honeypot field - hidden from humans, bots will fill it */}
+      <div className={styles.honeypot} aria-hidden="true">
+        <label htmlFor="website">Website</label>
+        <input
+          type="text"
+          id="website"
+          name="website"
+          value={form.website}
+          onChange={handleChange}
+          tabIndex={-1}
+          autoComplete="off"
         />
       </div>
 

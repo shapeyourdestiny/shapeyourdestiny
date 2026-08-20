@@ -207,3 +207,15 @@
   color: var(--ink-soft);
   margin: 0;
 }
+
+/* Honeypot field - hidden from humans, visible to bots */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  width: 0;
+  overflow: hidden;
+}
