@@ -36,7 +36,11 @@ export default function ResetPasswordPage() {
     });
 
     if (updateError) {
-      setError(updateError.message);
+      if (updateError.message.includes("session") || updateError.code === "session_not_found") {
+        setError("Your reset link has expired. Please request a new one.");
+      } else {
+        setError(updateError.message);
+      }
       setLoading(false);
       return;
     }
