@@ -5,7 +5,7 @@
 -- 2. Select your project (or create one)
 -- 3. Go to SQL Editor (left sidebar)
 -- 4. Paste this entire file and click "Run"
--- 5. Verify the table was created: Table Editor > ping
+-- 5. Verify tables were created in Table Editor
 -- =============================================================================
 
 -- Test table to verify database connection works
@@ -24,3 +24,65 @@ CREATE POLICY "Allow anonymous access to ping"
   TO anon
   USING (true)
   WITH CHECK (true);
+
+-- =============================================================================
+-- INSTRUCTOR AUTH TABLES
+-- =============================================================================
+
+-- Invite codes for registration (admin creates these, instructors consume them)
+CREATE TABLE IF NOT EXISTS invite_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code TEXT UNIQUE NOT NULL,
+  role TEXT NOT NULL DEFAULT 'instructor',
+  used_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE invite_codes ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can read invite codes (to check validity during registration)
+CREATE POLICY "Anyone can read invite codes"
+  ON invite_codes
+  FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+-- Authenticated users can update (to mark as used)
+CREATE POLICY "Authenticated users can update invite codes"
+  ON invite_codes
+  FOR UPDATE
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- User profiles (extends auth.users with app-specific data)
+CREATE TABLE IF NOT EXISTS profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'instructor',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Users can read their own profile
+CREATE POLICY "Users can read own profile"
+  ON profiles
+  FOR SELECT
+  TO authenticated
+  USING (auth.uid() = id);
+
+-- Users can insert their own profile (during registration)
+CREATE POLICY "Users can insert own profile"
+  ON profiles
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = id);
+
+-- Users can update their own profile
+CREATE POLICY "Users can update own profile"
+  ON profiles
+  FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);

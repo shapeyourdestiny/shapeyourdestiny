@@ -1,6 +1,8 @@
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
+  const supabase = await createClient();
+
   // Insert a test row
   const { data: inserted, error: insertError } = await supabase
     .from("ping")
