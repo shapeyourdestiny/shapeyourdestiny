@@ -18,7 +18,7 @@ export default function Header() {
     <header className={styles.header}>
       <nav className={styles.nav}>
         <a href="/" className={styles.logo}>
-          <img src="/Images/footer_logo_gold.webp" alt="Shape Your Destiny" />
+          <img src="/Images/footer_logo_gold.png" alt="Shape Your Destiny" />
         </a>
 
         <div className={styles.navLinks}>

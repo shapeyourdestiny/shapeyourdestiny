@@ -15,7 +15,7 @@ export default function Footer() {
       <footer className={styles.footer}>
         <div className={styles.container}>
           <div className={styles.brand}>
-            <img src="/Images/footer_logo_gold.webp" alt="Shape Your Destiny" className={styles.logo} />
+            <img src="/Images/footer_logo_gold.png" alt="Shape Your Destiny" className={styles.logo} />
             <p className={styles.tagline}>Wellness and confidence for every child.</p>
           </div>
 

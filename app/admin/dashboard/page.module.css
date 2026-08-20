@@ -1,0 +1,377 @@
+.page {
+  max-width: 900px;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+.header h1 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+.header p {
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
+.formCard,
+.tableCard {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(20,44,107,0.06);
+  margin-bottom: 24px;
+}
+
+.formCard h2,
+.tableCard h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.formDesc {
+  color: var(--ink-soft);
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.formRow {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+  width: 100%;
+}
+@media (max-width: 600px) {
+  .formRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+}
+
+.field label {
+  display: block;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.field input {
+  width: 100%;
+  min-width: 280px;
+  padding: 12px 14px;
+  border: 2px solid var(--tint-deep);
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+  background: var(--tint);
+}
+@media (max-width: 600px) {
+  .field input {
+    min-width: 0;
+  }
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+.field input::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.6;
+}
+
+.roleToggle {
+  display: flex;
+  gap: 8px;
+}
+
+.roleBtn {
+  padding: 10px 20px;
+  border: 2px solid var(--tint-deep);
+  border-radius: 8px;
+  background: var(--paper);
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.roleBtn:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+.roleBtnActive {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+.roleBtnActive:hover {
+  background: var(--navy-mid);
+  border-color: var(--navy-mid);
+  color: #fff;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: 14px;
+  margin: 0;
+}
+
+.success {
+  color: var(--green);
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  background: rgba(111, 203, 85, 0.1);
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 400px;
+  margin: 0 -24px -24px;
+  padding: 0 24px 24px;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table th {
+  background: var(--paper);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--tint-deep);
+}
+
+.table th {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  background: var(--tint);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.code {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  background: var(--tint);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.roleBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+.roleInstructor {
+  background: rgba(62, 143, 160, 0.15);
+  color: var(--teal-dark);
+}
+.roleAdmin {
+  background: rgba(216, 174, 75, 0.2);
+  color: #9a7a2a;
+}
+
+.statusAvailable,
+.statusUsed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.statusAvailable {
+  color: var(--orange);
+}
+.statusUsed {
+  color: var(--ink-soft);
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.email {
+  color: var(--ink);
+}
+
+.tableHeader {
+  margin-bottom: 16px;
+}
+.tableHeader h2 {
+  margin-bottom: 4px;
+}
+.tableSubhead {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.actions {
+  text-align: right;
+}
+
+.actionBtns {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.resendBtn,
+.cancelBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.resendBtn svg,
+.cancelBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.resendBtn {
+  color: var(--teal);
+}
+.resendBtn:hover {
+  background: rgba(62, 143, 160, 0.1);
+}
+
+.cancelBtn {
+  color: var(--ink-soft);
+}
+.cancelBtn:hover {
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.08);
+}
+
+.resendBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal content */
+.modalContent h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.modalContent p {
+  color: var(--ink-soft);
+  font-size: 15px;
+  margin-bottom: 24px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.modalSecondary {
+  background: none;
+  border: 2px solid var(--tint-deep);
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.modalSecondary:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+
+.modalDanger {
+  background: #d32f2f;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.modalDanger:hover {
+  background: #b71c1c;
+}
+.modalDanger:disabled,
+.modalSecondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.date {
+  color: var(--ink-soft);
+}
+
+.empty {
+  color: var(--ink-soft);
+  font-size: 14px;
+  text-align: center;
+  padding: 24px;
+}
+
+@media (max-width: 600px) {
+  .header h1 {
+    font-size: 24px;
+  }
+  .formCard,
+  .tableCard {
+    padding: 20px;
+    border-radius: 12px;
+  }
+  .tableWrap {
+    margin: 0 -20px -20px;
+    padding: 0 20px 20px;
+  }
+}

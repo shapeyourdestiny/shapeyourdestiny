@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS invite_codes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code TEXT UNIQUE NOT NULL,
   role TEXT NOT NULL DEFAULT 'instructor',
+  sent_to TEXT,
+  sent_at TIMESTAMPTZ DEFAULT now(),
   used_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -55,6 +57,31 @@ CREATE POLICY "Authenticated users can update invite codes"
   USING (true)
   WITH CHECK (true);
 
+-- Admins can insert invite codes
+CREATE POLICY "Admins can insert invite codes"
+  ON invite_codes
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+-- Admins can delete unused invite codes
+CREATE POLICY "Admins can delete invite codes"
+  ON invite_codes
+  FOR DELETE
+  TO authenticated
+  USING (
+    used_by IS NULL AND
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
 -- User profiles (extends auth.users with app-specific data)
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -71,6 +98,18 @@ CREATE POLICY "Users can read own profile"
   FOR SELECT
   TO authenticated
   USING (auth.uid() = id);
+
+-- Admins can read all profiles (for instructor list)
+CREATE POLICY "Admins can read all profiles"
+  ON profiles
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
 
 -- Users can insert their own profile (during registration)
 CREATE POLICY "Users can insert own profile"

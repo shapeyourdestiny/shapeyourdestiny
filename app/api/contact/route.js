@@ -1,30 +1,58 @@
 import { NextResponse } from "next/server";
+import { sendContactNotification, sendContactConfirmation } from "@/lib/email/index";
+
+const REASON_LABELS = {
+  school: "Bring the program to my school",
+  corporate: "Corporate wellness for my staff",
+  general: "General questions",
+  support: "Support with an existing program",
+};
 
 export async function POST(request) {
   try {
     const body = await request.json();
     const { name, email, phone, org, message, reason } = body;
 
-    // For now, just log the submission
-    // TODO: Integrate with email service (Resend, SendGrid, etc.)
-    console.log("Contact form submission:", {
-      name,
-      email,
-      phone,
-      org,
-      message,
-      reason,
-      timestamp: new Date().toISOString(),
-    });
+    if (!name || !email || !message) {
+      return NextResponse.json(
+        { error: "Name, email, and message are required" },
+        { status: 400 }
+      );
+    }
 
-    // In production, you would send an email here
-    // Example with Resend:
-    // await resend.emails.send({
-    //   from: 'Contact Form <noreply@shapeyourdestiny.co>',
-    //   to: 'destiny@shapeyourdestiny.co',
-    //   subject: `New ${reason} inquiry from ${name}`,
-    //   text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nOrganization: ${org}\n\nMessage:\n${message}`,
-    // });
+    const reasonLabel = REASON_LABELS[reason] || reason;
+
+    // Send internal notification to team
+    try {
+      await sendContactNotification({
+        name,
+        email,
+        phone,
+        org,
+        message,
+        reason,
+        reasonLabel,
+      });
+    } catch (error) {
+      console.error("Failed to send contact notification:", error);
+      return NextResponse.json(
+        { error: "Failed to process submission" },
+        { status: 500 }
+      );
+    }
+
+    // Send confirmation to submitter (non-critical - log failure but don't fail request)
+    try {
+      await sendContactConfirmation({
+        name,
+        email,
+        message,
+        reasonLabel,
+      });
+    } catch (error) {
+      console.error("Failed to send confirmation email to submitter:", error);
+      // Don't fail the request - the inquiry was still received
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

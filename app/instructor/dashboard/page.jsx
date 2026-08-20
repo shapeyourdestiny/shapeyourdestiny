@@ -25,6 +25,11 @@ export default async function InstructorDashboardPage() {
     .eq("id", user.id)
     .single();
 
+  // Redirect admins to admin dashboard
+  if (profile?.role === "admin") {
+    redirect("/admin/dashboard");
+  }
+
   return (
     <>
       <Header />
