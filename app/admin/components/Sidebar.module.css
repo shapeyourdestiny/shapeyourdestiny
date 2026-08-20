@@ -9,28 +9,13 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
   padding: 20px 20px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .logo {
-  width: 32px;
-  height: 32px;
-  color: var(--gold);
-  flex-shrink: 0;
-}
-.logo svg {
-  width: 100%;
-  height: 100%;
-}
-
-.wordmark {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 15px;
-  color: #fff;
-  line-height: 1.2;
+  height: 28px;
+  width: auto;
 }
 
 .nav {
@@ -159,8 +144,8 @@
     flex-shrink: 0;
   }
 
-  .wordmark {
-    display: none;
+  .logo {
+    height: 22px;
   }
 
   .nav {

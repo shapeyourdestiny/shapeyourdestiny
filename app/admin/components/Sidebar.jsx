@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./Sidebar.module.css";
 
@@ -43,12 +44,14 @@ export default function Sidebar({ profile }) {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.brand}>
-        <div className={styles.logo}>
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="12,2 15,8.5 22,9.3 17,14 18.2,21 12,17.5 5.8,21 7,14 2,9.3 9,8.5" />
-          </svg>
-        </div>
-        <span className={styles.wordmark}>Shape Your Destiny</span>
+        <Image
+          src="/Images/footer_logo_gold.png"
+          alt="Shape Your Destiny"
+          width={120}
+          height={28}
+          className={styles.logo}
+          priority
+        />
       </div>
 
       <nav className={styles.nav}>

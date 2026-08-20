@@ -41,8 +41,8 @@
 }
 
 .table th {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -55,11 +55,14 @@
 }
 
 .name {
-  font-weight: 600;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
   color: var(--ink);
 }
 
 .date {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
   color: var(--ink-soft);
 }
 

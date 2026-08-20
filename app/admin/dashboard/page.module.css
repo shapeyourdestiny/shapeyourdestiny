@@ -170,8 +170,8 @@
 }
 
 .table th {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -184,9 +184,9 @@
 }
 
 .code {
-  font-family: monospace;
+  font-family: 'Nunito', monospace;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 800;
   color: var(--navy);
   background: var(--tint);
   padding: 4px 8px;
@@ -197,8 +197,9 @@
   display: inline-block;
   padding: 4px 10px;
   border-radius: 999px;
+  font-family: 'Nunito', sans-serif;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: capitalize;
 }
 .roleInstructor {
@@ -215,7 +216,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-weight: 600;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
 }
 .statusAvailable {
   color: var(--orange);
@@ -232,6 +234,8 @@
 }
 
 .email {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
   color: var(--ink);
 }
 
@@ -351,6 +355,8 @@
 }
 
 .date {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
   color: var(--ink-soft);
 }
 
