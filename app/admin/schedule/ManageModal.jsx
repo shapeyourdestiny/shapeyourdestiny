@@ -10,6 +10,7 @@ import {
   deleteSchoolAction,
   deleteClassAction,
   toggleReviewDayAction,
+  updateInstructorDistrictAction,
 } from "@/lib/schedule/actions";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
@@ -152,6 +153,18 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
     }
   };
 
+  const handleUpdateInstructorDistrict = async (profileId, districtId) => {
+    setLoading(true);
+    try {
+      await updateInstructorDistrictAction(profileId, districtId || null);
+      await onDataChange();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleDay = (day) => {
     setClassDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
@@ -173,7 +186,7 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
 
         {/* Tabs */}
         <div className={styles.tabs}>
-          {["districts", "schools", "classes"].map((t) => (
+          {["districts", "schools", "classes", "instructors"].map((t) => (
             <button
               key={t}
               className={`${styles.tab} ${tab === t ? styles.active : ""}`}
@@ -465,6 +478,46 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
                       )}
                     </div>
                   ))
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Instructors Tab */}
+          {tab === "instructors" && (
+            <>
+              <p className={styles.tabDescription}>
+                Assign instructors and admins to their home districts.
+              </p>
+              <div className={styles.list}>
+                {data.instructors?.map((instructor) => {
+                  const currentDistrict = data.districts.find(
+                    (d) => d.id === instructor.district_id
+                  );
+                  return (
+                    <div key={instructor.id} className={styles.listItem}>
+                      <span className={styles.listName}>{instructor.full_name}</span>
+                      <span className={styles.roleBadge}>{instructor.role}</span>
+                      <select
+                        className={styles.districtSelect}
+                        value={instructor.district_id || ""}
+                        onChange={(e) =>
+                          handleUpdateInstructorDistrict(instructor.id, e.target.value)
+                        }
+                        disabled={loading}
+                      >
+                        <option value="">No District</option>
+                        {data.districts.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                })}
+                {(!data.instructors || data.instructors.length === 0) && (
+                  <p className={styles.empty}>No instructors or admins found</p>
                 )}
               </div>
             </>
