@@ -1,0 +1,725 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: calc(100vh - 80px);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.header h1 {
+  font-size: 28px;
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.viewToggle {
+  display: flex;
+  background: var(--paper);
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(20, 44, 107, 0.08);
+}
+
+.viewBtn {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.viewBtn:hover {
+  color: var(--navy);
+}
+.viewBtn.active {
+  background: var(--navy);
+  color: #fff;
+}
+
+.manageBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--paper);
+  border: 2px solid var(--tint-deep);
+  border-radius: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.manageBtn:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+.manageBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Week View */
+.weekView {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+}
+
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.06);
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+.sidebarTitle {
+  font-size: 16px;
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+
+.sidebarGroup {
+  margin-bottom: 16px;
+}
+
+.sidebarGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  cursor: default;
+}
+
+.districtDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.districtName {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  flex: 1;
+}
+
+.visibilityToggle {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+.visibilityToggle:hover {
+  color: var(--navy);
+}
+.visibilityToggle svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.sidebarGroupContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 18px;
+}
+
+.instructorChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--tint);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: grab;
+  transition: all 0.15s ease;
+  border-left: 3px solid var(--chip-color);
+}
+.instructorChip:hover {
+  background: var(--tint-deep);
+}
+.instructorChip.assigned {
+  opacity: 0.5;
+  cursor: default;
+}
+.instructorChip:active {
+  cursor: grabbing;
+}
+
+.chipName {
+  flex: 1;
+}
+
+.chipAssigned {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+
+/* Week main content */
+.weekMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dayTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+
+.dayTab {
+  padding: 10px 20px;
+  border: none;
+  background: var(--paper);
+  border-radius: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.dayTab:hover {
+  color: var(--navy);
+}
+.dayTab.active {
+  background: var(--navy);
+  color: #fff;
+}
+
+.classesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  flex: 1;
+}
+
+.districtCard {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.06);
+  border-top: 4px solid var(--district-color);
+}
+
+.districtCardTitle {
+  font-size: 16px;
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+
+.districtClasses {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.classCard {
+  background: var(--tint);
+  border-radius: 12px;
+  padding: 14px;
+}
+.classCard.reviewDay {
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+.classHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.classTime {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.schoolName {
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.slots {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.emptySlot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--paper);
+  border: 2px dashed var(--tint-deep);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.emptySlot:hover {
+  border-color: var(--navy);
+  border-style: solid;
+}
+
+.slotLabel {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.dropHint {
+  font-size: 11px;
+  color: var(--teal);
+  font-weight: 600;
+}
+
+.desktopHint {
+  display: inline;
+}
+.mobileHint {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .desktopHint {
+    display: none;
+  }
+  .mobileHint {
+    display: inline;
+  }
+}
+
+.filledSlot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--paper);
+  border-radius: 8px;
+  border-left: 3px solid var(--slot-color);
+}
+
+.slotName {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.unassignBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+.unassignBtn:hover {
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.1);
+}
+.unassignBtn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--ink-soft);
+}
+
+/* Month View */
+.monthView {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.06);
+}
+
+.monthNav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.monthNavBtn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.monthNavBtn:hover {
+  background: var(--tint);
+  color: var(--navy);
+}
+.monthNavBtn svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.monthTitle {
+  font-size: 22px;
+  margin: 0;
+  min-width: 200px;
+  text-align: center;
+}
+
+.calendarGrid {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--tint-deep);
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.calendarHeaderCell {
+  text-align: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+}
+
+.calendarWeek {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendarCell {
+  aspect-ratio: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+.calendarCell:hover {
+  background: var(--tint);
+}
+.calendarCell.hasClasses {
+  cursor: pointer;
+}
+
+.calendarCellEmpty {
+  aspect-ratio: 1;
+}
+
+.dayNumber {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.dayNumber.reviewRing {
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+.districtDots {
+  display: flex;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.calendarDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* Year View */
+.yearView {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.06);
+}
+
+.yearNav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.yearTitle {
+  font-size: 26px;
+  margin: 0;
+}
+
+.miniMonthsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .miniMonthsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .miniMonthsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.miniMonth {
+  background: var(--tint);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.miniMonth:hover {
+  background: var(--tint-deep);
+}
+
+.miniMonthTitle {
+  font-size: 14px;
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.miniMonthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.miniDay {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--paper);
+}
+.miniDay.hasClasses {
+  background: var(--dot-color, var(--teal));
+}
+.miniDay.reviewDay {
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+.miniDayEmpty {
+  aspect-ratio: 1;
+}
+
+/* Mobile picker content */
+.pickerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pickerGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pickerGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.pickerGroupContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pickerItem {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--tint);
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.pickerItem:hover {
+  background: var(--tint-deep);
+}
+.pickerItem:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Day detail content */
+.dayDetailContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dayDetailClass {
+  background: var(--tint);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.dayDetailHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dayDetailTime {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.dayDetailSchool {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-left: auto;
+}
+
+.dayDetailAssignments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dayDetailInstructor {
+  padding: 4px 10px;
+  background: var(--paper);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dayDetailEmpty {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .headerRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .viewToggle {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .weekView {
+    flex-direction: column;
+  }
+
+  .dayTabs {
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 24px;
+  }
+
+  .monthView,
+  .yearView {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .monthTitle {
+    font-size: 18px;
+    min-width: 160px;
+  }
+}
