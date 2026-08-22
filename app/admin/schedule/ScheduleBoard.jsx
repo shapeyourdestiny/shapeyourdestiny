@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import styles from "./ScheduleBoard.module.css";
 import BottomSheet from "./BottomSheet";
 import ManageModal from "./ManageModal";
@@ -17,8 +16,20 @@ const MONTHS = [
 ];
 
 export default function ScheduleBoard({ initialData }) {
-  const router = useRouter();
   const [data, setData] = useState(initialData);
+
+  // Refetch data from API
+  const refreshData = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/schedule");
+      if (res.ok) {
+        const newData = await res.json();
+        setData(newData);
+      }
+    } catch (err) {
+      console.error("Failed to refresh data:", err);
+    }
+  }, []);
   const [view, setView] = useState("week"); // week | month | year
   const [activeDay, setActiveDay] = useState("Mon");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -89,7 +100,7 @@ export default function ScheduleBoard({ initialData }) {
     setLoading(true);
     try {
       await assignInstructorAction(classId, draggedInstructor.id, slotType);
-      router.refresh();
+      await refreshData();
     } catch (err) {
       console.error("Failed to assign:", err);
     } finally {
@@ -103,7 +114,7 @@ export default function ScheduleBoard({ initialData }) {
     setLoading(true);
     try {
       await unassignInstructorAction(classId, slotType);
-      router.refresh();
+      await refreshData();
     } catch (err) {
       console.error("Failed to unassign:", err);
     } finally {
@@ -126,7 +137,7 @@ export default function ScheduleBoard({ initialData }) {
         instructor.id,
         mobilePickerSlot.slotType
       );
-      router.refresh();
+      await refreshData();
     } catch (err) {
       console.error("Failed to assign:", err);
     } finally {
@@ -724,6 +735,7 @@ export default function ScheduleBoard({ initialData }) {
         open={manageOpen}
         onClose={() => setManageOpen(false)}
         data={data}
+        onDataChange={refreshData}
       />
     </div>
   );

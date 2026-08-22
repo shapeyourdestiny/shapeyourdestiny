@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import styles from "./ManageModal.module.css";
 import {
   createDistrictAction,
@@ -25,8 +24,7 @@ const PRESET_COLORS = [
   "#34495E", // dark gray
 ];
 
-export default function ManageModal({ open, onClose, data }) {
-  const router = useRouter();
+export default function ManageModal({ open, onClose, data, onDataChange }) {
   const [tab, setTab] = useState("districts");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -60,7 +58,7 @@ export default function ManageModal({ open, onClose, data }) {
       await createDistrictAction(districtName.trim(), districtColor);
       setDistrictName("");
       setDistrictColor(PRESET_COLORS[0]);
-      router.refresh();
+      await onDataChange();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -77,7 +75,7 @@ export default function ManageModal({ open, onClose, data }) {
     try {
       await createSchoolAction(selectedDistrictId, schoolName.trim());
       setSchoolName("");
-      router.refresh();
+      await onDataChange();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -95,7 +93,7 @@ export default function ManageModal({ open, onClose, data }) {
       await createClassAction(selectedSchoolId, classDays, classTime.trim());
       setClassDays([]);
       setClassTime("");
-      router.refresh();
+      await onDataChange();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -108,7 +106,7 @@ export default function ManageModal({ open, onClose, data }) {
     setLoading(true);
     try {
       await deleteDistrictAction(id);
-      router.refresh();
+      await onDataChange();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -121,7 +119,7 @@ export default function ManageModal({ open, onClose, data }) {
     setLoading(true);
     try {
       await deleteSchoolAction(id);
-      router.refresh();
+      await onDataChange();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -134,7 +132,7 @@ export default function ManageModal({ open, onClose, data }) {
     setLoading(true);
     try {
       await deleteClassAction(id);
-      router.refresh();
+      await onDataChange();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -146,7 +144,7 @@ export default function ManageModal({ open, onClose, data }) {
     setLoading(true);
     try {
       await toggleReviewDayAction(classId, !currentValue);
-      router.refresh();
+      await onDataChange();
     } catch (err) {
       setError(err.message);
     } finally {
