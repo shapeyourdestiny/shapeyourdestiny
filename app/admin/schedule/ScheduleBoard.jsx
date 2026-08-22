@@ -59,14 +59,25 @@ export default function ScheduleBoard({ initialData }) {
     });
   });
 
-  // Group instructors by district
+  // Group instructors by district (instructors can belong to multiple districts)
   const instructorsByDistrict = {};
   data.instructors.forEach((instructor) => {
-    const districtId = instructor.district_id || "unassigned";
-    if (!instructorsByDistrict[districtId]) {
-      instructorsByDistrict[districtId] = [];
+    const districtIds = instructor.district_ids || [];
+    if (districtIds.length === 0) {
+      // No districts assigned
+      if (!instructorsByDistrict["unassigned"]) {
+        instructorsByDistrict["unassigned"] = [];
+      }
+      instructorsByDistrict["unassigned"].push(instructor);
+    } else {
+      // Add to each assigned district
+      districtIds.forEach((districtId) => {
+        if (!instructorsByDistrict[districtId]) {
+          instructorsByDistrict[districtId] = [];
+        }
+        instructorsByDistrict[districtId].push(instructor);
+      });
     }
-    instructorsByDistrict[districtId].push(instructor);
   });
 
   // Toggle district visibility in sidebar
@@ -269,6 +280,79 @@ export default function ScheduleBoard({ initialData }) {
       >
         <span className={styles.chipName}>{instructor.full_name}</span>
         {isAssigned && <span className={styles.chipAssigned}>Assigned</span>}
+      </div>
+    );
+  };
+
+  // Render Day View
+  const renderDayView = () => {
+    const dayClasses = getClassesForDay(activeDay);
+
+    return (
+      <div className={styles.dayView}>
+        {/* Day tabs */}
+        <div className={styles.dayTabs}>
+          {DAYS.map((day) => (
+            <button
+              key={day}
+              className={`${styles.dayTab} ${activeDay === day ? styles.active : ""}`}
+              onClick={() => setActiveDay(day)}
+            >
+              {day}
+            </button>
+          ))}
+        </div>
+
+        {/* Day content - full width classes list with inline instructor pool */}
+        <div className={styles.dayContent}>
+          {dayClasses.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>No classes scheduled for {activeDay}</p>
+            </div>
+          ) : (
+            <div className={styles.dayClassesList}>
+              {dayClasses.map((cls) => (
+                <div
+                  key={cls.id}
+                  className={`${styles.dayClassCard} ${cls.is_review_day ? styles.reviewDay : ""}`}
+                  style={{ "--district-color": cls.district?.color || "#3E8FA0" }}
+                >
+                  <div className={styles.dayClassInfo}>
+                    <span
+                      className={styles.districtDot}
+                      style={{ background: cls.district?.color }}
+                    />
+                    <span className={styles.dayClassTime}>{cls.time}</span>
+                    <span className={styles.dayClassSchool}>
+                      {cls.district?.name} - {cls.school?.name}
+                    </span>
+                    {cls.is_review_day && (
+                      <span className={styles.reviewBadge}>Review Day</span>
+                    )}
+                  </div>
+                  <div className={styles.dayClassSlots}>
+                    {renderSlot(cls, "instructor_1", "Instructor 1")}
+                    {renderSlot(cls, "instructor_2", "Instructor 2")}
+                    {cls.is_review_day && renderSlot(cls, "admin_review", "Admin Review")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Instructor pool for Day view */}
+          <aside className={styles.dayInstructorPool}>
+            <h3 className={styles.sidebarTitle}>Instructors</h3>
+            <div className={styles.instructorGrid}>
+              {data.instructors.map((instructor) =>
+                renderInstructorChip(
+                  instructor,
+                  assignedInstructorIds.has(instructor.id)
+                )
+              )}
+            </div>
+          </aside>
+        </div>
       </div>
     );
   };
@@ -597,7 +681,7 @@ export default function ScheduleBoard({ initialData }) {
         </div>
         <div className={styles.headerRight}>
           <div className={styles.viewToggle}>
-            {["week", "month", "year"].map((v) => (
+            {["day", "week", "month", "year"].map((v) => (
               <button
                 key={v}
                 className={`${styles.viewBtn} ${view === v ? styles.active : ""}`}
@@ -618,6 +702,7 @@ export default function ScheduleBoard({ initialData }) {
       </div>
 
       {/* Main content based on view */}
+      {view === "day" && renderDayView()}
       {view === "week" && renderWeekView()}
       {view === "month" && renderMonthView()}
       {view === "year" && renderYearView()}

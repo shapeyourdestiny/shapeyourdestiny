@@ -360,21 +360,51 @@
   border-radius: 4px;
 }
 
-.districtSelect {
+.instructorItem {
+  background: var(--paper);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.instructorHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.districtCheckboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.districtCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 10px;
-  border: 2px solid var(--tint-deep);
+  background: var(--tint);
   border-radius: 6px;
   font-size: 13px;
-  font-family: inherit;
-  background: var(--paper);
   cursor: pointer;
-  min-width: 140px;
+  transition: background 0.15s ease;
 }
-.districtSelect:focus {
-  outline: none;
-  border-color: var(--navy);
+.districtCheckbox:hover {
+  background: var(--tint-deep);
 }
-.districtSelect:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.districtCheckbox input {
+  width: auto;
+  margin: 0;
+}
+.districtCheckbox input:checked + .districtDot + span {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.noDistricts {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-style: italic;
 }

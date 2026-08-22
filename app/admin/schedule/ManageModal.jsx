@@ -10,7 +10,8 @@ import {
   deleteSchoolAction,
   deleteClassAction,
   toggleReviewDayAction,
-  updateInstructorDistrictAction,
+  addInstructorToDistrictAction,
+  removeInstructorFromDistrictAction,
 } from "@/lib/schedule/actions";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
@@ -153,10 +154,14 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
     }
   };
 
-  const handleUpdateInstructorDistrict = async (profileId, districtId) => {
+  const handleToggleInstructorDistrict = async (profileId, districtId, isCurrentlyAssigned) => {
     setLoading(true);
     try {
-      await updateInstructorDistrictAction(profileId, districtId || null);
+      if (isCurrentlyAssigned) {
+        await removeInstructorFromDistrictAction(profileId, districtId);
+      } else {
+        await addInstructorToDistrictAction(profileId, districtId);
+      }
       await onDataChange();
     } catch (err) {
       setError(err.message);
@@ -487,32 +492,42 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
           {tab === "instructors" && (
             <>
               <p className={styles.tabDescription}>
-                Assign instructors and admins to their home districts.
+                Assign instructors and admins to districts. Each person can belong to multiple districts.
               </p>
               <div className={styles.list}>
                 {data.instructors?.map((instructor) => {
-                  const currentDistrict = data.districts.find(
-                    (d) => d.id === instructor.district_id
-                  );
+                  const assignedDistricts = instructor.district_ids || [];
                   return (
-                    <div key={instructor.id} className={styles.listItem}>
-                      <span className={styles.listName}>{instructor.full_name}</span>
-                      <span className={styles.roleBadge}>{instructor.role}</span>
-                      <select
-                        className={styles.districtSelect}
-                        value={instructor.district_id || ""}
-                        onChange={(e) =>
-                          handleUpdateInstructorDistrict(instructor.id, e.target.value)
-                        }
-                        disabled={loading}
-                      >
-                        <option value="">No District</option>
-                        {data.districts.map((d) => (
-                          <option key={d.id} value={d.id}>
-                            {d.name}
-                          </option>
-                        ))}
-                      </select>
+                    <div key={instructor.id} className={styles.instructorItem}>
+                      <div className={styles.instructorHeader}>
+                        <span className={styles.listName}>{instructor.full_name}</span>
+                        <span className={styles.roleBadge}>{instructor.role}</span>
+                      </div>
+                      <div className={styles.districtCheckboxes}>
+                        {data.districts.map((d) => {
+                          const isAssigned = assignedDistricts.includes(d.id);
+                          return (
+                            <label key={d.id} className={styles.districtCheckbox}>
+                              <input
+                                type="checkbox"
+                                checked={isAssigned}
+                                onChange={() =>
+                                  handleToggleInstructorDistrict(instructor.id, d.id, isAssigned)
+                                }
+                                disabled={loading}
+                              />
+                              <span
+                                className={styles.districtDot}
+                                style={{ background: d.color }}
+                              />
+                              <span>{d.name}</span>
+                            </label>
+                          );
+                        })}
+                        {data.districts.length === 0 && (
+                          <span className={styles.noDistricts}>No districts created yet</span>
+                        )}
+                      </div>
                     </div>
                   );
                 })}

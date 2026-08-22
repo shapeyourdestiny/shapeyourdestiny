@@ -253,8 +253,55 @@ CREATE POLICY "Admins can delete class_assignments"
     )
   );
 
--- Add district_id to profiles for instructor home district
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS district_id UUID REFERENCES districts(id) ON DELETE SET NULL;
-
 -- Add color to profiles for instructor chip color (optional, can inherit from district)
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS color TEXT;
+
+-- Junction table for instructors belonging to multiple districts
+CREATE TABLE IF NOT EXISTS instructor_districts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  district_id UUID NOT NULL REFERENCES districts(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (profile_id, district_id)
+);
+
+ALTER TABLE instructor_districts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admins can read instructor_districts"
+  ON instructor_districts
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can insert instructor_districts"
+  ON instructor_districts
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can delete instructor_districts"
+  ON instructor_districts
+  FOR DELETE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+-- Migration: copy existing district_id to instructor_districts
+-- Run this once after creating the table:
+-- INSERT INTO instructor_districts (profile_id, district_id)
+-- SELECT id, district_id FROM profiles WHERE district_id IS NOT NULL
+-- ON CONFLICT DO NOTHING;
