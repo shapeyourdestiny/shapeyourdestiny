@@ -133,8 +133,14 @@ CREATE TABLE IF NOT EXISTS classes (
   days TEXT[] NOT NULL, -- array of 'Mon'/'Tue'/'Wed'/'Thu'/'Fri'
   time TEXT NOT NULL, -- display format like "2:30pm"
   is_review_day BOOLEAN DEFAULT false,
+  start_date DATE, -- when the program starts
+  num_weeks INTEGER DEFAULT 8, -- how many weeks the program runs
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- If classes table already exists, add the new columns
+ALTER TABLE classes ADD COLUMN IF NOT EXISTS start_date DATE;
+ALTER TABLE classes ADD COLUMN IF NOT EXISTS num_weeks INTEGER DEFAULT 8;
 
 ALTER TABLE classes ENABLE ROW LEVEL SECURITY;
 
@@ -305,3 +311,69 @@ CREATE POLICY "Admins can delete instructor_districts"
 -- INSERT INTO instructor_districts (profile_id, district_id)
 -- SELECT id, district_id FROM profiles WHERE district_id IS NOT NULL
 -- ON CONFLICT DO NOTHING;
+
+-- =============================================================================
+-- HOLIDAYS TABLE
+-- =============================================================================
+-- Stores school holidays/off days that affect class scheduling
+
+CREATE TABLE IF NOT EXISTS holidays (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  date DATE NOT NULL,
+  name TEXT NOT NULL,
+  district_id UUID REFERENCES districts(id) ON DELETE CASCADE, -- null = applies to all districts
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (date, district_id) -- can't have same date twice for same district (or global)
+);
+
+ALTER TABLE holidays ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admins can read holidays"
+  ON holidays
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can insert holidays"
+  ON holidays
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can update holidays"
+  ON holidays
+  FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can delete holidays"
+  ON holidays
+  FOR DELETE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import styles from "./ScheduleBoard.module.css";
 import BottomSheet from "./BottomSheet";
 import ManageModal from "./ManageModal";
@@ -14,6 +14,53 @@ const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
+const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Get Monday of the week containing a date
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
+  return new Date(d.setDate(diff));
+}
+
+// Format date range for week nav (e.g., "Aug 24-28")
+function formatWeekRange(weekStart) {
+  const start = new Date(weekStart);
+  const end = new Date(weekStart);
+  end.setDate(end.getDate() + 4); // Friday
+
+  const startMonth = SHORT_MONTHS[start.getMonth()];
+  const endMonth = SHORT_MONTHS[end.getMonth()];
+
+  if (startMonth === endMonth) {
+    return `${startMonth} ${start.getDate()}-${end.getDate()}`;
+  }
+  return `${startMonth} ${start.getDate()} - ${endMonth} ${end.getDate()}`;
+}
+
+// Get date for a day column in the current week
+function getDateForDay(weekStart, dayIndex) {
+  const d = new Date(weekStart);
+  d.setDate(d.getDate() + dayIndex);
+  return d;
+}
+
+// Check if date is today
+function isToday(date) {
+  const today = new Date();
+  return date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear();
+}
+
+// Format date as YYYY-MM-DD for comparison
+function formatDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
 
 export default function ScheduleBoard({ initialData }) {
   const [data, setData] = useState(initialData);
@@ -30,12 +77,17 @@ export default function ScheduleBoard({ initialData }) {
       console.error("Failed to refresh data:", err);
     }
   }, []);
-  const [view, setView] = useState("week"); // week | month | year
+
+  const [view, setView] = useState("week");
   const [activeDay, setActiveDay] = useState("Mon");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [manageOpen, setManageOpen] = useState(false);
-  const [hiddenDistricts, setHiddenDistricts] = useState(new Set());
+
+  // Instructor pool state
+  const [poolSearch, setPoolSearch] = useState("");
+  const [expandedDistricts, setExpandedDistricts] = useState(new Set());
 
   // Mobile state
   const [mobilePickerOpen, setMobilePickerOpen] = useState(false);
@@ -48,41 +100,41 @@ export default function ScheduleBoard({ initialData }) {
   const [loading, setLoading] = useState(false);
 
   // Get all assigned instructor IDs
-  const assignedInstructorIds = new Set();
-  data.districts.forEach((district) => {
-    district.schools?.forEach((school) => {
-      school.classes?.forEach((cls) => {
-        cls.assignments?.forEach((a) => {
-          if (a.profile?.id) assignedInstructorIds.add(a.profile.id);
+  const assignedInstructorIds = useMemo(() => {
+    const ids = new Set();
+    data.districts.forEach((district) => {
+      district.schools?.forEach((school) => {
+        school.classes?.forEach((cls) => {
+          cls.assignments?.forEach((a) => {
+            if (a.profile?.id) ids.add(a.profile.id);
+          });
         });
       });
     });
-  });
+    return ids;
+  }, [data]);
 
   // Group instructors by district (instructors can belong to multiple districts)
-  const instructorsByDistrict = {};
-  data.instructors.forEach((instructor) => {
-    const districtIds = instructor.district_ids || [];
-    if (districtIds.length === 0) {
-      // No districts assigned
-      if (!instructorsByDistrict["unassigned"]) {
-        instructorsByDistrict["unassigned"] = [];
+  const instructorsByDistrict = useMemo(() => {
+    const grouped = {};
+    data.instructors.forEach((instructor) => {
+      const districtIds = instructor.district_ids || [];
+      if (districtIds.length === 0) {
+        if (!grouped["unassigned"]) grouped["unassigned"] = [];
+        grouped["unassigned"].push(instructor);
+      } else {
+        districtIds.forEach((districtId) => {
+          if (!grouped[districtId]) grouped[districtId] = [];
+          grouped[districtId].push(instructor);
+        });
       }
-      instructorsByDistrict["unassigned"].push(instructor);
-    } else {
-      // Add to each assigned district
-      districtIds.forEach((districtId) => {
-        if (!instructorsByDistrict[districtId]) {
-          instructorsByDistrict[districtId] = [];
-        }
-        instructorsByDistrict[districtId].push(instructor);
-      });
-    }
-  });
+    });
+    return grouped;
+  }, [data.instructors]);
 
-  // Toggle district visibility in sidebar
-  const toggleDistrictVisibility = (districtId) => {
-    setHiddenDistricts((prev) => {
+  // Toggle district expansion
+  const toggleDistrictExpanded = (districtId) => {
+    setExpandedDistricts((prev) => {
       const next = new Set(prev);
       if (next.has(districtId)) {
         next.delete(districtId);
@@ -91,6 +143,19 @@ export default function ScheduleBoard({ initialData }) {
       }
       return next;
     });
+  };
+
+  // Week navigation
+  const goToPrevWeek = () => {
+    const newStart = new Date(weekStart);
+    newStart.setDate(newStart.getDate() - 7);
+    setWeekStart(newStart);
+  };
+
+  const goToNextWeek = () => {
+    const newStart = new Date(weekStart);
+    newStart.setDate(newStart.getDate() + 7);
+    setWeekStart(newStart);
   };
 
   // Drag handlers
@@ -177,6 +242,22 @@ export default function ScheduleBoard({ initialData }) {
     return classes;
   };
 
+  // Get holidays for a specific date
+  const getHolidaysForDate = (date) => {
+    const dateKey = formatDateKey(date);
+    return (data.holidays || []).filter((h) => h.date === dateKey);
+  };
+
+  // Check if a date is a holiday (optionally for a specific district)
+  const isHoliday = (date, districtId = null) => {
+    const holidays = getHolidaysForDate(date);
+    if (districtId) {
+      // Check for global holidays or district-specific
+      return holidays.some((h) => h.district_id === null || h.district_id === districtId);
+    }
+    return holidays.length > 0;
+  };
+
   // Calendar utilities for Month/Year views
   const getDaysInMonth = (year, month) => {
     return new Date(year, month + 1, 0).getDate();
@@ -187,7 +268,6 @@ export default function ScheduleBoard({ initialData }) {
   };
 
   const getDayName = (dayIndex) => {
-    // 0 = Sunday, 1 = Monday, etc.
     const names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     return names[dayIndex];
   };
@@ -202,7 +282,6 @@ export default function ScheduleBoard({ initialData }) {
   // Render slot (instructor chip or drop zone)
   const renderSlot = (cls, slotType, label) => {
     const assignment = cls.assignments?.find((a) => a.slotType === slotType);
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 760;
 
     if (assignment?.profile) {
       const color = assignment.profile.color || cls.district?.color || "#3E8FA0";
@@ -241,19 +320,24 @@ export default function ScheduleBoard({ initialData }) {
     );
   };
 
-  // Render class card
-  const renderClassCard = (cls) => {
+  // Render grid class card (for Week view columns)
+  const renderGridClassCard = (cls) => {
     return (
       <div
         key={cls.id}
-        className={`${styles.classCard} ${cls.is_review_day ? styles.reviewDay : ""}`}
-        style={{ "--district-color": cls.district?.color || "#3E8FA0" }}
+        className={`${styles.gridCard} ${cls.is_review_day ? styles.reviewDay : ""}`}
+        style={{ "--card-accent": cls.is_review_day ? "var(--gold)" : "var(--teal)" }}
       >
-        <div className={styles.classHeader}>
-          <span className={styles.classTime}>{cls.time}</span>
-          <span className={styles.schoolName}>{cls.school?.name}</span>
+        <div className={styles.gridCardTime}>{cls.time}</div>
+        <div className={styles.gridCardSchool}>{cls.school?.name}</div>
+        <div className={styles.gridCardDistrict}>
+          <span className={styles.districtDot} style={{ background: cls.district?.color }} />
+          <span>{cls.district?.name}</span>
         </div>
-        <div className={styles.slots}>
+        {cls.is_review_day && (
+          <span className={styles.reviewPill}>Review Day</span>
+        )}
+        <div className={styles.gridCardSlots}>
           {renderSlot(cls, "instructor_1", "Instructor 1")}
           {renderSlot(cls, "instructor_2", "Instructor 2")}
           {cls.is_review_day && renderSlot(cls, "admin_review", "Admin Review")}
@@ -284,122 +368,110 @@ export default function ScheduleBoard({ initialData }) {
     );
   };
 
-  // Render Day View
-  const renderDayView = () => {
-    const dayClasses = getClassesForDay(activeDay);
+  // Render instructor pool (shared between Day and Week views)
+  const renderInstructorPool = () => {
+    const searchLower = poolSearch.toLowerCase().trim();
+    const isSearching = searchLower.length > 0;
+
+    // Filter and prepare district groups
+    const districtGroups = [];
+
+    data.districts.forEach((district) => {
+      const districtInstructors = instructorsByDistrict[district.id] || [];
+      if (districtInstructors.length === 0) return;
+
+      const filtered = isSearching
+        ? districtInstructors.filter((i) =>
+            i.full_name.toLowerCase().includes(searchLower)
+          )
+        : districtInstructors;
+
+      if (isSearching && filtered.length === 0) return;
+
+      const availableCount = districtInstructors.filter(
+        (i) => !assignedInstructorIds.has(i.id)
+      ).length;
+
+      const isExpanded = isSearching || expandedDistricts.has(district.id);
+
+      districtGroups.push({
+        id: district.id,
+        name: district.name,
+        color: district.color,
+        instructors: filtered,
+        availableCount,
+        isExpanded,
+      });
+    });
+
+    // Handle "No District" group
+    const unassignedInstructors = instructorsByDistrict["unassigned"] || [];
+    if (unassignedInstructors.length > 0) {
+      const filtered = isSearching
+        ? unassignedInstructors.filter((i) =>
+            i.full_name.toLowerCase().includes(searchLower)
+          )
+        : unassignedInstructors;
+
+      if (!isSearching || filtered.length > 0) {
+        const availableCount = unassignedInstructors.filter(
+          (i) => !assignedInstructorIds.has(i.id)
+        ).length;
+
+        districtGroups.push({
+          id: "unassigned",
+          name: "No District",
+          color: "#999",
+          instructors: filtered,
+          availableCount,
+          isExpanded: isSearching || expandedDistricts.has("unassigned"),
+        });
+      }
+    }
+
+    const hasAnyResults = districtGroups.length > 0;
 
     return (
-      <div className={styles.dayView}>
-        {/* Day tabs */}
-        <div className={styles.dayTabs}>
-          {DAYS.map((day) => (
-            <button
-              key={day}
-              className={`${styles.dayTab} ${activeDay === day ? styles.active : ""}`}
-              onClick={() => setActiveDay(day)}
-            >
-              {day}
-            </button>
-          ))}
+      <aside className={styles.instructorPool}>
+        <h3 className={styles.poolTitle}>Instructors</h3>
+        <div className={styles.poolSearch}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search instructors..."
+            value={poolSearch}
+            onChange={(e) => setPoolSearch(e.target.value)}
+          />
         </div>
-
-        {/* Day content - full width classes list with inline instructor pool */}
-        <div className={styles.dayContent}>
-          {dayClasses.length === 0 ? (
-            <div className={styles.emptyState}>
-              <p>No classes scheduled for {activeDay}</p>
-            </div>
+        <div className={styles.poolContent}>
+          {!hasAnyResults && isSearching ? (
+            <p className={styles.poolNoMatch}>No instructors match</p>
           ) : (
-            <div className={styles.dayClassesList}>
-              {dayClasses.map((cls) => (
-                <div
-                  key={cls.id}
-                  className={`${styles.dayClassCard} ${cls.is_review_day ? styles.reviewDay : ""}`}
-                  style={{ "--district-color": cls.district?.color || "#3E8FA0" }}
+            districtGroups.map((group) => (
+              <div key={group.id} className={styles.poolGroup}>
+                <button
+                  className={styles.poolGroupHeader}
+                  onClick={() => !isSearching && toggleDistrictExpanded(group.id)}
                 >
-                  <div className={styles.dayClassInfo}>
-                    <span
-                      className={styles.districtDot}
-                      style={{ background: cls.district?.color }}
-                    />
-                    <span className={styles.dayClassTime}>{cls.time}</span>
-                    <span className={styles.dayClassSchool}>
-                      {cls.district?.name} - {cls.school?.name}
-                    </span>
-                    {cls.is_review_day && (
-                      <span className={styles.reviewBadge}>Review Day</span>
-                    )}
-                  </div>
-                  <div className={styles.dayClassSlots}>
-                    {renderSlot(cls, "instructor_1", "Instructor 1")}
-                    {renderSlot(cls, "instructor_2", "Instructor 2")}
-                    {cls.is_review_day && renderSlot(cls, "admin_review", "Admin Review")}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Instructor pool for Day view */}
-          <aside className={styles.dayInstructorPool}>
-            <h3 className={styles.sidebarTitle}>Instructors</h3>
-            <div className={styles.instructorGrid}>
-              {data.instructors.map((instructor) =>
-                renderInstructorChip(
-                  instructor,
-                  assignedInstructorIds.has(instructor.id)
-                )
-              )}
-            </div>
-          </aside>
-        </div>
-      </div>
-    );
-  };
-
-  // Render Week View
-  const renderWeekView = () => {
-    const dayClasses = getClassesForDay(activeDay);
-
-    return (
-      <div className={styles.weekView}>
-        {/* Sidebar - instructor pool */}
-        <aside className={styles.sidebar}>
-          <h3 className={styles.sidebarTitle}>Instructors</h3>
-          {data.districts.map((district) => {
-            const districtInstructors = instructorsByDistrict[district.id] || [];
-            if (districtInstructors.length === 0) return null;
-            const isHidden = hiddenDistricts.has(district.id);
-
-            return (
-              <div key={district.id} className={styles.sidebarGroup}>
-                <div className={styles.sidebarGroupHeader}>
-                  <span
-                    className={styles.districtDot}
-                    style={{ background: district.color }}
-                  />
-                  <span className={styles.districtName}>{district.name}</span>
-                  <button
-                    className={styles.visibilityToggle}
-                    onClick={() => toggleDistrictVisibility(district.id)}
-                    aria-label={isHidden ? "Show" : "Hide"}
+                  <span className={styles.districtDot} style={{ background: group.color }} />
+                  <span className={styles.poolGroupName}>{group.name}</span>
+                  <span className={styles.poolGroupCount}>{group.availableCount} available</span>
+                  <svg
+                    className={`${styles.poolChevron} ${group.isExpanded ? styles.expanded : ""}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
                   >
-                    {isHidden ? (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
-                        <line x1="1" y1="1" x2="23" y2="23" />
-                      </svg>
-                    ) : (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                {!isHidden && (
-                  <div className={styles.sidebarGroupContent}>
-                    {districtInstructors.map((instructor) =>
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+                {group.isExpanded && (
+                  <div className={styles.poolGroupContent}>
+                    {group.instructors.map((instructor) =>
                       renderInstructorChip(
                         instructor,
                         assignedInstructorIds.has(instructor.id)
@@ -408,68 +480,182 @@ export default function ScheduleBoard({ initialData }) {
                   </div>
                 )}
               </div>
-            );
-          })}
-          {/* Unassigned district instructors */}
-          {instructorsByDistrict["unassigned"]?.length > 0 && (
-            <div className={styles.sidebarGroup}>
-              <div className={styles.sidebarGroupHeader}>
-                <span className={styles.districtDot} style={{ background: "#999" }} />
-                <span className={styles.districtName}>No District</span>
-              </div>
-              <div className={styles.sidebarGroupContent}>
-                {instructorsByDistrict["unassigned"].map((instructor) =>
-                  renderInstructorChip(
-                    instructor,
-                    assignedInstructorIds.has(instructor.id)
-                  )
-                )}
-              </div>
-            </div>
+            ))
           )}
-        </aside>
+        </div>
+      </aside>
+    );
+  };
 
-        {/* Main content */}
-        <main className={styles.weekMain}>
-          {/* Day tabs */}
-          <div className={styles.dayTabs}>
-            {DAYS.map((day) => (
+  // Render Day View
+  const renderDayView = () => {
+    const dayClasses = getClassesForDay(activeDay);
+    const dayIndex = DAYS.indexOf(activeDay);
+    const currentDate = getDateForDay(weekStart, dayIndex);
+    const dayHolidays = getHolidaysForDate(currentDate);
+
+    return (
+      <div className={styles.dayView}>
+        {/* Week nav for day view */}
+        <div className={styles.dayNav}>
+          <button className={styles.weekNavBtn} onClick={goToPrevWeek}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <span className={styles.dayNavDate}>
+            {SHORT_MONTHS[currentDate.getMonth()]} {currentDate.getDate()}, {currentDate.getFullYear()}
+          </span>
+          <button className={styles.weekNavBtn} onClick={goToNextWeek}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+
+        <div className={styles.dayTabs}>
+          {DAYS.map((day, idx) => {
+            const tabDate = getDateForDay(weekStart, idx);
+            const tabHolidays = getHolidaysForDate(tabDate);
+            return (
               <button
                 key={day}
-                className={`${styles.dayTab} ${activeDay === day ? styles.active : ""}`}
+                className={`${styles.dayTab} ${activeDay === day ? styles.active : ""} ${tabHolidays.length > 0 ? styles.hasHoliday : ""}`}
                 onClick={() => setActiveDay(day)}
               >
                 {day}
+                {tabHolidays.length > 0 && <span className={styles.holidayDot} />}
               </button>
-            ))}
+            );
+          })}
+        </div>
+
+        <div className={styles.dayContent}>
+          {renderInstructorPool()}
+
+          <main className={styles.dayMain}>
+            {/* Show holidays */}
+            {dayHolidays.length > 0 && (
+              <div className={styles.holidayBanner}>
+                {dayHolidays.map((h) => {
+                  const district = h.district_id
+                    ? data.districts.find((d) => d.id === h.district_id)
+                    : null;
+                  return (
+                    <div key={h.id} className={styles.holidayTag}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                      <span className={styles.holidayTagName}>{h.name}</span>
+                      {district && (
+                        <span className={styles.holidayTagDistrict}>
+                          <span className={styles.districtDot} style={{ background: district.color }} />
+                          {district.name}
+                        </span>
+                      )}
+                      {!district && (
+                        <span className={styles.holidayTagGlobal}>All districts</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {dayClasses.length === 0 ? (
+              <div className={styles.emptyPlaceholder}>
+                <p>Nothing scheduled</p>
+              </div>
+            ) : (
+              <div className={styles.dayClassesList}>
+                {dayClasses.map((cls) => renderGridClassCard(cls))}
+              </div>
+            )}
+          </main>
+        </div>
+      </div>
+    );
+  };
+
+  // Render Week View - horizontal 5-column grid
+  const renderWeekView = () => {
+    return (
+      <div className={styles.weekView}>
+        {renderInstructorPool()}
+
+        <main className={styles.weekMain}>
+          {/* Week navigation */}
+          <div className={styles.weekNav}>
+            <button className={styles.weekNavBtn} onClick={goToPrevWeek}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <span className={styles.weekNavLabel}>{formatWeekRange(weekStart)}</span>
+            <button className={styles.weekNavBtn} onClick={goToNextWeek}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
           </div>
 
-          {/* Classes grid */}
-          <div className={styles.classesGrid}>
-            {data.districts.map((district) => {
-              const districtClasses = dayClasses.filter(
-                (c) => c.district?.id === district.id
-              );
-              if (districtClasses.length === 0) return null;
+          {/* 5-column grid */}
+          <div className={styles.weekGrid}>
+            {DAYS.map((day, index) => {
+              const date = getDateForDay(weekStart, index);
+              const dayClasses = getClassesForDay(day);
+              const isTodayCol = isToday(date);
+              const dayHolidays = getHolidaysForDate(date);
 
               return (
-                <div
-                  key={district.id}
-                  className={styles.districtCard}
-                  style={{ "--district-color": district.color }}
-                >
-                  <h3 className={styles.districtCardTitle}>{district.name}</h3>
-                  <div className={styles.districtClasses}>
-                    {districtClasses.map(renderClassCard)}
+                <div key={day} className={`${styles.weekColumn} ${dayHolidays.length > 0 ? styles.hasHoliday : ""}`}>
+                  <div className={`${styles.weekColumnHeader} ${isTodayCol ? styles.today : ""}`}>
+                    <span className={styles.weekColumnDay}>{day}</span>
+                    <span className={styles.weekColumnDate}>
+                      {SHORT_MONTHS[date.getMonth()]} {date.getDate()}
+                    </span>
+                  </div>
+                  <div className={styles.weekColumnContent}>
+                    {/* Show holidays */}
+                    {dayHolidays.length > 0 && (
+                      <div className={styles.holidayBanner}>
+                        {dayHolidays.map((h) => {
+                          const district = h.district_id
+                            ? data.districts.find((d) => d.id === h.district_id)
+                            : null;
+                          return (
+                            <div key={h.id} className={styles.holidayTag}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                              </svg>
+                              <span className={styles.holidayTagName}>{h.name}</span>
+                              {district && (
+                                <span className={styles.holidayTagDistrict}>
+                                  <span className={styles.districtDot} style={{ background: district.color }} />
+                                  {district.name}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {dayClasses.length === 0 && dayHolidays.length === 0 ? (
+                      <div className={styles.emptyPlaceholder}>
+                        <p>Nothing scheduled</p>
+                      </div>
+                    ) : (
+                      dayClasses.map((cls) => renderGridClassCard(cls))
+                    )}
                   </div>
                 </div>
               );
             })}
-            {dayClasses.length === 0 && (
-              <div className={styles.emptyState}>
-                <p>No classes scheduled for {activeDay}</p>
-              </div>
-            )}
           </div>
         </main>
       </div>
@@ -483,7 +669,6 @@ export default function ScheduleBoard({ initialData }) {
     const weeks = [];
     let currentWeek = [];
 
-    // Fill in empty cells for days before the first of the month
     for (let i = 0; i < firstDay; i++) {
       currentWeek.push(null);
     }
@@ -496,7 +681,6 @@ export default function ScheduleBoard({ initialData }) {
       }
     }
 
-    // Fill in remaining days of last week
     while (currentWeek.length > 0 && currentWeek.length < 7) {
       currentWeek.push(null);
     }
@@ -506,7 +690,6 @@ export default function ScheduleBoard({ initialData }) {
 
     return (
       <div className={styles.monthView}>
-        {/* Month navigation */}
         <div className={styles.monthNav}>
           <button
             className={styles.monthNavBtn}
@@ -543,9 +726,7 @@ export default function ScheduleBoard({ initialData }) {
           </button>
         </div>
 
-        {/* Calendar grid */}
         <div className={styles.calendarGrid}>
-          {/* Header */}
           <div className={styles.calendarHeader}>
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
               <div key={d} className={styles.calendarHeaderCell}>
@@ -554,7 +735,6 @@ export default function ScheduleBoard({ initialData }) {
             ))}
           </div>
 
-          {/* Weeks */}
           {weeks.map((week, weekIndex) => (
             <div key={weekIndex} className={styles.calendarWeek}>
               {week.map((day, dayIndex) => {
@@ -643,11 +823,9 @@ export default function ScheduleBoard({ initialData }) {
               >
                 <h4 className={styles.miniMonthTitle}>{monthName}</h4>
                 <div className={styles.miniMonthGrid}>
-                  {/* Empty cells before first day */}
                   {Array.from({ length: firstDay }).map((_, i) => (
                     <div key={`empty-${i}`} className={styles.miniDayEmpty} />
                   ))}
-                  {/* Days */}
                   {Array.from({ length: daysInMonth }).map((_, i) => {
                     const day = i + 1;
                     const classes = getClassesForDate(selectedYear, monthIndex, day);
@@ -748,7 +926,6 @@ export default function ScheduleBoard({ initialData }) {
               </div>
             );
           })}
-          {/* Unassigned */}
           {instructorsByDistrict["unassigned"]?.filter(
             (i) => !assignedInstructorIds.has(i.id)
           ).length > 0 && (
