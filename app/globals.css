@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap');
-
 :root {
   --navy: #1F3F91;
   --navy-deep: #142C6B;
@@ -10,6 +8,7 @@
   --teal: #3E8FA0;
   --teal-dark: #2C6E7D;
   --green: #6FCB55;
+  --red: #E0594C;
   --paper: #FFFFFF;
   --tint: #EAF1FC;
   --tint-deep: #DCE8FB;
@@ -26,12 +25,12 @@ body {
   margin: 0;
   background: var(--tint);
   color: var(--ink);
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
   font-size: 17px;
   line-height: 1.6;
 }
 h1, h2, h3, h4 {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
   font-weight: 700;
   color: var(--ink);
   margin: 0;
@@ -67,6 +66,131 @@ button { font-family: inherit; }
   box-shadow: 0 6px 16px rgba(224,138,60,0.4);
 }
 .btnPrimary:hover { background: var(--orange-dark); transform: translateY(-2px); }
+
+/* ===== SHARED UTILITY CLASSES ===== */
+
+/* Modal overlay base */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 44, 107, 0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Form input styles */
+.formInput,
+.formSelect {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--tint-deep);
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--paper);
+  transition: border-color 0.15s ease;
+}
+.formInput:focus,
+.formSelect:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+/* Form label styles */
+.formLabel {
+  display: block;
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+/* Close button for modals */
+.closeBtn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.closeBtn:hover {
+  background: var(--tint);
+  color: var(--ink);
+}
+
+/* Error alert */
+.errorAlert {
+  color: #d32f2f;
+  font-size: 14px;
+  margin: 0 0 16px;
+  padding: 12px;
+  background: rgba(211, 47, 47, 0.08);
+  border-radius: 8px;
+}
+
+/* Badge/pill styles */
+.badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+.badgeNavy {
+  background: rgba(31, 63, 145, 0.1);
+  color: var(--navy);
+}
+.badgeTeal {
+  background: rgba(62, 143, 160, 0.15);
+  color: var(--teal-dark);
+}
+
+/* Eyebrow/caps header style */
+.eyebrow {
+  display: inline-flex;
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--navy);
+  background: rgba(31, 63, 145, 0.08);
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+
+/* Card base */
+.card {
+  background: var(--paper);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 8px 30px rgba(20, 44, 107, 0.08);
+}
+
+/* Delete icon button */
+.deleteIconBtn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.deleteIconBtn:hover {
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.1);
+}
+.deleteIconBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./Sidebar.module.css";
 
-const NAV_ITEMS = [
+const NAV_OVERVIEW = [
   {
     href: "/admin/dashboard",
     label: "Invite Codes",
@@ -27,6 +27,9 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+];
+
+const NAV_OPERATIONS = [
   {
     href: "/admin/schedule",
     label: "Schedule Board",
@@ -39,9 +42,20 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    href: "/admin/coverage",
+    label: "Coverage",
+    badgeKey: "coverageCount",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 11l3 3L22 4" />
+        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+      </svg>
+    ),
+  },
 ];
 
-export default function Sidebar({ profile }) {
+export default function Sidebar({ profile, coverageCount = 0 }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -52,6 +66,13 @@ export default function Sidebar({ profile }) {
   };
 
   const initial = profile?.full_name?.charAt(0)?.toUpperCase() || "A";
+
+  const getBadgeCount = (item) => {
+    if (item.badgeKey === "coverageCount") {
+      return coverageCount;
+    }
+    return 0;
+  };
 
   return (
     <aside className={styles.sidebar}>
@@ -68,8 +89,9 @@ export default function Sidebar({ profile }) {
 
       <nav className={styles.nav}>
         <span className={styles.navLabel}>Overview</span>
-        {NAV_ITEMS.map((item) => {
+        {NAV_OVERVIEW.map((item) => {
           const isActive = pathname === item.href;
+          const badgeCount = getBadgeCount(item);
           return (
             <a
               key={item.href}
@@ -78,6 +100,27 @@ export default function Sidebar({ profile }) {
             >
               <span className={styles.navIcon}>{item.icon}</span>
               {item.label}
+              {badgeCount > 0 && (
+                <span className={styles.badge}>{badgeCount}</span>
+              )}
+            </a>
+          );
+        })}
+        <span className={styles.navLabel} style={{ marginTop: 16 }}>Operations</span>
+        {NAV_OPERATIONS.map((item) => {
+          const isActive = pathname === item.href;
+          const badgeCount = getBadgeCount(item);
+          return (
+            <a
+              key={item.href}
+              href={item.href}
+              className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+            >
+              <span className={styles.navIcon}>{item.icon}</span>
+              {item.label}
+              {badgeCount > 0 && (
+                <span className={styles.badge}>{badgeCount}</span>
+              )}
             </a>
           );
         })}
