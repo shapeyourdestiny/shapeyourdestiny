@@ -411,6 +411,68 @@
   font-style: italic;
 }
 
+/* Empty Week Card */
+.emptyWeekCard {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 26px 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.emptyWeekCard svg {
+  width: 28px;
+  height: 28px;
+  color: var(--tint-deep);
+  margin-bottom: 10px;
+}
+.emptyWeekCard p {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0 0 4px;
+}
+.emptyWeekCard span {
+  font-size: 12px;
+  color: #B7C1D8;
+}
+
+/* Day Row - shared by desktop and mobile, styled differently via media queries */
+.dayRow {
+  display: flex;
+  background: var(--paper);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(20, 44, 107, 0.06);
+}
+.dayRow.today {
+  box-shadow: 0 4px 20px rgba(31, 63, 145, 0.15);
+}
+.dayRow.today .dayBadge {
+  background: var(--navy);
+  color: #fff;
+}
+.dayRow.isHoliday {
+  border: 2px solid var(--gold);
+}
+
+.daySessionsWrap {
+  flex: 1;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.emptyDayText {
+  font-size: 14px;
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+}
+
 /* Can't Make It Button */
 .cantMakeItBtn {
   display: flex;
@@ -894,6 +956,100 @@
   }
 }
 
+@media (max-width: 759px) {
+  /* Compact day rows for mobile */
+  .dayRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+  }
+  .dayRow.hasSession {
+    border-left: 3px solid var(--teal);
+  }
+
+  .dayRow .dayBadge {
+    width: 42px;
+    flex: none;
+    padding: 0;
+    background: transparent;
+    flex-direction: column;
+    gap: 0;
+  }
+  .dayRow .dayName {
+    font-size: 11.5px;
+    color: var(--navy);
+  }
+  .dayRow .dayDate {
+    font-size: 10px;
+  }
+  .dayRow.today .dayBadge {
+    background: transparent;
+  }
+  .dayRow.today .dayName {
+    color: var(--navy);
+    font-weight: 800;
+  }
+
+  .daySessionsWrap {
+    flex: 1;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .dayRow .sessionCard {
+    padding: 0;
+    background: transparent;
+    gap: 8px;
+  }
+
+  .dayRow .sessionInfo {
+    min-width: 0;
+  }
+
+  .dayRow .sessionSchool {
+    font-size: 12.5px;
+  }
+
+  .dayRow .sessionTime {
+    font-size: 10.5px;
+  }
+
+  .dayRow .sessionColor {
+    display: none;
+  }
+
+  .dayRow .holidayNotice {
+    flex: 1;
+    padding: 0;
+    background: transparent;
+    border-left: none;
+    gap: 8px;
+  }
+  .dayRow .holidayNotice svg {
+    width: 18px;
+    height: 18px;
+  }
+  .dayRow .holidayName {
+    font-size: 12px;
+  }
+  .dayRow .holidaySubtext {
+    display: none;
+  }
+
+  .emptyDayText {
+    flex: 1;
+    padding: 0;
+  }
+
+  /* Hide desktop week day layout */
+  .weekDay {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   .heroCard {
     padding: 24px;
@@ -915,18 +1071,6 @@
   .viewWeekBtn {
     width: 100%;
     justify-content: center;
-  }
-
-  .weekDay {
-    flex-direction: column;
-  }
-
-  .dayBadge {
-    width: 100%;
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: 8px;
-    padding: 12px 16px;
   }
 
   .navLabel {

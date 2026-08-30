@@ -1,0 +1,253 @@
+/* Desktop Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 230px;
+  height: 100vh;
+  background: var(--navy-deep);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  padding: 20px 20px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.brandLogo {
+  width: auto;
+  height: 26px;
+}
+
+.mobileLogo {
+  width: auto;
+  height: 30px;
+}
+
+.nav {
+  flex: 1;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navLabel {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(196, 208, 238, 0.5);
+  padding: 0 8px;
+  margin-bottom: 8px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--on-navy-soft);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.navItem:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+}
+
+.navItemActive {
+  background: var(--orange);
+  color: #fff;
+}
+.navItemActive:hover {
+  background: var(--orange-dark);
+}
+
+.navIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.navIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.badge {
+  margin-left: auto;
+  background: var(--orange);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  min-width: 20px;
+  text-align: center;
+}
+.navItemActive .badge {
+  background: #fff;
+  color: var(--orange);
+}
+
+.user {
+  padding: 16px 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--gold);
+  color: var(--navy-deep);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.userInfo {
+  text-align: center;
+}
+
+.userName {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.userRole {
+  display: block;
+  font-size: 12px;
+  color: var(--on-navy-soft);
+}
+
+.logout {
+  background: none;
+  border: none;
+  color: var(--on-navy-soft);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  margin-top: 4px;
+  transition: color 0.15s ease;
+}
+.logout:hover {
+  color: #fff;
+}
+
+/* Mobile Top Bar - hidden on desktop */
+.mobileHeader {
+  display: none;
+}
+
+/* Mobile Bottom Tab Bar - hidden on desktop */
+.bottomTabs {
+  display: none;
+}
+
+/* Mobile styles */
+@media (max-width: 759px) {
+  .sidebar {
+    display: none;
+  }
+
+  .mobileHeader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    z-index: 100;
+  }
+
+  .bottomTabs {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: #fff;
+    border-top: 1px solid var(--tint-deep);
+    display: flex;
+    align-items: stretch;
+    z-index: 100;
+  }
+
+  .tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-decoration: none;
+    color: var(--ink-soft);
+    transition: color 0.15s ease;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .tabIcon {
+    width: 22px;
+    height: 22px;
+    position: relative;
+  }
+  .tabIcon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .tabBadge {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background: var(--orange);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    min-width: 16px;
+    text-align: center;
+  }
+
+  .tabLabel {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .tabActive {
+    color: var(--navy);
+  }
+  .tabActive .tabIcon {
+    color: var(--orange);
+  }
+}

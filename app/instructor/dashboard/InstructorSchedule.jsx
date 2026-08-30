@@ -310,6 +310,19 @@ export default function InstructorSchedule({
       });
     }
 
+    // Check if the entire week is empty (no sessions, no holidays)
+    const hasAnySessions = days.some(d => d.sessions.length > 0 || d.holiday);
+    const isEmptyWeek = !hasAnySessions;
+
+    // Format next session date for empty state
+    const getNextSessionText = () => {
+      if (nextSession) {
+        const dateObj = new Date(nextSession.date + "T00:00:00");
+        return `Your next session is ${SHORT_MONTHS[dateObj.getMonth()]} ${dateObj.getDate()}`;
+      }
+      return "Check back once you're assigned to a class";
+    };
+
     return (
       <div className={styles.weekView}>
         <div className={styles.weekNav}>
@@ -326,110 +339,123 @@ export default function InstructorSchedule({
           </button>
         </div>
 
-        <div className={styles.weekList}>
-          {days.map((day) => (
-            <div
-              key={day.date}
-              className={`${styles.weekDay} ${day.isToday ? styles.today : ""} ${day.holiday ? styles.isHoliday : ""}`}
-            >
-              <div className={styles.dayBadge}>
-                <span className={styles.dayName}>{day.dayName}</span>
-                <span className={styles.dayDate}>{day.month} {day.dayNum}</span>
-              </div>
+        {/* Empty week - show collapsed card */}
+        {isEmptyWeek ? (
+          <div className={styles.emptyWeekCard}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <path d="M16 2v4M8 2v4M3 10h18" />
+            </svg>
+            <p>Nothing scheduled this week</p>
+            <span>{getNextSessionText()}</span>
+          </div>
+        ) : (
+          /* Mixed week - compact day rows */
+          <div className={styles.weekList}>
+            {days.map((day) => {
+              const hasSession = day.sessions.length > 0;
+              const hasHoliday = !!day.holiday;
 
-              <div className={styles.dayContent}>
-                {day.holiday ? (
-                  <div className={styles.holidayNotice}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="12" y1="8" x2="12" y2="12" />
-                      <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
-                    <div className={styles.holidayInfo}>
-                      <span className={styles.holidayName}>{day.holiday.name}</span>
-                      <span className={styles.holidaySubtext}>No school, enjoy the day off</span>
-                    </div>
+              return (
+                <div
+                  key={day.date}
+                  className={`${styles.dayRow} ${hasSession ? styles.hasSession : ""} ${day.isToday ? styles.today : ""} ${hasHoliday ? styles.isHoliday : ""}`}
+                >
+                  <div className={styles.dayBadge}>
+                    <span className={styles.dayName}>{day.dayName}</span>
+                    <span className={styles.dayDate}>{day.month} {day.dayNum}</span>
                   </div>
-                ) : day.sessions.length > 0 ? (
-                  day.sessions.map((session) => {
-                    const coverage = getCoverageStatus(session);
-                    const hasCoverage = coverage?.hasCoverageRequest;
-                    const isMyRequest = coverage?.isMyRequest;
-                    const isCoveredByMe = coverage?.isCoveredByMe;
-                    const isClaimed = coverage?.status === "claimed";
 
-                    return (
-                      <div key={session.id} className={styles.sessionCard}>
-                        <div
-                          className={styles.sessionColor}
-                          style={{ background: session.school.color }}
-                        />
-                        <div className={styles.sessionInfo}>
-                          <span className={styles.sessionSchool}>{session.school.name}</span>
-                          <span className={styles.sessionTime}>{session.time}</span>
-                          {session.coTeacher && (
-                            <span className={styles.sessionCoTeacher}>
-                              with {session.coTeacher.name}
-                            </span>
-                          )}
-                        </div>
-                        {session.isReviewDay && (
-                          <span className={styles.reviewBadge}>Review</span>
-                        )}
-                        {/* Coverage Status Badge */}
-                        {hasCoverage && isMyRequest && !isClaimed && (
-                          <span className={`${styles.coverageStatus} ${styles.open}`}>
-                            Seeking Coverage
-                          </span>
-                        )}
-                        {hasCoverage && isMyRequest && isClaimed && (
-                          <span className={`${styles.coverageStatus} ${styles.covered}`}>
-                            Covered
-                          </span>
-                        )}
-                        {hasCoverage && isCoveredByMe && (
-                          <span className={`${styles.coverageStatus} ${styles.covering}`}>
-                            You're Covering
-                          </span>
-                        )}
-                        {/* Can't Make It Button - only show if no coverage request */}
-                        {!hasCoverage && (
-                          <button
-                            type="button"
-                            className={styles.cantMakeItBtn}
-                            onClick={() => handleCantMakeIt(session)}
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                              <circle cx="12" cy="12" r="10" />
-                              <path d="M12 8v4M12 16h.01" />
-                            </svg>
-                            Can't make it?
-                          </button>
-                        )}
-                        {session.school.address && (
-                          <a
-                            href={getDirectionsUrl(session.school.address)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.sessionDirections}
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <polygon points="3 11 22 2 13 21 11 13 3 11" />
-                            </svg>
-                          </a>
-                        )}
+                  {hasHoliday ? (
+                    <div className={styles.holidayNotice}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                      <div className={styles.holidayInfo}>
+                        <span className={styles.holidayName}>{day.holiday.name}</span>
                       </div>
-                    );
-                  })
-                ) : (
-                  <div className={styles.emptyDay}>
-                    <span>No session scheduled</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+                    </div>
+                  ) : hasSession ? (
+                    <div className={styles.daySessionsWrap}>
+                      {day.sessions.map((session) => {
+                        const coverage = getCoverageStatus(session);
+                        const hasCoverage = coverage?.hasCoverageRequest;
+                        const isMyRequest = coverage?.isMyRequest;
+                        const isCoveredByMe = coverage?.isCoveredByMe;
+                        const isClaimed = coverage?.status === "claimed";
+
+                        return (
+                          <div key={session.id} className={styles.sessionCard}>
+                            <div
+                              className={styles.sessionColor}
+                              style={{ background: session.school.color }}
+                            />
+                            <div className={styles.sessionInfo}>
+                              <span className={styles.sessionSchool}>{session.school.name}</span>
+                              <span className={styles.sessionTime}>{session.time}</span>
+                              {session.coTeacher && (
+                                <span className={styles.sessionCoTeacher}>
+                                  with {session.coTeacher.name}
+                                </span>
+                              )}
+                            </div>
+                            {session.isReviewDay && (
+                              <span className={styles.reviewBadge}>Review</span>
+                            )}
+                            {hasCoverage && isMyRequest && !isClaimed && (
+                              <span className={`${styles.coverageStatus} ${styles.open}`}>
+                                Seeking Coverage
+                              </span>
+                            )}
+                            {hasCoverage && isMyRequest && isClaimed && (
+                              <span className={`${styles.coverageStatus} ${styles.covered}`}>
+                                Covered
+                              </span>
+                            )}
+                            {hasCoverage && isCoveredByMe && (
+                              <span className={`${styles.coverageStatus} ${styles.covering}`}>
+                                You&apos;re Covering
+                              </span>
+                            )}
+                            {!hasCoverage && (
+                              <button
+                                type="button"
+                                className={styles.cantMakeItBtn}
+                                onClick={() => handleCantMakeIt(session)}
+                              >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                                  <circle cx="12" cy="12" r="10" />
+                                  <path d="M12 8v4M12 16h.01" />
+                                </svg>
+                                Can&apos;t make it?
+                              </button>
+                            )}
+                            {session.school.address && (
+                              <a
+                                href={getDirectionsUrl(session.school.address)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.sessionDirections}
+                              >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                                </svg>
+                              </a>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <span className={styles.emptyDayText}>No session</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   };
