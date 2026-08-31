@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instructor App Shell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F3F91;--navy-deep:#142C6B;--gold:#D8AE4B;
+    --orange:#F2A65E;--orange-dark:#E08A3C;--teal:#3E8FA0;
+    --paper:#fff;--tint:#EAF1FC;--tint-deep:#DCE8FB;--ink:#16193B;--ink-soft:#4A5170;
+    --shadow:0 10px 28px rgba(20,44,107,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--tint);color:var(--ink);font-family:'Nunito',sans-serif;font-size:14.5px;}
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;font-weight:700;margin:0;}
+
+  .app{display:flex;min-height:100vh;}
+
+  /* ---------- DESKTOP SIDEBAR ---------- */
+  .sidebar{width:230px;flex:none;background:var(--navy-deep);padding:22px 16px;display:flex;flex-direction:column;}
+  .sidebar-brand{display:flex;align-items:center;gap:9px;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:0 6px 18px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:14px;}
+  .sidebar-brand svg{width:18px;height:18px;color:var(--gold);}
+  .nav-label{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#7488BE;padding:0 10px;margin-bottom:8px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;color:#C4D0EE;text-decoration:none;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;margin-bottom:2px;}
+  .nav-item svg{width:16px;height:16px;flex:none;}
+  .nav-item.active{background:var(--orange);color:#fff;}
+  .nav-item:not(.active):hover{background:rgba(255,255,255,0.06);color:#fff;}
+  .sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);}
+  .who-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:0 6px;}
+  .who-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--navy-deep);display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:13px;}
+  .who-name{font-size:13px;color:#fff;font-weight:700;}
+  .who-role{font-size:11px;color:#9AABD6;}
+  .logout-link{display:flex;align-items:center;gap:8px;color:#9AABD6;text-decoration:none;font-size:12.5px;font-family:'Baloo 2',sans-serif;font-weight:600;padding:8px 6px;}
+  .logout-link:hover{color:#fff;}
+
+  /* ---------- MAIN CONTENT ---------- */
+  .main{flex:1;min-width:0;}
+  .content{max-width:760px;margin:0 auto;padding:32px 28px 100px;}
+  .page-head{margin-bottom:20px;}
+  .page-head h1{font-size:22px;}
+  .page-head p{color:var(--ink-soft);font-size:13.5px;margin-top:4px;}
+
+  .empty-hero{background:linear-gradient(155deg, var(--navy) 0%, var(--navy-deep) 100%);border-radius:22px;padding:40px 24px;text-align:center;color:#fff;margin-bottom:22px;}
+  .empty-hero svg{width:32px;height:32px;color:var(--gold);margin-bottom:12px;}
+  .empty-hero h3{font-size:16px;margin-bottom:4px;}
+  .empty-hero p{font-size:12.5px;color:#C4D0EE;}
+
+  .view-toggle{display:flex;gap:4px;background:var(--paper);border-radius:11px;padding:4px;box-shadow:var(--shadow);width:fit-content;margin-bottom:16px;}
+  .view-btn{border:none;background:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;color:var(--ink-soft);}
+  .view-btn.active{background:var(--navy);color:#fff;}
+
+  .week-nav{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
+  .week-nav button{background:var(--paper);border:none;border-radius:9px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--navy);box-shadow:var(--shadow);}
+  .week-nav span{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;}
+
+  .day-row{background:var(--paper);border-radius:14px;padding:13px 15px;margin-bottom:8px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;}
+  .day-row.holiday-row{border-left:4px solid var(--orange);background:linear-gradient(90deg, rgba(242,166,94,0.06), #fff 60px);}
+  .day-badge{width:46px;flex:none;text-align:center;}
+  .day-badge .dname{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11.5px;color:var(--navy);}
+  .day-badge .ddate{font-size:10.5px;color:var(--ink-soft);}
+  .day-empty{font-size:12.5px;color:#B7C1D8;font-style:italic;}
+  .holiday-title{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13.5px;}
+  .holiday-sub{font-size:11.5px;color:var(--ink-soft);}
+  .holiday-icon{width:15px;height:15px;color:var(--orange-dark);flex:none;}
+
+  /* ---------- MOBILE ---------- */
+  .mobile-topbar{display:none;}
+  .bottom-tabs{display:none;}
+
+  @media(max-width:760px){
+    .sidebar{display:none;}
+    .app{display:block;}
+    .content{max-width:none;padding:16px 16px 90px;}
+
+    .mobile-topbar{
+      display:flex;align-items:center;gap:9px;background:var(--navy);padding:14px 18px;
+      color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;
+      position:sticky;top:0;z-index:10;
+    }
+    .mobile-topbar svg{width:18px;height:18px;color:var(--gold);}
+
+    .bottom-tabs{
+      display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--paper);
+      border-top:1px solid var(--tint-deep);padding:8px 0 calc(8px + env(safe-area-inset-bottom));
+      box-shadow:0 -6px 18px rgba(20,44,107,0.08);z-index:10;
+    }
+    .tab-btn{
+      flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+      background:none;border:none;cursor:pointer;color:var(--ink-soft);padding:4px 0;
+    }
+    .tab-btn svg{width:21px;height:21px;}
+    .tab-btn span{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10.5px;}
+    .tab-btn.active{color:var(--navy);}
+    .tab-btn.active svg{color:var(--orange);}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- DESKTOP SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.6L22 9.2l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.2L2 9.2l7.4-.6z"/></svg>Shape Your Destiny</div>
+    <div class="nav-label">Menu</div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Schedule
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      Profile
+    </div>
+    <div class="sidebar-footer">
+      <div class="who-row">
+        <div class="who-avatar">J</div>
+        <div><div class="who-name">Jane</div><div class="who-role">Instructor</div></div>
+      </div>
+      <a class="logout-link" href="#">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        Log Out
+      </a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="mobile-topbar">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.6L22 9.2l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.2L2 9.2l7.4-.6z"/></svg>
+      Shape Your Destiny
+    </div>
+
+    <div class="content">
+      <div class="page-head">
+        <h1>My Schedule</h1>
+        <p>Hi Jane, here's what's coming up.</p>
+      </div>
+
+      <div class="empty-hero">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <h3>Nothing scheduled yet</h3>
+        <p>Your upcoming sessions will appear here</p>
+      </div>
+
+      <div class="view-toggle">
+        <button class="view-btn active">Week</button>
+        <button class="view-btn">Month</button>
+      </div>
+
+      <div class="week-nav">
+        <button><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <span>Aug 24&ndash;28, 2026</span>
+        <button><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+
+      <div id="weekList"></div>
+    </div>
+  </div>
+
+  <!-- MOBILE BOTTOM TABS -->
+  <div class="bottom-tabs">
+    <button class="tab-btn active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Schedule</span>
+    </button>
+    <button class="tab-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      <span>Profile</span>
+    </button>
+  </div>
+
+</div>
+
+<script>
+  const WEEK = [
+    { day:'Mon', date:'Aug 24' }, { day:'Tue', date:'Aug 25' }, { day:'Wed', date:'Aug 26' },
+    { day:'Thu', date:'Aug 27' },
+    { day:'Fri', date:'Aug 28', holiday:'Teacher Workday' },
+  ];
+  const list = document.getElementById('weekList');
+  WEEK.forEach(d => {
+    const row = document.createElement('div');
+    row.className = 'day-row' + (d.holiday ? ' holiday-row' : '');
+    if(d.holiday){
+      row.innerHTML = `<div class="day-badge"><div class="dname">${d.day}</div><div class="ddate">${d.date}</div></div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <svg class="holiday-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/></svg>
+            <span class="holiday-title">${d.holiday}</span>
+          </div>
+          <div class="holiday-sub">No school, enjoy the day off</div>
+        </div>`;
+    } else {
+      row.innerHTML = `<div class="day-badge"><div class="dname">${d.day}</div><div class="ddate">${d.date}</div></div>
+        <span class="day-empty">No session scheduled</span>`;
+    }
+    list.appendChild(row);
+  });
+</script>
+
+</body>
+</html>

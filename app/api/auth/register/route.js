@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request) {
-  const { inviteCode, fullName, email, password } = await request.json();
+  const { inviteCode, fullName, phone, email, password, cprExpires, foodHandlerExpires } = await request.json();
 
-  if (!inviteCode || !fullName || !email || !password) {
+  if (!inviteCode || !fullName || !phone || !email || !password) {
     return Response.json({ error: "All fields are required" }, { status: 400 });
   }
 
@@ -11,10 +12,11 @@ export async function POST(request) {
     return Response.json({ error: "Password must be at least 6 characters" }, { status: 400 });
   }
 
-  const supabase = await createClient();
+  // Use admin client for DB operations (bypasses RLS)
+  const adminClient = createAdminClient();
 
   // 1. Look up the invite code
-  const { data: inviteData, error: inviteError } = await supabase
+  const { data: inviteData, error: inviteError } = await adminClient
     .from("invite_codes")
     .select("id, role, used_by")
     .eq("code", inviteCode.trim())
@@ -28,7 +30,8 @@ export async function POST(request) {
     return Response.json({ error: "This invite code has already been used" }, { status: 400 });
   }
 
-  // 2. Create the account
+  // 2. Create the account using the regular server client for auth
+  const supabase = await createClient();
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
@@ -43,15 +46,25 @@ export async function POST(request) {
     return Response.json({ error: "Account creation failed" }, { status: 500 });
   }
 
-  // 3. Insert profile - use admin-level insert by temporarily bypassing RLS
-  // We do this in a transaction-like manner
-  const { error: profileError } = await supabase
+  // 3. Insert profile using admin client (bypasses RLS)
+  const profileData = {
+    id: userId,
+    full_name: fullName.trim(),
+    phone: phone.trim(),
+    role: inviteData.role,
+  };
+
+  // Add certification dates if the columns exist (may need migration)
+  if (cprExpires) {
+    profileData.cpr_expires = cprExpires;
+  }
+  if (foodHandlerExpires) {
+    profileData.food_handler_expires = foodHandlerExpires;
+  }
+
+  const { error: profileError } = await adminClient
     .from("profiles")
-    .insert({
-      id: userId,
-      full_name: fullName.trim(),
-      role: inviteData.role,
-    });
+    .insert(profileData);
 
   if (profileError) {
     console.error("Profile insert error:", profileError);
@@ -59,7 +72,7 @@ export async function POST(request) {
   }
 
   // 4. Mark invite code as used
-  await supabase
+  await adminClient
     .from("invite_codes")
     .update({ used_by: userId })
     .eq("id", inviteData.id);

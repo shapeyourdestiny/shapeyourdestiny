@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import styles from "./ScheduleBoard.module.css";
 import BottomSheet from "./BottomSheet";
 import ManageModal from "./ManageModal";
+import AddClassModal from "./AddClassModal";
 import {
   assignInstructorAction,
   unassignInstructorAction,
 } from "@/lib/schedule/actions";
+import { computeClassOccurrences } from "@/lib/schedule/occurrences";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const MONTHS = [
@@ -15,6 +17,12 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December"
 ];
 const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Program colors for badges
+const PROGRAM_COLORS = {
+  wellness: "#3E8FA0",   // teal
+  soccer: "#1F3F91",     // navy
+};
 
 // Get Monday of the week containing a date
 function getWeekStart(date) {
@@ -62,8 +70,23 @@ function formatDateKey(date) {
   return `${y}-${m}-${d}`;
 }
 
+// Check if mobile viewport
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < breakpoint);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 export default function ScheduleBoard({ initialData }) {
   const [data, setData] = useState(initialData);
+  const isMobile = useIsMobile(640);
 
   // Refetch data from API
   const refreshData = useCallback(async () => {
@@ -79,27 +102,37 @@ export default function ScheduleBoard({ initialData }) {
   }, []);
 
   const [view, setView] = useState("week");
-  const [activeDay, setActiveDay] = useState("Mon");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [manageOpen, setManageOpen] = useState(false);
+  const [addClassOpen, setAddClassOpen] = useState(false);
 
-  // Instructor pool state
-  const [poolSearch, setPoolSearch] = useState("");
-  const [expandedDistricts, setExpandedDistricts] = useState(new Set());
+  // Month view selected day state
+  const [selectedMonthDay, setSelectedMonthDay] = useState(null);
 
-  // Mobile state
-  const [mobilePickerOpen, setMobilePickerOpen] = useState(false);
-  const [mobilePickerSlot, setMobilePickerSlot] = useState(null);
-  const [mobileDayDetailOpen, setMobileDayDetailOpen] = useState(false);
-  const [mobileDayDetail, setMobileDayDetail] = useState(null);
-
-  // Drag state
-  const [draggedInstructor, setDraggedInstructor] = useState(null);
+  // Click-to-assign state
+  const [pickerOpen, setPickerOpen] = useState(null); // { classId, slotType, anchorRect }
+  const [pickerSearch, setPickerSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const popoverRef = useRef(null);
 
-  // Get all assigned instructor IDs
+  // Close popover when clicking outside
+  useEffect(() => {
+    if (!pickerOpen || isMobile) return;
+
+    const handleClickOutside = (e) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target)) {
+        setPickerOpen(null);
+        setPickerSearch("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [pickerOpen, isMobile]);
+
+  // Get all assigned instructor IDs (for filtering available instructors)
   const assignedInstructorIds = useMemo(() => {
     const ids = new Set();
     data.districts.forEach((district) => {
@@ -114,36 +147,17 @@ export default function ScheduleBoard({ initialData }) {
     return ids;
   }, [data]);
 
-  // Group instructors by district (instructors can belong to multiple districts)
-  const instructorsByDistrict = useMemo(() => {
-    const grouped = {};
-    data.instructors.forEach((instructor) => {
-      const districtIds = instructor.district_ids || [];
-      if (districtIds.length === 0) {
-        if (!grouped["unassigned"]) grouped["unassigned"] = [];
-        grouped["unassigned"].push(instructor);
-      } else {
-        districtIds.forEach((districtId) => {
-          if (!grouped[districtId]) grouped[districtId] = [];
-          grouped[districtId].push(instructor);
-        });
-      }
-    });
-    return grouped;
-  }, [data.instructors]);
+  // Get available instructors (not already assigned)
+  const availableInstructors = useMemo(() => {
+    return data.instructors.filter((i) => !assignedInstructorIds.has(i.id));
+  }, [data.instructors, assignedInstructorIds]);
 
-  // Toggle district expansion
-  const toggleDistrictExpanded = (districtId) => {
-    setExpandedDistricts((prev) => {
-      const next = new Set(prev);
-      if (next.has(districtId)) {
-        next.delete(districtId);
-      } else {
-        next.add(districtId);
-      }
-      return next;
-    });
-  };
+  // Get district info for an instructor
+  const getInstructorDistrict = useCallback((instructor) => {
+    const districtIds = instructor.district_ids || [];
+    if (districtIds.length === 0) return null;
+    return data.districts.find((d) => districtIds.includes(d.id));
+  }, [data.districts]);
 
   // Week navigation
   const goToPrevWeek = () => {
@@ -158,34 +172,38 @@ export default function ScheduleBoard({ initialData }) {
     setWeekStart(newStart);
   };
 
-  // Drag handlers
-  const handleDragStart = (e, instructor) => {
-    setDraggedInstructor(instructor);
-    e.dataTransfer.effectAllowed = "move";
+  // Open picker (click on slot)
+  const openPicker = (classId, slotType, event) => {
+    event.stopPropagation();
+    const rect = event.currentTarget.getBoundingClientRect();
+    setPickerOpen({ classId, slotType, anchorRect: rect });
+    setPickerSearch("");
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+  // Close picker
+  const closePicker = () => {
+    setPickerOpen(null);
+    setPickerSearch("");
   };
 
-  const handleDrop = async (e, classId, slotType) => {
-    e.preventDefault();
-    if (!draggedInstructor || loading) return;
-
+  // Assign instructor
+  const handleAssign = async (instructor) => {
+    if (!pickerOpen || loading) return;
     setLoading(true);
     try {
-      await assignInstructorAction(classId, draggedInstructor.id, slotType);
+      await assignInstructorAction(pickerOpen.classId, instructor.id, pickerOpen.slotType);
       await refreshData();
     } catch (err) {
       console.error("Failed to assign:", err);
     } finally {
       setLoading(false);
-      setDraggedInstructor(null);
+      closePicker();
     }
   };
 
-  const handleUnassign = async (classId, slotType) => {
+  // Unassign instructor (× button)
+  const handleUnassign = async (e, classId, slotType) => {
+    e.stopPropagation();
     if (loading) return;
     setLoading(true);
     try {
@@ -198,38 +216,61 @@ export default function ScheduleBoard({ initialData }) {
     }
   };
 
-  // Mobile tap-to-assign
-  const openMobilePicker = (classId, slotType) => {
-    setMobilePickerSlot({ classId, slotType });
-    setMobilePickerOpen(true);
+  // Filter holidays to those applicable to a specific school
+  // Includes: global holidays, district holidays, and school-specific holidays
+  const getHolidaysForSchool = (districtId, schoolId) => {
+    return (data.holidays || []).filter(h => {
+      // Global holiday (applies to all)
+      if (h.district_id === null && h.school_id === null) return true;
+      // District-specific holiday (applies to all schools in district)
+      if (h.district_id === districtId && h.school_id === null) return true;
+      // School-specific holiday
+      if (h.school_id === schoolId) return true;
+      return false;
+    });
   };
 
-  const handleMobileAssign = async (instructor) => {
-    if (!mobilePickerSlot || loading) return;
-    setLoading(true);
-    try {
-      await assignInstructorAction(
-        mobilePickerSlot.classId,
-        instructor.id,
-        mobilePickerSlot.slotType
-      );
-      await refreshData();
-    } catch (err) {
-      console.error("Failed to assign:", err);
-    } finally {
-      setLoading(false);
-      setMobilePickerOpen(false);
-      setMobilePickerSlot(null);
-    }
+  // Check if a class should appear on a specific date
+  const isClassActiveOnDate = (cls, dateStr, districtId, schoolId) => {
+    if (!cls.start_date) return true;
+    if (dateStr < cls.start_date) return false;
+
+    const classProgram = cls.program || "wellness";
+    const offDaysForProgram = (data.programOffDays || []).filter(
+      od => od.program === classProgram
+    );
+
+    // Only apply holidays that are global, for this district, or for this school
+    const applicableHolidays = getHolidaysForSchool(districtId, schoolId);
+    const isHolidayDate = applicableHolidays.some(h => h.date === dateStr);
+    const isOffDay = offDaysForProgram.some(od => od.date === dateStr);
+    if (isHolidayDate || isOffDay) return false;
+
+    if (!cls.target_sessions) return true;
+
+    const result = computeClassOccurrences({
+      startDate: cls.start_date,
+      days: cls.days,
+      targetSessions: cls.target_sessions,
+      holidays: applicableHolidays,
+      programOffDays: offDaysForProgram,
+    });
+
+    return result.occurrences.some(o => o.date === dateStr);
   };
 
-  // Get classes for a specific day
-  const getClassesForDay = (day) => {
+  // Get classes for a specific day and date
+  const getClassesForDay = (day, date = null) => {
     const classes = [];
+    const dateStr = date ? formatDateKey(date) : null;
+
     data.districts.forEach((district) => {
       district.schools?.forEach((school) => {
         school.classes?.forEach((cls) => {
           if (cls.days?.includes(day)) {
+            if (dateStr && !isClassActiveOnDate(cls, dateStr, district.id, school.id)) {
+              return;
+            }
             classes.push({
               ...cls,
               school,
@@ -248,17 +289,7 @@ export default function ScheduleBoard({ initialData }) {
     return (data.holidays || []).filter((h) => h.date === dateKey);
   };
 
-  // Check if a date is a holiday (optionally for a specific district)
-  const isHoliday = (date, districtId = null) => {
-    const holidays = getHolidaysForDate(date);
-    if (districtId) {
-      // Check for global holidays or district-specific
-      return holidays.some((h) => h.district_id === null || h.district_id === districtId);
-    }
-    return holidays.length > 0;
-  };
-
-  // Calendar utilities for Month/Year views
+  // Calendar utilities
   const getDaysInMonth = (year, month) => {
     return new Date(year, month + 1, 0).getDate();
   };
@@ -276,59 +307,83 @@ export default function ScheduleBoard({ initialData }) {
     const date = new Date(year, month, day);
     const dayName = getDayName(date.getDay());
     if (!DAYS.includes(dayName)) return [];
-    return getClassesForDay(dayName);
+    return getClassesForDay(dayName, date);
   };
 
-  // Render slot (instructor chip or drop zone)
+  // Filter instructors by search
+  const filteredInstructors = useMemo(() => {
+    const search = pickerSearch.toLowerCase().trim();
+    if (!search) return availableInstructors;
+    return availableInstructors.filter((i) =>
+      i.full_name.toLowerCase().includes(search)
+    );
+  }, [availableInstructors, pickerSearch]);
+
+  // Render slot (instructor chip or empty slot)
   const renderSlot = (cls, slotType, label) => {
     const assignment = cls.assignments?.find((a) => a.slotType === slotType);
+    const isThisSlotOpen = pickerOpen?.classId === cls.id && pickerOpen?.slotType === slotType;
 
     if (assignment?.profile) {
       const color = assignment.profile.color || cls.district?.color || "#3E8FA0";
       return (
-        <div className={styles.filledSlot} style={{ "--slot-color": color }}>
-          <span className={styles.slotName}>{assignment.profile.full_name}</span>
-          <button
-            className={styles.unassignBtn}
-            onClick={() => handleUnassign(cls.id, slotType)}
-            disabled={loading}
-            aria-label="Unassign"
+        <div className={styles.slotWrapper}>
+          <div
+            className={`${styles.filledSlot} ${isThisSlotOpen ? styles.slotActive : ""}`}
+            style={{ "--slot-color": color }}
+            onClick={(e) => openPicker(cls.id, slotType, e)}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
+            <span className={styles.slotName}>{assignment.profile.full_name}</span>
+            <button
+              className={styles.unassignBtn}
+              onClick={(e) => handleUnassign(e, cls.id, slotType)}
+              disabled={loading}
+              aria-label="Unassign"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
         </div>
       );
     }
 
     // Empty slot
     return (
-      <div
-        className={styles.emptySlot}
-        onDragOver={handleDragOver}
-        onDrop={(e) => handleDrop(e, cls.id, slotType)}
-        onClick={() => openMobilePicker(cls.id, slotType)}
-      >
-        <span className={styles.slotLabel}>{label}</span>
-        <span className={styles.dropHint}>
-          <span className={styles.desktopHint}>Drop here</span>
-          <span className={styles.mobileHint}>Tap to assign</span>
-        </span>
+      <div className={styles.slotWrapper}>
+        <div
+          className={`${styles.emptySlot} ${isThisSlotOpen ? styles.slotActive : ""}`}
+          onClick={(e) => openPicker(cls.id, slotType, e)}
+        >
+          <span className={styles.slotLabel}>{label}</span>
+          <span className={styles.assignHint}>Click to assign</span>
+        </div>
       </div>
     );
   };
 
   // Render grid class card (for Week view columns)
   const renderGridClassCard = (cls) => {
+    const program = cls.program || "wellness";
+    const programColor = PROGRAM_COLORS[program] || PROGRAM_COLORS.wellness;
+
     return (
       <div
         key={cls.id}
         className={`${styles.gridCard} ${cls.is_review_day ? styles.reviewDay : ""}`}
-        style={{ "--card-accent": cls.is_review_day ? "var(--gold)" : "var(--teal)" }}
+        style={{ "--card-accent": cls.is_review_day ? "var(--gold)" : programColor }}
       >
-        <div className={styles.gridCardTime}>{cls.time}</div>
+        <div className={styles.gridCardHeader}>
+          <span
+            className={styles.programBadge}
+            style={{ background: programColor }}
+          >
+            {program}
+          </span>
+          <span className={styles.gridCardTime}>{cls.time}</span>
+        </div>
         <div className={styles.gridCardSchool}>{cls.school?.name}</div>
         <div className={styles.gridCardDistrict}>
           <span className={styles.districtDot} style={{ background: cls.district?.color }} />
@@ -346,166 +401,27 @@ export default function ScheduleBoard({ initialData }) {
     );
   };
 
-  // Render instructor chip (draggable)
-  const renderInstructorChip = (instructor, isAssigned) => {
-    const color = instructor.color || "#3E8FA0";
-    return (
-      <div
-        key={instructor.id}
-        className={`${styles.instructorChip} ${isAssigned ? styles.assigned : ""}`}
-        style={{ "--chip-color": color }}
-        draggable={!isAssigned}
-        onDragStart={(e) => handleDragStart(e, instructor)}
-        onClick={() => {
-          if (mobilePickerOpen && !isAssigned) {
-            handleMobileAssign(instructor);
-          }
-        }}
-      >
-        <span className={styles.chipName}>{instructor.full_name}</span>
-        {isAssigned && <span className={styles.chipAssigned}>Assigned</span>}
-      </div>
-    );
+  // Check if a date is in the past
+  const isPastDate = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const compareDate = new Date(date);
+    compareDate.setHours(0, 0, 0, 0);
+    return compareDate < today;
   };
 
-  // Render instructor pool (shared between Day and Week views)
-  const renderInstructorPool = () => {
-    const searchLower = poolSearch.toLowerCase().trim();
-    const isSearching = searchLower.length > 0;
-
-    // Filter and prepare district groups
-    const districtGroups = [];
-
-    data.districts.forEach((district) => {
-      const districtInstructors = instructorsByDistrict[district.id] || [];
-      if (districtInstructors.length === 0) return;
-
-      const filtered = isSearching
-        ? districtInstructors.filter((i) =>
-            i.full_name.toLowerCase().includes(searchLower)
-          )
-        : districtInstructors;
-
-      if (isSearching && filtered.length === 0) return;
-
-      const availableCount = districtInstructors.filter(
-        (i) => !assignedInstructorIds.has(i.id)
-      ).length;
-
-      const isExpanded = isSearching || expandedDistricts.has(district.id);
-
-      districtGroups.push({
-        id: district.id,
-        name: district.name,
-        color: district.color,
-        instructors: filtered,
-        availableCount,
-        isExpanded,
-      });
-    });
-
-    // Handle "No District" group
-    const unassignedInstructors = instructorsByDistrict["unassigned"] || [];
-    if (unassignedInstructors.length > 0) {
-      const filtered = isSearching
-        ? unassignedInstructors.filter((i) =>
-            i.full_name.toLowerCase().includes(searchLower)
-          )
-        : unassignedInstructors;
-
-      if (!isSearching || filtered.length > 0) {
-        const availableCount = unassignedInstructors.filter(
-          (i) => !assignedInstructorIds.has(i.id)
-        ).length;
-
-        districtGroups.push({
-          id: "unassigned",
-          name: "No District",
-          color: "#999",
-          instructors: filtered,
-          availableCount,
-          isExpanded: isSearching || expandedDistricts.has("unassigned"),
-        });
-      }
-    }
-
-    const hasAnyResults = districtGroups.length > 0;
-
+  // Render Week View - horizontal 5-column grid (no sidebar)
+  const renderWeekView = () => {
     return (
-      <aside className={styles.instructorPool}>
-        <h3 className={styles.poolTitle}>Instructors</h3>
-        <div className={styles.poolSearch}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search instructors..."
-            value={poolSearch}
-            onChange={(e) => setPoolSearch(e.target.value)}
-          />
-        </div>
-        <div className={styles.poolContent}>
-          {!hasAnyResults && isSearching ? (
-            <p className={styles.poolNoMatch}>No instructors match</p>
-          ) : (
-            districtGroups.map((group) => (
-              <div key={group.id} className={styles.poolGroup}>
-                <button
-                  className={styles.poolGroupHeader}
-                  onClick={() => !isSearching && toggleDistrictExpanded(group.id)}
-                >
-                  <span className={styles.districtDot} style={{ background: group.color }} />
-                  <span className={styles.poolGroupName}>{group.name}</span>
-                  <span className={styles.poolGroupCount}>{group.availableCount} available</span>
-                  <svg
-                    className={`${styles.poolChevron} ${group.isExpanded ? styles.expanded : ""}`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </button>
-                {group.isExpanded && (
-                  <div className={styles.poolGroupContent}>
-                    {group.instructors.map((instructor) =>
-                      renderInstructorChip(
-                        instructor,
-                        assignedInstructorIds.has(instructor.id)
-                      )
-                    )}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      </aside>
-    );
-  };
-
-  // Render Day View
-  const renderDayView = () => {
-    const dayClasses = getClassesForDay(activeDay);
-    const dayIndex = DAYS.indexOf(activeDay);
-    const currentDate = getDateForDay(weekStart, dayIndex);
-    const dayHolidays = getHolidaysForDate(currentDate);
-
-    return (
-      <div className={styles.dayView}>
-        {/* Week nav for day view */}
-        <div className={styles.dayNav}>
+      <div className={styles.weekView}>
+        {/* Week navigation */}
+        <div className={styles.weekNav}>
           <button className={styles.weekNavBtn} onClick={goToPrevWeek}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <span className={styles.dayNavDate}>
-            {SHORT_MONTHS[currentDate.getMonth()]} {currentDate.getDate()}, {currentDate.getFullYear()}
-          </span>
+          <span className={styles.weekNavLabel}>{formatWeekRange(weekStart)}</span>
           <button className={styles.weekNavBtn} onClick={goToNextWeek}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="9 18 15 12 9 6" />
@@ -513,151 +429,80 @@ export default function ScheduleBoard({ initialData }) {
           </button>
         </div>
 
-        <div className={styles.dayTabs}>
-          {DAYS.map((day, idx) => {
-            const tabDate = getDateForDay(weekStart, idx);
-            const tabHolidays = getHolidaysForDate(tabDate);
+        {/* 5-column grid */}
+        <div className={styles.weekGrid}>
+          {DAYS.map((day, index) => {
+            const date = getDateForDay(weekStart, index);
+            const dayClasses = getClassesForDay(day, date);
+            const isTodayCol = isToday(date);
+            const isPast = isPastDate(date);
+            const dayHolidays = getHolidaysForDate(date);
+
             return (
-              <button
-                key={day}
-                className={`${styles.dayTab} ${activeDay === day ? styles.active : ""} ${tabHolidays.length > 0 ? styles.hasHoliday : ""}`}
-                onClick={() => setActiveDay(day)}
-              >
-                {day}
-                {tabHolidays.length > 0 && <span className={styles.holidayDot} />}
-              </button>
+              <div key={day} className={`${styles.weekColumn} ${dayHolidays.length > 0 ? styles.hasHoliday : ""} ${isPast ? styles.pastDay : ""}`}>
+                <div className={`${styles.weekColumnHeader} ${isTodayCol ? styles.today : ""}`}>
+                  <span className={styles.weekColumnDay}>{day}</span>
+                  <span className={styles.weekColumnDate}>
+                    {SHORT_MONTHS[date.getMonth()]} {date.getDate()}
+                  </span>
+                </div>
+                <div className={styles.weekColumnContent}>
+                  {/* Show holidays */}
+                  {dayHolidays.length > 0 && (
+                    <div className={styles.holidayBanner}>
+                      {dayHolidays.map((h) => {
+                        // Find school and district for display
+                        let school = null;
+                        let district = null;
+                        if (h.school_id) {
+                          for (const d of data.districts) {
+                            const s = d.schools?.find((s) => s.id === h.school_id);
+                            if (s) {
+                              school = s;
+                              district = d;
+                              break;
+                            }
+                          }
+                        } else if (h.district_id) {
+                          district = data.districts.find((d) => d.id === h.district_id);
+                        }
+                        return (
+                          <div key={h.id} className={styles.holidayTag}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                              <line x1="16" y1="2" x2="16" y2="6" />
+                              <line x1="8" y1="2" x2="8" y2="6" />
+                              <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            <span className={styles.holidayTagName}>{h.name}</span>
+                            {school ? (
+                              <span className={styles.holidayTagDistrict}>
+                                <span className={styles.districtDot} style={{ background: district?.color || "#888" }} />
+                                {school.name}
+                              </span>
+                            ) : district ? (
+                              <span className={styles.holidayTagDistrict}>
+                                <span className={styles.districtDot} style={{ background: district.color }} />
+                                {district.name}
+                              </span>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {dayClasses.length === 0 && dayHolidays.length === 0 ? (
+                    <div className={styles.emptyPlaceholder}>
+                      <p>Nothing scheduled</p>
+                    </div>
+                  ) : (
+                    dayClasses.map((cls) => renderGridClassCard(cls))
+                  )}
+                </div>
+              </div>
             );
           })}
         </div>
-
-        <div className={styles.dayContent}>
-          {renderInstructorPool()}
-
-          <main className={styles.dayMain}>
-            {/* Show holidays */}
-            {dayHolidays.length > 0 && (
-              <div className={styles.holidayBanner}>
-                {dayHolidays.map((h) => {
-                  const district = h.district_id
-                    ? data.districts.find((d) => d.id === h.district_id)
-                    : null;
-                  return (
-                    <div key={h.id} className={styles.holidayTag}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                      </svg>
-                      <span className={styles.holidayTagName}>{h.name}</span>
-                      {district && (
-                        <span className={styles.holidayTagDistrict}>
-                          <span className={styles.districtDot} style={{ background: district.color }} />
-                          {district.name}
-                        </span>
-                      )}
-                      {!district && (
-                        <span className={styles.holidayTagGlobal}>All districts</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            {dayClasses.length === 0 ? (
-              <div className={styles.emptyPlaceholder}>
-                <p>Nothing scheduled</p>
-              </div>
-            ) : (
-              <div className={styles.dayClassesList}>
-                {dayClasses.map((cls) => renderGridClassCard(cls))}
-              </div>
-            )}
-          </main>
-        </div>
-      </div>
-    );
-  };
-
-  // Render Week View - horizontal 5-column grid
-  const renderWeekView = () => {
-    return (
-      <div className={styles.weekView}>
-        {renderInstructorPool()}
-
-        <main className={styles.weekMain}>
-          {/* Week navigation */}
-          <div className={styles.weekNav}>
-            <button className={styles.weekNavBtn} onClick={goToPrevWeek}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-            <span className={styles.weekNavLabel}>{formatWeekRange(weekStart)}</span>
-            <button className={styles.weekNavBtn} onClick={goToNextWeek}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
-          </div>
-
-          {/* 5-column grid */}
-          <div className={styles.weekGrid}>
-            {DAYS.map((day, index) => {
-              const date = getDateForDay(weekStart, index);
-              const dayClasses = getClassesForDay(day);
-              const isTodayCol = isToday(date);
-              const dayHolidays = getHolidaysForDate(date);
-
-              return (
-                <div key={day} className={`${styles.weekColumn} ${dayHolidays.length > 0 ? styles.hasHoliday : ""}`}>
-                  <div className={`${styles.weekColumnHeader} ${isTodayCol ? styles.today : ""}`}>
-                    <span className={styles.weekColumnDay}>{day}</span>
-                    <span className={styles.weekColumnDate}>
-                      {SHORT_MONTHS[date.getMonth()]} {date.getDate()}
-                    </span>
-                  </div>
-                  <div className={styles.weekColumnContent}>
-                    {/* Show holidays */}
-                    {dayHolidays.length > 0 && (
-                      <div className={styles.holidayBanner}>
-                        {dayHolidays.map((h) => {
-                          const district = h.district_id
-                            ? data.districts.find((d) => d.id === h.district_id)
-                            : null;
-                          return (
-                            <div key={h.id} className={styles.holidayTag}>
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                <line x1="16" y1="2" x2="16" y2="6" />
-                                <line x1="8" y1="2" x2="8" y2="6" />
-                                <line x1="3" y1="10" x2="21" y2="10" />
-                              </svg>
-                              <span className={styles.holidayTagName}>{h.name}</span>
-                              {district && (
-                                <span className={styles.holidayTagDistrict}>
-                                  <span className={styles.districtDot} style={{ background: district.color }} />
-                                  {district.name}
-                                </span>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                    {dayClasses.length === 0 && dayHolidays.length === 0 ? (
-                      <div className={styles.emptyPlaceholder}>
-                        <p>Nothing scheduled</p>
-                      </div>
-                    ) : (
-                      dayClasses.map((cls) => renderGridClassCard(cls))
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </main>
       </div>
     );
   };
@@ -688,6 +533,22 @@ export default function ScheduleBoard({ initialData }) {
       weeks.push(currentWeek);
     }
 
+    // Get today for highlighting
+    const today = new Date();
+    const isTodayInMonth = today.getMonth() === selectedMonth && today.getFullYear() === selectedYear;
+    const todayDate = today.getDate();
+
+    // Get selected day's classes and holidays for detail panel
+    const selectedClasses = selectedMonthDay
+      ? getClassesForDate(selectedYear, selectedMonth, selectedMonthDay)
+      : [];
+    const selectedDayHolidays = selectedMonthDay
+      ? getHolidaysForDate(new Date(selectedYear, selectedMonth, selectedMonthDay))
+      : [];
+
+    // Use the shared program colors constant
+    const programColors = PROGRAM_COLORS;
+
     return (
       <div className={styles.monthView}>
         <div className={styles.monthNav}>
@@ -700,6 +561,7 @@ export default function ScheduleBoard({ initialData }) {
               } else {
                 setSelectedMonth(selectedMonth - 1);
               }
+              setSelectedMonthDay(null);
             }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -718,6 +580,7 @@ export default function ScheduleBoard({ initialData }) {
               } else {
                 setSelectedMonth(selectedMonth + 1);
               }
+              setSelectedMonthDay(null);
             }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -726,125 +589,271 @@ export default function ScheduleBoard({ initialData }) {
           </button>
         </div>
 
-        <div className={styles.calendarGrid}>
-          <div className={styles.calendarHeader}>
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-              <div key={d} className={styles.calendarHeaderCell}>
-                {d}
+        <div className={styles.monthContent}>
+          {/* Calendar Grid */}
+          <div className={styles.monthCalendarSide}>
+            <div className={styles.calendarGrid}>
+              <div className={styles.calendarHeader}>
+                {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                  <div key={i} className={styles.calendarHeaderCell}>
+                    {d}
+                  </div>
+                ))}
               </div>
-            ))}
+
+              {weeks.map((week, weekIndex) => (
+                <div key={weekIndex} className={styles.calendarWeek}>
+                  {week.map((day, dayIndex) => {
+                    if (!day) {
+                      return <div key={dayIndex} className={styles.calendarCellEmpty} />;
+                    }
+
+                    const cellDate = new Date(selectedYear, selectedMonth, day);
+                    const classes = getClassesForDate(selectedYear, selectedMonth, day);
+                    const dayHolidays = getHolidaysForDate(cellDate);
+                    const isSelected = selectedMonthDay === day;
+                    const isTodayCell = isTodayInMonth && todayDate === day;
+
+                    // Get unique programs for this day
+                    const uniquePrograms = new Set();
+                    classes.forEach((cls) => {
+                      uniquePrograms.add(cls.program || "wellness");
+                    });
+
+                    // Determine day state (priority: holiday > multiple > single > empty)
+                    let dayState = "empty";
+                    if (dayHolidays.length > 0) {
+                      dayState = "holiday";
+                    } else if (uniquePrograms.size >= 2) {
+                      dayState = "multiple";
+                    } else if (uniquePrograms.size === 1) {
+                      dayState = uniquePrograms.has("soccer") ? "soccer" : "wellness";
+                    }
+
+                    // Get program colors for dots
+                    const programDots = [];
+                    const seenPrograms = new Set();
+                    classes.forEach((cls) => {
+                      const prog = cls.program || "wellness";
+                      if (!seenPrograms.has(prog)) {
+                        seenPrograms.add(prog);
+                        programDots.push(programColors[prog] || programColors.wellness);
+                      }
+                    });
+
+                    return (
+                      <div
+                        key={dayIndex}
+                        className={`${styles.calendarCell} ${styles[`dayState_${dayState}`]} ${isSelected ? styles.selected : ""} ${isTodayCell ? styles.today : ""}`}
+                        onClick={() => setSelectedMonthDay(day)}
+                      >
+                        <span className={`${styles.dayNumber} ${dayState !== "empty" ? styles.dayNumberActive : ""}`}>{day}</span>
+                        {(programDots.length > 0 || dayHolidays.length > 0) && (
+                          <div className={styles.cellIndicators}>
+                            {programDots.map((color, i) => (
+                              <span
+                                key={`prog-${i}`}
+                                className={styles.programDot}
+                                style={{ background: color }}
+                              />
+                            ))}
+                            {dayHolidays.length > 0 && (
+                              <span className={styles.holidayMarker} />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+
+            {/* Legend */}
+            <div className={styles.monthLegend}>
+              <div className={styles.legendItem}>
+                <span className={styles.legendSwatch} style={{ background: "rgba(62,143,160,0.5)" }} />
+                <span>Wellness day</span>
+              </div>
+              <div className={styles.legendItem}>
+                <span className={styles.legendSwatch} style={{ background: "rgba(31,63,145,0.5)" }} />
+                <span>Soccer day</span>
+              </div>
+              <div className={styles.legendItem}>
+                <span className={styles.legendSwatch} style={{ background: "rgba(180,91,199,0.5)" }} />
+                <span>Multiple programs</span>
+              </div>
+              <div className={styles.legendItem}>
+                <span className={styles.legendSwatch} style={{ background: "rgba(216,174,75,0.5)" }} />
+                <span>Holiday</span>
+              </div>
+            </div>
           </div>
 
-          {weeks.map((week, weekIndex) => (
-            <div key={weekIndex} className={styles.calendarWeek}>
-              {week.map((day, dayIndex) => {
-                if (!day) {
-                  return <div key={dayIndex} className={styles.calendarCellEmpty} />;
-                }
+          {/* Detail Panel */}
+          <div className={styles.monthDetailPanel}>
+            {selectedMonthDay ? (
+              <>
+                <div className={styles.detailPanelHeader}>
+                  <h3>
+                    {MONTHS[selectedMonth]} {selectedMonthDay}, {selectedYear}
+                  </h3>
+                </div>
+                <div className={styles.detailPanelContent}>
+                  {/* Holidays */}
+                  {selectedDayHolidays.length > 0 && (
+                    <div className={styles.detailHolidays}>
+                      {selectedDayHolidays.map((h) => {
+                        const district = h.district_id
+                          ? data.districts.find((d) => d.id === h.district_id)
+                          : null;
+                        return (
+                          <div key={h.id} className={styles.detailHolidayItem}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                              <line x1="16" y1="2" x2="16" y2="6" />
+                              <line x1="8" y1="2" x2="8" y2="6" />
+                              <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            <span className={styles.detailHolidayName}>{h.name}</span>
+                            {district && (
+                              <span className={styles.detailHolidayDistrict}>
+                                <span className={styles.districtDot} style={{ background: district.color }} />
+                                {district.name}
+                              </span>
+                            )}
+                            {!district && (
+                              <span className={styles.detailHolidayGlobal}>All districts</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
-                const classes = getClassesForDate(selectedYear, selectedMonth, day);
-                const districtColors = [
-                  ...new Set(classes.map((c) => c.district?.color).filter(Boolean)),
-                ];
-                const hasReviewDay = classes.some((c) => c.is_review_day);
-
-                return (
-                  <div
-                    key={dayIndex}
-                    className={`${styles.calendarCell} ${classes.length > 0 ? styles.hasClasses : ""}`}
-                    onClick={() => {
-                      if (classes.length > 0) {
-                        setMobileDayDetail({ year: selectedYear, month: selectedMonth, day, classes });
-                        setMobileDayDetailOpen(true);
-                      }
-                    }}
-                  >
-                    <span className={`${styles.dayNumber} ${hasReviewDay ? styles.reviewRing : ""}`}>
-                      {day}
-                    </span>
-                    {districtColors.length > 0 && (
-                      <div className={styles.districtDots}>
-                        {districtColors.slice(0, 3).map((color, i) => (
-                          <span
-                            key={i}
-                            className={styles.calendarDot}
-                            style={{ background: color }}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+                  {/* Classes */}
+                  {selectedClasses.length > 0 ? (
+                    <div className={styles.detailClasses}>
+                      {selectedClasses.map((cls) => (
+                        <div key={cls.id} className={styles.detailClassCard}>
+                          <div className={styles.detailClassHeader}>
+                            <span
+                              className={styles.detailProgramBadge}
+                              style={{ background: programColors[cls.program] || "var(--teal)" }}
+                            >
+                              {cls.program || "wellness"}
+                            </span>
+                            <span className={styles.detailClassTime}>{cls.time}</span>
+                          </div>
+                          <div className={styles.detailClassSchool}>{cls.school?.name}</div>
+                          <div className={styles.detailClassDistrict}>
+                            <span className={styles.districtDot} style={{ background: cls.district?.color }} />
+                            <span>{cls.district?.name}</span>
+                          </div>
+                          {cls.assignments && cls.assignments.length > 0 && (
+                            <div className={styles.detailClassInstructors}>
+                              {cls.assignments.map((a) => (
+                                <span key={a.id} className={styles.detailInstructorChip}>
+                                  {a.profile?.full_name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {(!cls.assignments || cls.assignments.length === 0) && (
+                            <div className={styles.detailNoInstructors}>No instructors assigned</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : selectedDayHolidays.length === 0 ? (
+                    <div className={styles.detailEmpty}>
+                      <p>No classes scheduled</p>
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            ) : (
+              <div className={styles.detailPanelEmpty}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <p>Select a day to view details</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
   };
 
-  // Render Year View
-  const renderYearView = () => {
+  // Render instructor picker popover (desktop) or use bottom sheet (mobile)
+  const renderPickerPopover = () => {
+    if (!pickerOpen) return null;
+
+    // On mobile, we use BottomSheet instead
+    if (isMobile) return null;
+
+    const { anchorRect } = pickerOpen;
+    const popoverStyle = {
+      position: "fixed",
+      top: anchorRect.bottom + 8,
+      left: anchorRect.left,
+      minWidth: Math.max(280, anchorRect.width),
+    };
+
+    // Adjust if popover would go off-screen
+    if (anchorRect.left + 280 > window.innerWidth) {
+      popoverStyle.left = window.innerWidth - 290;
+    }
+    if (anchorRect.bottom + 300 > window.innerHeight) {
+      popoverStyle.top = anchorRect.top - 308;
+    }
+
     return (
-      <div className={styles.yearView}>
-        <div className={styles.yearNav}>
-          <button
-            className={styles.monthNavBtn}
-            onClick={() => setSelectedYear(selectedYear - 1)}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <h2 className={styles.yearTitle}>{selectedYear}</h2>
-          <button
-            className={styles.monthNavBtn}
-            onClick={() => setSelectedYear(selectedYear + 1)}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
+      <div className={styles.pickerPopover} style={popoverStyle} ref={popoverRef}>
+        <div className={styles.pickerSearch}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search instructors..."
+            value={pickerSearch}
+            onChange={(e) => setPickerSearch(e.target.value)}
+            autoFocus
+          />
         </div>
-
-        <div className={styles.miniMonthsGrid}>
-          {MONTHS.map((monthName, monthIndex) => {
-            const daysInMonth = getDaysInMonth(selectedYear, monthIndex);
-            const firstDay = getFirstDayOfMonth(selectedYear, monthIndex);
-
-            return (
-              <div
-                key={monthIndex}
-                className={styles.miniMonth}
-                onClick={() => {
-                  setSelectedMonth(monthIndex);
-                  setView("month");
-                }}
-              >
-                <h4 className={styles.miniMonthTitle}>{monthName}</h4>
-                <div className={styles.miniMonthGrid}>
-                  {Array.from({ length: firstDay }).map((_, i) => (
-                    <div key={`empty-${i}`} className={styles.miniDayEmpty} />
-                  ))}
-                  {Array.from({ length: daysInMonth }).map((_, i) => {
-                    const day = i + 1;
-                    const classes = getClassesForDate(selectedYear, monthIndex, day);
-                    const hasClasses = classes.length > 0;
-                    const hasReviewDay = classes.some((c) => c.is_review_day);
-                    const color = classes[0]?.district?.color;
-
-                    return (
-                      <div
-                        key={day}
-                        className={`${styles.miniDay} ${hasClasses ? styles.hasClasses : ""} ${hasReviewDay ? styles.reviewDay : ""}`}
-                        style={hasClasses && color ? { "--dot-color": color } : {}}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+        <div className={styles.pickerList}>
+          {filteredInstructors.length === 0 ? (
+            <div className={styles.pickerEmpty}>No available instructors</div>
+          ) : (
+            filteredInstructors.map((instructor) => {
+              const district = getInstructorDistrict(instructor);
+              return (
+                <button
+                  key={instructor.id}
+                  className={styles.pickerRow}
+                  onClick={() => handleAssign(instructor)}
+                  disabled={loading}
+                >
+                  <div
+                    className={styles.pickerAvatar}
+                    style={{ background: instructor.color || "#3E8FA0" }}
+                  >
+                    {instructor.full_name?.charAt(0) || "?"}
+                  </div>
+                  <span className={styles.pickerName}>{instructor.full_name}</span>
+                  {district && (
+                    <span className={styles.pickerDistrict}>{district.name}</span>
+                  )}
+                </button>
+              );
+            })
+          )}
         </div>
       </div>
     );
@@ -859,7 +868,7 @@ export default function ScheduleBoard({ initialData }) {
         </div>
         <div className={styles.headerRight}>
           <div className={styles.viewToggle}>
-            {["day", "week", "month", "year"].map((v) => (
+            {["week", "month"].map((v) => (
               <button
                 key={v}
                 className={`${styles.viewBtn} ${view === v ? styles.active : ""}`}
@@ -869,6 +878,13 @@ export default function ScheduleBoard({ initialData }) {
               </button>
             ))}
           </div>
+          <button className={styles.addClassBtn} onClick={() => setAddClassOpen(true)}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add Class
+          </button>
           <button className={styles.manageBtn} onClick={() => setManageOpen(true)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="3" />
@@ -880,115 +896,61 @@ export default function ScheduleBoard({ initialData }) {
       </div>
 
       {/* Main content based on view */}
-      {view === "day" && renderDayView()}
       {view === "week" && renderWeekView()}
       {view === "month" && renderMonthView()}
-      {view === "year" && renderYearView()}
 
-      {/* Mobile instructor picker bottom sheet */}
+      {/* Desktop popover for click-to-assign */}
+      {renderPickerPopover()}
+
+      {/* Mobile bottom sheet for click-to-assign */}
       <BottomSheet
-        open={mobilePickerOpen}
-        onClose={() => {
-          setMobilePickerOpen(false);
-          setMobilePickerSlot(null);
-        }}
+        open={isMobile && pickerOpen !== null}
+        onClose={closePicker}
         title="Select Instructor"
       >
-        <div className={styles.pickerContent}>
-          {data.districts.map((district) => {
-            const districtInstructors = instructorsByDistrict[district.id] || [];
-            const available = districtInstructors.filter(
-              (i) => !assignedInstructorIds.has(i.id)
-            );
-            if (available.length === 0) return null;
-
-            return (
-              <div key={district.id} className={styles.pickerGroup}>
-                <div className={styles.pickerGroupHeader}>
-                  <span
-                    className={styles.districtDot}
-                    style={{ background: district.color }}
-                  />
-                  <span>{district.name}</span>
-                </div>
-                <div className={styles.pickerGroupContent}>
-                  {available.map((instructor) => (
-                    <button
-                      key={instructor.id}
-                      className={styles.pickerItem}
-                      onClick={() => handleMobileAssign(instructor)}
-                      disabled={loading}
+        <div className={styles.mobilePickerContent}>
+          <div className={styles.mobilePickerSearch}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search instructors..."
+              value={pickerSearch}
+              onChange={(e) => setPickerSearch(e.target.value)}
+            />
+          </div>
+          <div className={styles.mobilePickerList}>
+            {filteredInstructors.length === 0 ? (
+              <div className={styles.pickerEmpty}>No available instructors</div>
+            ) : (
+              filteredInstructors.map((instructor) => {
+                const district = getInstructorDistrict(instructor);
+                return (
+                  <button
+                    key={instructor.id}
+                    className={styles.mobilePickerRow}
+                    onClick={() => handleAssign(instructor)}
+                    disabled={loading}
+                  >
+                    <div
+                      className={styles.pickerAvatar}
+                      style={{ background: instructor.color || "#3E8FA0" }}
                     >
-                      {instructor.full_name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-          {instructorsByDistrict["unassigned"]?.filter(
-            (i) => !assignedInstructorIds.has(i.id)
-          ).length > 0 && (
-            <div className={styles.pickerGroup}>
-              <div className={styles.pickerGroupHeader}>
-                <span className={styles.districtDot} style={{ background: "#999" }} />
-                <span>No District</span>
-              </div>
-              <div className={styles.pickerGroupContent}>
-                {instructorsByDistrict["unassigned"]
-                  .filter((i) => !assignedInstructorIds.has(i.id))
-                  .map((instructor) => (
-                    <button
-                      key={instructor.id}
-                      className={styles.pickerItem}
-                      onClick={() => handleMobileAssign(instructor)}
-                      disabled={loading}
-                    >
-                      {instructor.full_name}
-                    </button>
-                  ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </BottomSheet>
-
-      {/* Mobile day detail bottom sheet */}
-      <BottomSheet
-        open={mobileDayDetailOpen}
-        onClose={() => {
-          setMobileDayDetailOpen(false);
-          setMobileDayDetail(null);
-        }}
-        title={
-          mobileDayDetail
-            ? `${MONTHS[mobileDayDetail.month]} ${mobileDayDetail.day}, ${mobileDayDetail.year}`
-            : ""
-        }
-      >
-        <div className={styles.dayDetailContent}>
-          {mobileDayDetail?.classes.map((cls) => (
-            <div key={cls.id} className={styles.dayDetailClass}>
-              <div className={styles.dayDetailHeader}>
-                <span
-                  className={styles.districtDot}
-                  style={{ background: cls.district?.color }}
-                />
-                <span className={styles.dayDetailTime}>{cls.time}</span>
-                <span className={styles.dayDetailSchool}>{cls.school?.name}</span>
-              </div>
-              <div className={styles.dayDetailAssignments}>
-                {cls.assignments?.map((a) => (
-                  <span key={a.id} className={styles.dayDetailInstructor}>
-                    {a.profile?.full_name}
-                  </span>
-                ))}
-                {(!cls.assignments || cls.assignments.length === 0) && (
-                  <span className={styles.dayDetailEmpty}>No instructors assigned</span>
-                )}
-              </div>
-            </div>
-          ))}
+                      {instructor.full_name?.charAt(0) || "?"}
+                    </div>
+                    <div className={styles.mobilePickerInfo}>
+                      <span className={styles.mobilePickerName}>{instructor.full_name}</span>
+                      {district && (
+                        <span className={styles.mobilePickerDistrict}>{district.name}</span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
       </BottomSheet>
 
@@ -996,6 +958,14 @@ export default function ScheduleBoard({ initialData }) {
       <ManageModal
         open={manageOpen}
         onClose={() => setManageOpen(false)}
+        data={data}
+        onDataChange={refreshData}
+      />
+
+      {/* Add Class modal */}
+      <AddClassModal
+        open={addClassOpen}
+        onClose={() => setAddClassOpen(false)}
         data={data}
         onDataChange={refreshData}
       />

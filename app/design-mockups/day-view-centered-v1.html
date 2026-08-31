@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day View, Centered</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F3F91;--navy-deep:#142C6B;--gold:#D8AE4B;--orange:#F2A65E;--orange-dark:#E08A3C;
+    --teal:#3E8FA0;--paper:#fff;--tint:#EAF1FC;--tint-deep:#DCE8FB;--ink:#16193B;--ink-soft:#4A5170;
+    --shadow:0 8px 24px rgba(20,44,107,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--tint);color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;}
+  h1,h2{font-family:'Baloo 2',sans-serif;font-weight:700;margin:0;}
+
+  .page{max-width:1300px;margin:0 auto;padding:28px 28px 60px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+  .topbar h1{font-size:22px;}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+  .view-toggle{display:flex;gap:4px;background:var(--paper);border-radius:11px;padding:4px;box-shadow:var(--shadow);}
+  .view-btn{border:none;background:none;padding:8px 15px;border-radius:8px;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;color:var(--ink-soft);}
+  .view-btn.active{background:var(--navy);color:#fff;}
+  .add-btn{display:flex;align-items:center;gap:6px;background:var(--orange);color:#fff;border:none;border-radius:999px;padding:9px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;}
+  .manage-btn{display:flex;align-items:center;gap:6px;background:var(--paper);border:none;border-radius:999px;padding:9px 16px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;box-shadow:var(--shadow);}
+
+  /* Everything below is centered in its own column, not left-anchored in the full-width page */
+  .day-column{max-width:520px;margin:0 auto;}
+
+  .nav-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;}
+  .nav-row button{background:var(--paper);border:none;border-radius:9px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--navy);box-shadow:var(--shadow);}
+  .nav-row span{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;}
+
+  .day-tabs{display:flex;gap:6px;justify-content:center;margin-bottom:18px;}
+  .day-tab{flex:1;max-width:90px;border:none;background:var(--paper);padding:10px 4px;border-radius:9px;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;color:var(--ink-soft);box-shadow:var(--shadow);}
+  .day-tab.active{background:var(--navy);color:#fff;}
+
+  .class-card{background:var(--paper);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);border-top:3px solid var(--teal);}
+  .class-time{font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;margin-bottom:4px;}
+  .class-school{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px;}
+  .class-district{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);margin-bottom:14px;}
+  .district-dot{width:7px;height:7px;border-radius:50%;flex:none;}
+  .slot{display:flex;align-items:center;gap:9px;border:1.5px solid var(--tint-deep);background:var(--tint);border-radius:12px;padding:10px 13px;margin-bottom:8px;}
+  .avatar{width:24px;height:24px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-family:'Nunito',sans-serif;font-weight:800;}
+  .slot-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:13.5px;flex:1;}
+  .remove-btn{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:14px;}
+
+  .empty-day{text-align:center;color:#B7C1D8;font-style:italic;padding:60px 20px;border:1.5px dashed var(--tint-deep);border-radius:16px;}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="topbar">
+    <h1>Schedule Board</h1>
+    <div class="topbar-right">
+      <div class="view-toggle">
+        <button class="view-btn active">Day</button>
+        <button class="view-btn">Week</button>
+        <button class="view-btn">Month</button>
+      </div>
+      <button class="add-btn">+ Add Class</button>
+      <button class="manage-btn">&#9881; Manage</button>
+    </div>
+  </div>
+
+  <div class="day-column">
+    <div class="nav-row">
+      <button>&lsaquo;</button>
+      <span>Sep 16, 2026</span>
+      <button>&rsaquo;</button>
+    </div>
+
+    <div class="day-tabs">
+      <button class="day-tab">Mon</button>
+      <button class="day-tab">Tue</button>
+      <button class="day-tab active">Wed</button>
+      <button class="day-tab">Thu</button>
+      <button class="day-tab">Fri</button>
+    </div>
+
+    <div class="class-card">
+      <div class="class-time">2:30&ndash;4:30pm</div>
+      <div class="class-school">Palmetto Elementary</div>
+      <div class="class-district"><span class="district-dot" style="background:#3E8FA0"></span>Fontana</div>
+      <div class="slot"><div class="avatar" style="background:#D8AE4B">HS</div><span class="slot-name">Heather Swear</span><button class="remove-btn">&#10005;</button></div>
+      <div class="slot"><div class="avatar" style="background:#B45BC7">JD</div><span class="slot-name">Jane Doe</span><button class="remove-btn">&#10005;</button></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

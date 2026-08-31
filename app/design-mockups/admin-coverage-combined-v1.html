@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin: Coverage (Combined)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F3F91;--navy-deep:#142C6B;--gold:#D8AE4B;--orange:#F2A65E;--orange-dark:#E08A3C;
+    --teal:#3E8FA0;--teal-dark:#2C6E7D;--green:#4FA347;--paper:#fff;--tint:#EAF1FC;--tint-deep:#DCE8FB;
+    --ink:#16193B;--ink-soft:#4A5170;--red:#E0594C;--shadow:0 8px 24px rgba(20,44,107,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--tint);color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;}
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;font-weight:700;margin:0;}
+  button{font-family:inherit;}
+
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:230px;flex:none;background:var(--navy-deep);padding:22px 16px;}
+  .sidebar-brand{display:flex;align-items:center;gap:9px;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:0 6px 18px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:14px;}
+  .nav-label{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#7488BE;padding:0 10px;margin-bottom:8px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;color:#C4D0EE;text-decoration:none;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;margin-bottom:2px;}
+  .nav-item svg{width:16px;height:16px;flex:none;}
+  .nav-item.active{background:var(--orange);color:#fff;}
+  .nav-badge{margin-left:auto;background:var(--gold);color:var(--navy-deep);font-family:'Nunito',sans-serif;font-weight:800;font-size:10px;padding:1px 7px;border-radius:999px;}
+
+  .main{flex:1;min-width:0;}
+  .content{max-width:960px;margin:0 auto;padding:34px 30px 60px;}
+
+  .page-head{margin-bottom:8px;}
+  .page-head h1{font-size:22px;}
+  .page-head p{color:var(--ink-soft);font-size:13px;margin-top:4px;}
+
+  .top-tabs{display:flex;gap:22px;border-bottom:2px solid var(--tint-deep);margin:20px 0 24px;}
+  .top-tab{padding:0 0 12px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:var(--ink-soft);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;display:flex;align-items:center;gap:7px;}
+  .top-tab.active{color:var(--navy);border-bottom-color:var(--navy);}
+  .top-tab .nav-badge{background:var(--red);color:#fff;}
+
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* ---------- Requests tab ---------- */
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+  @media(max-width:700px){.stat-row{grid-template-columns:1fr;}}
+  .stat-card{background:var(--paper);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;}
+  .stat-icon{width:36px;height:36px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;}
+  .stat-icon svg{width:18px;height:18px;color:#fff;}
+  .stat-num{font-family:'Nunito',sans-serif;font-weight:800;font-size:21px;line-height:1;}
+  .stat-label{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .stat-card.urgent .stat-icon{background:var(--red);} .stat-card.urgent .stat-num{color:var(--red);}
+  .stat-card.open .stat-icon{background:var(--orange);} .stat-card.open .stat-num{color:var(--orange-dark);}
+  .stat-card.covered .stat-icon{background:var(--green);} .stat-card.covered .stat-num{color:var(--green);}
+
+  .callout-card{background:rgba(224,89,76,0.06);border:1.5px solid rgba(224,89,76,0.2);border-radius:14px;padding:14px 18px;margin-bottom:20px;display:flex;gap:11px;align-items:flex-start;}
+  .callout-card svg{width:16px;height:16px;color:var(--red);flex:none;margin-top:1px;}
+  .callout-text{font-size:12.5px;color:var(--ink-soft);}
+  .callout-text strong{color:var(--ink);}
+  .callout-name{color:var(--red);font-weight:800;}
+
+  .filter-tab-row{display:flex;gap:6px;margin-bottom:14px;}
+  .tab-pill{border:1.5px solid var(--tint-deep);background:var(--paper);color:var(--ink-soft);padding:8px 15px;border-radius:999px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;}
+  .tab-pill.active{border-color:var(--navy);background:var(--navy);color:#fff;}
+
+  .req-row{background:var(--paper);border-radius:14px;padding:14px 18px;box-shadow:var(--shadow);margin-bottom:8px;display:flex;align-items:center;gap:14px;}
+  .req-row.urgent{border-left:4px solid var(--red);}
+  .req-row.covered{opacity:.75;}
+  .req-date{width:48px;flex:none;text-align:center;}
+  .req-date .dow{font-family:'Nunito',sans-serif;font-weight:800;font-size:9px;color:var(--ink-soft);text-transform:uppercase;}
+  .req-date .dom{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;color:var(--navy);}
+  .req-info{flex:1;min-width:0;}
+  .req-school{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;}
+  .req-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .program-badge{font-family:'Nunito',sans-serif;font-weight:800;font-size:9.5px;padding:2px 8px;border-radius:999px;margin-right:6px;}
+  .req-people{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+  .mini-avatar{width:18px;height:18px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-family:'Nunito',sans-serif;font-weight:800;}
+  .avatar{width:26px;height:26px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-family:'Nunito',sans-serif;font-weight:800;}
+  .req-actions{flex:none;display:flex;gap:8px;align-items:center;}
+  .status-tag{font-family:'Nunito',sans-serif;font-weight:800;font-size:10.5px;padding:4px 10px;border-radius:999px;}
+  .status-tag.open{background:rgba(242,166,94,0.14);color:var(--orange-dark);}
+  .status-tag.covered{background:rgba(79,163,71,0.12);color:var(--green);}
+  .assign-btn{background:var(--navy);color:#fff;border:none;border-radius:999px;padding:8px 14px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11.5px;cursor:pointer;}
+
+  .req-actions{position:relative;}
+  .assign-popover{
+    position:absolute;top:calc(100% + 8px);right:0;background:var(--paper);border-radius:14px;
+    box-shadow:0 14px 34px rgba(20,44,107,0.2);width:230px;padding:12px;z-index:30;text-align:left;
+  }
+  .assign-search{width:100%;border:1.5px solid var(--tint-deep);border-radius:9px;padding:7px 10px;font-family:'Nunito',sans-serif;font-size:12px;background:var(--tint);margin-bottom:8px;}
+  .assign-list{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;}
+  .assign-item{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:8px;cursor:pointer;background:none;border:none;width:100%;text-align:left;}
+  .assign-item:hover{background:var(--tint);}
+  .assign-item .assign-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:11.5px;}
+  .assign-district{font-size:9px;color:var(--ink-soft);margin-left:auto;}
+
+  /* ---------- Trends tab ---------- */
+  .trends-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+  .period-toggle{display:flex;gap:4px;background:var(--paper);border-radius:11px;padding:4px;box-shadow:var(--shadow);}
+  .period-btn{border:none;background:none;padding:7px 13px;border-radius:8px;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11.5px;color:var(--ink-soft);}
+  .period-btn.active{background:var(--navy);color:#fff;}
+
+  .trend-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+  @media(max-width:800px){.trend-stat-row{grid-template-columns:repeat(2,1fr);}}
+  .trend-stat-card{background:var(--paper);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);}
+  .trend-stat-num{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;color:var(--navy);}
+  .trend-stat-label{font-size:11px;color:var(--ink-soft);margin-top:3px;}
+
+  .chart-card{background:var(--paper);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);margin-bottom:20px;}
+  .chart-card h3{font-size:13.5px;margin-bottom:16px;}
+  .bar-chart{display:flex;align-items:flex-end;gap:14px;height:110px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .bar{width:100%;max-width:34px;background:var(--tint-deep);border-radius:6px 6px 0 0;position:relative;}
+  .bar.covered-part{background:var(--teal);border-radius:0;}
+  .bar-stack{width:100%;max-width:34px;display:flex;flex-direction:column-reverse;border-radius:6px 6px 0 0;overflow:hidden;}
+  .bar-count{font-family:'Nunito',sans-serif;font-weight:800;font-size:10.5px;color:var(--ink-soft);margin-bottom:4px;}
+  .bar-month{font-size:10.5px;color:var(--ink-soft);margin-top:8px;font-family:'Nunito',sans-serif;font-weight:800;}
+  .chart-legend{display:flex;gap:14px;margin-top:14px;padding-top:12px;border-top:1px solid var(--tint);}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-soft);}
+  .legend-dot{width:8px;height:8px;border-radius:2px;}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:700px){.two-col{grid-template-columns:1fr;}}
+  .list-card{background:var(--paper);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);}
+  .list-card h3{font-size:13.5px;margin-bottom:4px;}
+  .list-card .subhead{font-size:11px;color:var(--ink-soft);margin-bottom:14px;}
+  .rank-row{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--tint);}
+  .rank-row:last-child{border-bottom:none;}
+  .rank-num{width:20px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:12px;color:#B7C1D8;flex:none;}
+  .rank-info{flex:1;min-width:0;}
+  .rank-name{font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;}
+  .rank-sub{font-size:10.5px;color:var(--ink-soft);}
+  .rank-val{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:13px;flex:none;}
+  .rank-val.flag{color:var(--red);}
+  .rank-val.good{color:var(--green);}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-brand"><span style="color:#D8AE4B;">\u2605</span> Shape Your Destiny</div>
+    <div class="nav-label">Overview</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Invite Codes</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Instructors</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 6l8 7 8-7"/></svg>Messages</div>
+    <div class="nav-label" style="margin-top:14px;">Operations</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Schedule Board</div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Coverage
+      <span class="nav-badge">2</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="content">
+
+      <div class="page-head">
+        <h1>Coverage</h1>
+        <p>Open requests that need attention, and how the system's trending over time.</p>
+      </div>
+
+      <div class="top-tabs">
+        <div class="top-tab active" data-tab="requests">
+          Requests
+          <span class="nav-badge">2</span>
+        </div>
+        <div class="top-tab" data-tab="trends">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+          Trends
+        </div>
+      </div>
+
+      <!-- REQUESTS TAB -->
+      <div class="tab-panel active" id="requestsPanel">
+        <div class="stat-row">
+          <div class="stat-card urgent">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
+            <div><div class="stat-num">1</div><div class="stat-label">Unclaimed &amp; Within 3 Days</div></div>
+          </div>
+          <div class="stat-card open">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+            <div><div class="stat-num">2</div><div class="stat-label">Open Right Now</div></div>
+          </div>
+          <div class="stat-card covered">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></div>
+            <div><div class="stat-num">4</div><div class="stat-label">Covered This Month</div></div>
+          </div>
+        </div>
+
+        <div class="callout-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+          <div class="callout-text"><strong><span class="callout-name">Heather Swear</span> has requested coverage 3 times this month.</strong> Worth a quick check-in, not a red flag on its own. See the Trends tab for the full pattern.</div>
+        </div>
+
+        <div class="filter-tab-row">
+          <button class="tab-pill active">All</button>
+          <button class="tab-pill">Open</button>
+          <button class="tab-pill">Covered</button>
+        </div>
+
+        <div id="reqList"></div>
+      </div>
+
+      <!-- TRENDS TAB -->
+      <div class="tab-panel" id="trendsPanel">
+        <div class="trends-head">
+          <div class="period-toggle">
+            <button class="period-btn">30 Days</button>
+            <button class="period-btn active">90 Days</button>
+            <button class="period-btn">School Year</button>
+          </div>
+        </div>
+
+        <div class="trend-stat-row">
+          <div class="trend-stat-card"><div class="trend-stat-num">92%</div><div class="trend-stat-label">Fill Rate</div></div>
+          <div class="trend-stat-card"><div class="trend-stat-num">3.4 hrs</div><div class="trend-stat-label">Avg Time to Cover</div></div>
+          <div class="trend-stat-card"><div class="trend-stat-num">18</div><div class="trend-stat-label">Total Requests</div></div>
+          <div class="trend-stat-card"><div class="trend-stat-num">17</div><div class="trend-stat-label">Total Covered</div></div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Requests Per Month</h3>
+          <div class="bar-chart" id="barChart"></div>
+          <div class="chart-legend">
+            <div class="legend-item"><span class="legend-dot" style="background:var(--teal)"></span>Covered</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--tint-deep)"></span>Went uncovered</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="list-card">
+            <h3>Frequent Requesters</h3>
+            <p class="subhead">Rate shown as % of their own sessions, not raw count.</p>
+            <div id="requesterList"></div>
+          </div>
+          <div class="list-card">
+            <h3>Most Reliable Coverers</h3>
+            <p class="subhead">Instructors who step up most often.</p>
+            <div id="covererList"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function initials(n){ return n.split(' ').map(w=>w[0]).join(''); }
+
+  // Tab switching
+  document.querySelectorAll('.top-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.top-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab + 'Panel').classList.add('active');
+    });
+  });
+
+  // Requests list
+  const REQUESTS = [
+    { school:'Palmetto Elementary', program:'Youth Wellness', color:'#3E8FA0', dow:'WED', dom:'23', time:'2:30\u20134:30pm', from:'Heather Swear', fromColor:'#D8AE4B', status:'open', urgent:true },
+    { school:'Jurupa Hills High', program:'Soccer', color:'#1F3F91', dow:'MON', dom:'21', time:'4:00\u20135:30pm', from:'Devon Price', fromColor:'#2B4FA3', status:'open', urgent:false },
+    { school:'Summit Intermediate', program:'Youth Wellness', color:'#3E8FA0', dow:'FRI', dom:'18', time:'3:15\u20134:15pm', from:'Sarah Kim', fromColor:'#3FC0E8', status:'covered', coveredBy:'James Rivera', coveredColor:'#6FCB55' },
+  ];
+  const AVAILABLE_INSTRUCTORS = [
+    { name:'James Rivera', color:'#6FCB55', district:'Etiwanda' },
+    { name:'Priya Patel', color:'#E08A3C', district:'Chino Valley' },
+    { name:'Sarah Kim', color:'#3FC0E8', district:'Fontana' },
+    { name:'Maya Torres', color:'#3E8FA0', district:'Etiwanda' },
+    { name:'Alex Chen', color:'#F2A65E', district:'Chino Valley' },
+  ];
+
+  function closeAllPopovers(){ document.querySelectorAll('.assign-popover').forEach(p => p.remove()); }
+
+  function renderRequestRow(r){
+    const row = document.createElement('div');
+    row.className = 'req-row' + (r.urgent ? ' urgent' : '') + (r.status === 'covered' ? ' covered' : '');
+    row.innerHTML = `
+      <div class="req-date"><div class="dow">${r.dow}</div><div class="dom">${r.dom}</div></div>
+      <div class="req-info">
+        <div class="req-school"><span class="program-badge" style="background:${r.color}22;color:${r.color};">${r.program}</span>${r.school}</div>
+        <div class="req-meta">${r.time}</div>
+        <div class="req-people">
+          <div class="mini-avatar" style="background:${r.fromColor}">${initials(r.from)}</div>
+          Posted by ${r.from}
+          ${r.status === 'covered' ? `&middot; <div class="mini-avatar" style="background:${r.coveredColor}">${initials(r.coveredBy)}</div>Covered by ${r.coveredBy}` : ''}
+        </div>
+      </div>
+      <div class="req-actions">
+        ${r.status === 'open' ? `<span class="status-tag open">Open</span><button class="assign-btn">Assign Someone</button>` : `<span class="status-tag covered">Covered</span>`}
+      </div>`;
+
+    if(r.status === 'open'){
+      const actionsEl = row.querySelector('.req-actions');
+      actionsEl.querySelector('.assign-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeAllPopovers();
+        const pop = document.createElement('div');
+        pop.className = 'assign-popover';
+        pop.innerHTML = `
+          <input class="assign-search" placeholder="Search instructors...">
+          <div class="assign-list">
+            ${AVAILABLE_INSTRUCTORS.map(inst => `
+              <button class="assign-item" data-name="${inst.name}">
+                <div class="avatar" style="width:22px;height:22px;font-size:9px;background:${inst.color}">${initials(inst.name)}</div>
+                <span class="assign-name">${inst.name}</span>
+                <span class="assign-district">${inst.district}</span>
+              </button>`).join('')}
+          </div>`;
+        actionsEl.appendChild(pop);
+
+        pop.querySelector('.assign-search').addEventListener('input', ev => {
+          const q = ev.target.value.toLowerCase();
+          pop.querySelectorAll('.assign-item').forEach(item => {
+            item.style.display = item.dataset.name.toLowerCase().includes(q) ? 'flex' : 'none';
+          });
+        });
+        pop.querySelectorAll('.assign-item').forEach(item => {
+          item.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            const inst = AVAILABLE_INSTRUCTORS.find(i => i.name === item.dataset.name);
+            r.status = 'covered';
+            r.coveredBy = inst.name;
+            r.coveredColor = inst.color;
+            closeAllPopovers();
+            const newRow = renderRequestRow(r);
+            row.replaceWith(newRow);
+          });
+        });
+        setTimeout(() => {
+          document.addEventListener('click', function closeOnce(ev){
+            if(!pop.contains(ev.target)){ pop.remove(); document.removeEventListener('click', closeOnce); }
+          });
+        }, 0);
+      });
+    }
+    return row;
+  }
+
+  const list = document.getElementById('reqList');
+  REQUESTS.forEach(r => list.appendChild(renderRequestRow(r)));
+
+  // Trends chart
+  const MONTHS = [
+    { label:'Jun', total:3, covered:3 }, { label:'Jul', total:2, covered:2 },
+    { label:'Aug', total:5, covered:4 }, { label:'Sep', total:4, covered:4 },
+    { label:'Oct', total:6, covered:5 }, { label:'Nov', total:3, covered:3 },
+  ];
+  const maxVal = Math.max(...MONTHS.map(m => m.total));
+  const chart = document.getElementById('barChart');
+  MONTHS.forEach(m => {
+    const uncovered = m.total - m.covered;
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    col.innerHTML = `
+      <span class="bar-count">${m.total}</span>
+      <div class="bar-stack" style="height:${(m.total/maxVal)*100}px;">
+        ${uncovered > 0 ? `<div class="bar" style="height:${(uncovered/m.total)*100}%;"></div>` : ''}
+        <div class="bar covered-part" style="height:${(m.covered/m.total)*100}%;"></div>
+      </div>
+      <span class="bar-month">${m.label}</span>`;
+    chart.appendChild(col);
+  });
+
+  const REQUESTERS = [
+    { name:'Heather Swear', color:'#D8AE4B', count:3, rate:'11% of sessions', flag:true },
+    { name:'Devon Price', color:'#2B4FA3', count:2, rate:'8% of sessions', flag:false },
+    { name:'Sarah Kim', color:'#3FC0E8', count:1, rate:'4% of sessions', flag:false },
+  ];
+  const COVERERS = [
+    { name:'James Rivera', color:'#6FCB55', count:4 },
+    { name:'Priya Patel', color:'#E08A3C', count:3 },
+    { name:'Maya Torres', color:'#3E8FA0', count:2 },
+  ];
+  const reqRankList = document.getElementById('requesterList');
+  REQUESTERS.forEach((r,i) => {
+    reqRankList.innerHTML += `<div class="rank-row"><span class="rank-num">${i+1}</span><div class="avatar" style="background:${r.color}">${initials(r.name)}</div><div class="rank-info"><div class="rank-name">${r.name}</div><div class="rank-sub">${r.count} requests &middot; ${r.rate}</div></div><span class="rank-val ${r.flag?'flag':''}">${r.count}</span></div>`;
+  });
+  const covRankList = document.getElementById('covererList');
+  COVERERS.forEach((r,i) => {
+    covRankList.innerHTML += `<div class="rank-row"><span class="rank-num">${i+1}</span><div class="avatar" style="background:${r.color}">${initials(r.name)}</div><div class="rank-info"><div class="rank-name">${r.name}</div><div class="rank-sub">${r.count} sessions covered</div></div><span class="rank-val good">${r.count}</span></div>`;
+  });
+</script>
+
+</body>
+</html>

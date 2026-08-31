@@ -71,8 +71,12 @@ CREATE TABLE IF NOT EXISTS schools (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   district_id UUID NOT NULL REFERENCES districts(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  address TEXT, -- Full address for directions (e.g., "123 Main St, City, CA 90210")
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- If schools table already exists, add address column
+ALTER TABLE schools ADD COLUMN IF NOT EXISTS address TEXT;
 
 ALTER TABLE schools ENABLE ROW LEVEL SECURITY;
 
@@ -306,25 +310,31 @@ CREATE POLICY "Admins can delete instructor_districts"
     )
   );
 
--- Migration: copy existing district_id to instructor_districts
--- Run this once after creating the table:
--- INSERT INTO instructor_districts (profile_id, district_id)
--- SELECT id, district_id FROM profiles WHERE district_id IS NOT NULL
--- ON CONFLICT DO NOTHING;
-
 -- =============================================================================
 -- HOLIDAYS TABLE
 -- =============================================================================
 -- Stores school holidays/off days that affect class scheduling
+-- Hierarchy: school_id takes precedence over district_id
+-- - school_id set: applies only to that specific school
+-- - district_id set (school_id null): applies to all schools in that district
+-- - both null: applies to all schools globally
 
 CREATE TABLE IF NOT EXISTS holidays (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   date DATE NOT NULL,
   name TEXT NOT NULL,
   district_id UUID REFERENCES districts(id) ON DELETE CASCADE, -- null = applies to all districts
+  school_id UUID REFERENCES schools(id) ON DELETE CASCADE, -- null = applies to all schools (in district or globally)
   created_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE (date, district_id) -- can't have same date twice for same district (or global)
+  UNIQUE (date, district_id, school_id) -- can't have same date twice for same scope
 );
+
+-- Add school_id column if holidays table already exists
+ALTER TABLE holidays ADD COLUMN IF NOT EXISTS school_id UUID REFERENCES schools(id) ON DELETE CASCADE;
+
+-- Drop old constraint and add new one (safe to run multiple times)
+ALTER TABLE holidays DROP CONSTRAINT IF EXISTS holidays_date_district_id_key;
+ALTER TABLE holidays ADD CONSTRAINT holidays_date_district_id_school_id_key UNIQUE (date, district_id, school_id);
 
 ALTER TABLE holidays ENABLE ROW LEVEL SECURITY;
 
@@ -375,5 +385,72 @@ CREATE POLICY "Admins can delete holidays"
     EXISTS (
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+-- =============================================================================
+-- INSTRUCTOR READ ACCESS
+-- =============================================================================
+-- Instructors need read access to see their own schedules
+
+-- Instructors can read holidays (shared calendar for everyone)
+-- Note: If district-specific holidays are needed later, add a nullable
+-- district_id column referencing districts, where null means "applies to everyone."
+CREATE POLICY "Instructors can read holidays"
+  ON holidays
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'instructor'
+    )
+  );
+
+-- Instructors can read schools (need school name/address for their sessions)
+CREATE POLICY "Instructors can read schools"
+  ON schools
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'instructor'
+    )
+  );
+
+-- Instructors can read classes (need class info for their sessions)
+CREATE POLICY "Instructors can read classes"
+  ON classes
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'instructor'
+    )
+  );
+
+-- Instructors can read class_assignments (need to see their own assignments + co-teachers)
+CREATE POLICY "Instructors can read class_assignments"
+  ON class_assignments
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'instructor'
+    )
+  );
+
+-- Instructors can read districts (need district info for context)
+CREATE POLICY "Instructors can read districts"
+  ON districts
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'instructor'
     )
   );

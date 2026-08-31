@@ -278,6 +278,34 @@
   border-radius: 8px;
 }
 
+.schoolItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--paper);
+  border-radius: 8px;
+}
+
+.schoolInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.schoolAddress {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.schoolNoAddress {
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-style: italic;
+  opacity: 0.7;
+}
+
 .districtDot {
   width: 10px;
   height: 10px;
@@ -413,6 +441,112 @@
   font-size: 12px;
   color: var(--ink-soft);
   font-weight: 400;
+}
+
+.classItem {
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.classItemEditing {
+  display: block;
+}
+
+.classInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.editBtn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.editBtn:hover {
+  color: var(--navy);
+  background: rgba(31, 63, 145, 0.1);
+}
+.editBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.editBtn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.editClassForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.editRow {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 520px) {
+  .editRow {
+    flex-direction: column;
+  }
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid var(--tint-deep);
+}
+
+.cancelEditBtn {
+  padding: 8px 14px;
+  background: none;
+  border: 1px solid var(--tint-deep);
+  border-radius: 6px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.cancelEditBtn:hover {
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+
+.saveEditBtn {
+  padding: 8px 14px;
+  background: var(--navy);
+  border: none;
+  border-radius: 6px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.saveEditBtn:hover {
+  background: var(--navy-mid);
+}
+.saveEditBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Holidays Tab */

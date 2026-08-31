@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./Hero.module.css";
 
 export default function Hero() {
@@ -15,7 +16,14 @@ export default function Hero() {
         </div>
 
         <div className={styles.photoWrap}>
-          <img src="/Images/hero-kids.webp" alt="Kids in the Shape Your Destiny wellness program" className={styles.heroImage} />
+          <Image
+            src="/Images/hero-kids.webp"
+            alt="Kids in the Shape Your Destiny wellness program"
+            className={styles.heroImage}
+            width={600}
+            height={400}
+            priority
+          />
         </div>
       </div>
 

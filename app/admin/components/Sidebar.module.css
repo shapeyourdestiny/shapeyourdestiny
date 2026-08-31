@@ -72,6 +72,23 @@
   height: 100%;
 }
 
+.badge {
+  margin-left: auto;
+  background: var(--orange);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  min-width: 20px;
+  text-align: center;
+}
+.navItemActive .badge {
+  background: #fff;
+  color: var(--orange);
+}
+
 .user {
   padding: 16px 16px 20px;
   border-top: 1px solid rgba(255,255,255,0.1);

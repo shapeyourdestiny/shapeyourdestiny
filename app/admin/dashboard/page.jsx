@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import InviteCodeForm from "./InviteCodeForm";
+import CreateAccountForm from "./CreateAccountForm";
 import InviteActions from "./InviteActions";
 import styles from "./page.module.css";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Invite Codes | Admin | Shape Your Destiny",
@@ -38,7 +41,10 @@ export default async function AdminDashboardPage() {
         <p>Create and manage invite codes for new instructors and admins.</p>
       </div>
 
-      <InviteCodeForm />
+      <div className={styles.formsGrid}>
+        <InviteCodeForm />
+        <CreateAccountForm />
+      </div>
 
       <div className={styles.tableCard}>
         <div className={styles.tableHeader}>

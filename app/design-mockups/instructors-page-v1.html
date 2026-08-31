@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instructors: List + Detail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F3F91;--navy-deep:#142C6B;--gold:#D8AE4B;
+    --orange:#F2A65E;--orange-dark:#E08A3C;--teal:#3E8FA0;--teal-dark:#2C6E7D;
+    --paper:#fff;--tint:#EAF1FC;--tint-deep:#DCE8FB;--ink:#16193B;--ink-soft:#4A5170;
+    --red:#E0594C;--red-tint:#FBEAE8;--green:#4FA347;
+    --shadow:0 8px 24px rgba(20,44,107,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--tint);color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;}
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;font-weight:700;margin:0;}
+  button{font-family:inherit;}
+
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:220px;flex:none;background:var(--navy-deep);padding:20px 16px;}
+  .sidebar-brand{display:flex;align-items:center;gap:8px;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;padding:0 6px 16px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:12px;}
+  .nav-label{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#7488BE;padding:0 10px;margin-bottom:8px;}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;color:#C4D0EE;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:12.5px;margin-bottom:2px;}
+  .nav-item.active{background:var(--orange);color:#fff;}
+
+  .main{flex:1;min-width:0;}
+  .content{max-width:1000px;margin:0 auto;padding:30px 30px 60px;}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- LIST VIEW ---------- */
+  .page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .page-head h1{font-size:22px;}
+  .page-head p{color:var(--ink-soft);font-size:13px;margin-top:4px;}
+
+  .controls-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .search-wrap{position:relative;flex:1;min-width:200px;}
+  .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--ink-soft);}
+  .search-input{width:100%;border:1.5px solid var(--tint-deep);border-radius:10px;padding:9px 12px 9px 32px;font-family:'Nunito',sans-serif;font-size:13px;background:var(--paper);}
+  .status-filter{display:flex;gap:6px;}
+  .sf-pill{border:1.5px solid var(--tint-deep);background:var(--paper);color:var(--ink-soft);padding:8px 14px;border-radius:999px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;cursor:pointer;}
+  .sf-pill.active{border-color:var(--navy);background:var(--navy);color:#fff;}
+
+  .list-card{background:var(--paper);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;}
+  .list-head{display:grid;grid-template-columns:2fr 1fr 1.2fr 1fr 1fr;gap:10px;padding:13px 20px;border-bottom:2px solid var(--tint);}
+  .list-head span{font-family:'Nunito',sans-serif;font-weight:800;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);}
+  .list-row{display:grid;grid-template-columns:2fr 1fr 1.2fr 1fr 1fr;gap:10px;align-items:center;padding:13px 20px;border-bottom:1px solid var(--tint);cursor:pointer;}
+  .list-row:hover{background:var(--tint);}
+  .list-row:last-child{border-bottom:none;}
+  .li-name{display:flex;align-items:center;gap:10px;}
+  .avatar{width:32px;height:32px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-family:'Nunito',sans-serif;font-weight:800;}
+  .li-name-text{font-family:'Nunito',sans-serif;font-weight:800;font-size:13.5px;}
+  .status-badge{display:inline-flex;font-family:'Nunito',sans-serif;font-weight:800;font-size:10.5px;padding:3px 9px;border-radius:999px;width:fit-content;}
+  .status-badge.active{background:rgba(79,163,71,0.12);color:var(--green);}
+  .status-badge.invited{background:rgba(242,166,94,0.14);color:var(--orange-dark);}
+  .status-badge.archived{background:var(--tint-deep);color:var(--ink-soft);}
+  .li-district{font-size:12.5px;color:var(--ink-soft);}
+  .li-sessions{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;}
+  .li-joined{font-size:12px;color:var(--ink-soft);}
+
+  /* ---------- DETAIL VIEW ---------- */
+  .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--ink-soft);text-decoration:none;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;margin-bottom:18px;cursor:pointer;}
+  .back-link svg{width:14px;height:14px;}
+
+  .detail-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+  .detail-avatar{width:60px;height:60px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;}
+  .detail-name{font-size:22px;}
+  .detail-meta{display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap;}
+  .role-tag{font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;color:var(--ink-soft);}
+
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;}
+  @media(max-width:700px){.detail-grid{grid-template-columns:1fr;}}
+  .info-card{background:var(--paper);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);}
+  .info-card h3{font-size:13px;margin-bottom:12px;}
+  .info-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--tint);font-size:12.5px;}
+  .info-row:last-child{border-bottom:none;}
+  .info-row span:first-child{color:var(--ink-soft);}
+  .info-row span:last-child{font-family:'Nunito',sans-serif;font-weight:800;text-align:right;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+  @media(max-width:700px){.stat-row{grid-template-columns:1fr;}}
+  .stat-card{background:var(--paper);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);text-align:center;}
+  .stat-num{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;color:var(--navy);}
+  .stat-label{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+  .stat-breakdown{font-size:11px;color:var(--ink-soft);margin-top:6px;}
+
+  .section-card{background:var(--paper);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:18px;}
+  .section-card h3{font-size:13.5px;margin-bottom:12px;}
+  .mini-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--tint);font-size:12.5px;}
+  .mini-row:last-child{border-bottom:none;}
+  .mini-dot{width:6px;height:6px;border-radius:50%;flex:none;}
+  .mini-row-text{flex:1;}
+  .mini-row-sub{font-size:11px;color:var(--ink-soft);}
+  .empty-note{font-size:12px;color:var(--ink-soft);font-style:italic;}
+
+  .action-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .action-btn{display:flex;align-items:center;gap:7px;border:none;border-radius:999px;padding:10px 18px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;}
+  .action-btn svg{width:14px;height:14px;}
+  .action-btn.reset{background:var(--navy);color:#fff;}
+  .action-btn.archive{background:var(--paper);color:var(--orange-dark);border:1.5px solid var(--orange);}
+  .action-btn.delete{background:var(--paper);color:var(--red);border:1.5px solid var(--red);}
+  .action-btn.delete:disabled{opacity:.45;cursor:not-allowed;}
+  .delete-note{font-size:11.5px;color:var(--ink-soft);margin-top:8px;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-brand"><span style="color:#D8AE4B;">\u2605</span> Shape Your Destiny</div>
+    <div class="nav-label">Overview</div>
+    <div class="nav-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Invite Codes</div>
+    <div class="nav-item active"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Instructors</div>
+    <div class="nav-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 6l8 7 8-7"/></svg>Messages</div>
+  </div>
+
+  <div class="main">
+    <div class="content">
+
+      <!-- LIST VIEW -->
+      <div class="view active" id="listView">
+        <div class="page-head">
+          <div><h1>Instructors</h1><p>Every instructor across every district.</p></div>
+        </div>
+        <div class="controls-row">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input class="search-input" placeholder="Search instructors...">
+          </div>
+          <div class="status-filter">
+            <button class="sf-pill active">All</button>
+            <button class="sf-pill">Active</button>
+            <button class="sf-pill">Invited</button>
+            <button class="sf-pill">Archived</button>
+          </div>
+        </div>
+
+        <div class="list-card">
+          <div class="list-head">
+            <span>Instructor</span><span>Status</span><span>District(s)</span><span>Sessions Taught</span><span>Joined</span>
+          </div>
+          <div id="rows"></div>
+        </div>
+      </div>
+
+      <!-- DETAIL VIEW -->
+      <div class="view" id="detailView">
+        <a class="back-link" id="backBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+          Back to Instructors
+        </a>
+
+        <div class="detail-header">
+          <div class="detail-avatar" style="background:#D8AE4B;">HS</div>
+          <div>
+            <h1 class="detail-name">Heather Swear</h1>
+            <div class="detail-meta">
+              <span class="status-badge active">Active</span>
+              <span class="role-tag">Instructor</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="stat-num">40</div>
+            <div class="stat-label">Sessions Taught</div>
+            <div class="stat-breakdown">32 Wellness &middot; 8 Soccer</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Upcoming Sessions</div>
+            <div class="stat-breakdown">Next: Wed, Sep 16</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">Aug 12</div>
+            <div class="stat-label">Joined</div>
+            <div class="stat-breakdown">2026</div>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="info-card">
+            <h3>Contact</h3>
+            <div class="info-row"><span>Email</span><span>heather@shapeyourdestiny.co</span></div>
+            <div class="info-row"><span>Phone</span><span>(909) 555-0142</span></div>
+          </div>
+          <div class="info-card">
+            <h3>Districts</h3>
+            <div class="info-row"><span>Fontana Unified</span><span>28 sessions</span></div>
+            <div class="info-row"><span>Chino Valley Unified</span><span>12 sessions</span></div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3>Reviews &amp; Audits</h3>
+          <div class="mini-row">
+            <span class="mini-dot" style="background:var(--orange)"></span>
+            <span class="mini-row-text">Annual Performance Review<div class="mini-row-sub">Due in 9 days &middot; Aug 28, 2026</div></span>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3>Upcoming Sessions</h3>
+          <div class="mini-row">
+            <span class="mini-dot" style="background:#3E8FA0"></span>
+            <span class="mini-row-text">Palmetto Elementary<div class="mini-row-sub">Wed, Sep 16 &middot; 2:30&ndash;4:30pm</div></span>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3>Account Actions</h3>
+          <div class="action-row">
+            <button class="action-btn reset">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              Send Password Reset
+            </button>
+            <button class="action-btn archive">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M4 8v10a2 2 0 002 2h12a2 2 0 002-2V8M10 12h4"/></svg>
+              Archive Instructor
+            </button>
+            <button class="action-btn delete" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
+              Delete Instructor
+            </button>
+          </div>
+          <p class="delete-note">Delete is disabled because this instructor has 40 sessions of history, use Archive instead to preserve their records. Delete only becomes available for accounts with zero session history.</p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const INSTRUCTORS = [
+    { name:'Heather Swear', color:'#D8AE4B', status:'active', districts:'Fontana, Chino Valley', sessions:40, joined:'Aug 12, 2026' },
+    { name:'James Rivera', color:'#6FCB55', status:'active', districts:'Etiwanda', sessions:22, joined:'Jul 3, 2026' },
+    { name:'Sarah Kim', color:'#3FC0E8', status:'invited', districts:'\u2014', sessions:0, joined:'Sep 1, 2026' },
+    { name:'Devon Price', color:'#2B4FA3', status:'archived', districts:'Chino Valley', sessions:6, joined:'Feb 20, 2026' },
+  ];
+
+  const rows = document.getElementById('rows');
+  INSTRUCTORS.forEach(inst => {
+    const row = document.createElement('div');
+    row.className = 'list-row';
+    row.innerHTML = `
+      <div class="li-name"><div class="avatar" style="background:${inst.color}">${inst.name.split(' ').map(w=>w[0]).join('')}</div><span class="li-name-text">${inst.name}</span></div>
+      <span class="status-badge ${inst.status}">${inst.status[0].toUpperCase()+inst.status.slice(1)}</span>
+      <span class="li-district">${inst.districts}</span>
+      <span class="li-sessions">${inst.sessions}</span>
+      <span class="li-joined">${inst.joined}</span>
+    `;
+    row.addEventListener('click', () => {
+      document.getElementById('listView').classList.remove('active');
+      document.getElementById('detailView').classList.add('active');
+    });
+    rows.appendChild(row);
+  });
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    document.getElementById('detailView').classList.remove('active');
+    document.getElementById('listView').classList.add('active');
+  });
+</script>
+
+</body>
+</html>

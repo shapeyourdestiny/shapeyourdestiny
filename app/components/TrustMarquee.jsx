@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./TrustMarquee.module.css";
 
 // Replace each src below with the real logo file path once you have them.
@@ -26,7 +27,13 @@ export default function TrustMarquee() {
         <div className={styles.track}>
           {looped.map((src, i) => (
             <div className={styles.logo} key={i} aria-hidden={i >= PARTNERS.length}>
-              <img src={src} alt={i < PARTNERS.length ? "Partner school logo" : ""} />
+              <Image
+                src={src}
+                alt={i < PARTNERS.length ? "Partner school logo" : ""}
+                width={120}
+                height={60}
+                style={{ objectFit: "contain" }}
+              />
             </div>
           ))}
         </div>

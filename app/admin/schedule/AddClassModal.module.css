@@ -1,0 +1,433 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 44, 107, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: var(--paper);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(20, 44, 107, 0.25);
+}
+
+@media (max-width: 760px) {
+  .modal {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--tint-deep);
+  flex-shrink: 0;
+}
+
+.header h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.closeBtn:hover {
+  background: var(--tint);
+  color: var(--ink);
+}
+.closeBtn svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: 14px;
+  margin: 0 0 16px;
+  padding: 12px;
+  background: rgba(211, 47, 47, 0.08);
+  border-radius: 8px;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.sectionHeader h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+}
+
+.programBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  background: rgba(31, 63, 145, 0.1);
+  color: var(--navy);
+  border-radius: 4px;
+}
+
+.sectionDesc {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 520px) {
+  .row {
+    flex-direction: column;
+  }
+}
+
+.field {
+  flex: 1;
+  margin-bottom: 12px;
+}
+
+.field label {
+  display: block;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--tint-deep);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--paper);
+  transition: border-color 0.15s ease;
+}
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+.field select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dayCheckboxes {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dayCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--tint);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 2px solid transparent;
+}
+.dayCheckbox:hover {
+  background: var(--tint-deep);
+}
+.dayCheckbox.selected {
+  background: var(--navy);
+  color: #fff;
+}
+.dayCheckbox input {
+  display: none;
+}
+
+.recurrenceToggle {
+  display: flex;
+  background: var(--tint);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.recurrenceBtn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.recurrenceBtn:hover {
+  color: var(--ink);
+}
+.recurrenceBtn.active {
+  background: var(--navy);
+  color: #fff;
+}
+
+.sessionsInput {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--tint);
+  border-radius: 8px;
+}
+.sessionsInput label {
+  font-size: 13px;
+  color: var(--ink);
+}
+.sessionsInput input {
+  width: 70px;
+  padding: 8px 10px;
+  border: 2px solid var(--tint-deep);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+.sessionsInput input:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+/* Off Days */
+.offDaysList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.offDayItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--tint);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.offDayDate {
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 60px;
+}
+
+.offDayReason {
+  flex: 1;
+  color: var(--ink-soft);
+}
+
+.offDayDelete {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+.offDayDelete:hover {
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.1);
+}
+.offDayDelete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.offDayDelete svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.addOffDayForm {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.addOffDayForm input[type="date"] {
+  width: 140px;
+  padding: 8px 10px;
+  border: 2px solid var(--tint-deep);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.addOffDayForm input[type="text"] {
+  flex: 1;
+  padding: 8px 10px;
+  border: 2px solid var(--tint-deep);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.addOffDayForm input:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+.addOffDayBtn {
+  padding: 8px 14px;
+  background: var(--tint);
+  border: 2px solid var(--tint-deep);
+  border-radius: 6px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.addOffDayBtn:hover:not(:disabled) {
+  background: var(--tint-deep);
+}
+.addOffDayBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .addOffDayForm {
+    flex-wrap: wrap;
+  }
+  .addOffDayForm input[type="date"] {
+    width: 100%;
+  }
+  .addOffDayForm input[type="text"] {
+    flex: 1;
+    min-width: 150px;
+  }
+}
+
+/* Preview */
+.preview {
+  background: rgba(62, 143, 160, 0.08);
+  border: 2px solid rgba(62, 143, 160, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.preview h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal-dark);
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.previewMain {
+  font-size: 14px;
+  color: var(--ink);
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+.previewMain strong {
+  color: var(--navy);
+}
+
+.previewSkipped {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid var(--tint-deep);
+}
+
+.cancelBtn {
+  padding: 12px 20px;
+  background: none;
+  border: 2px solid var(--tint-deep);
+  border-radius: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.cancelBtn:hover {
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+
+.submitBtn {
+  padding: 12px 24px;
+  background: var(--orange);
+  border: none;
+  border-radius: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.submitBtn:hover {
+  background: var(--orange-dark);
+}
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

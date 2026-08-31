@@ -5,7 +5,8 @@ import styles from "./ManageModal.module.css";
 import {
   createDistrictAction,
   createSchoolAction,
-  createClassAction,
+  updateSchoolAction,
+  updateClassAction,
   deleteDistrictAction,
   deleteSchoolAction,
   deleteClassAction,
@@ -49,23 +50,31 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
 
   // School form
   const [schoolName, setSchoolName] = useState("");
+  const [schoolAddress, setSchoolAddress] = useState("");
   const [selectedDistrictId, setSelectedDistrictId] = useState("");
-
-  // Class form
-  const [selectedSchoolId, setSelectedSchoolId] = useState("");
-  const [classDays, setClassDays] = useState([]);
-  const [classTime, setClassTime] = useState("");
-  const [classStartDate, setClassStartDate] = useState("");
-  const [classNumWeeks, setClassNumWeeks] = useState(8);
 
   // Holiday form
   const [holidayDate, setHolidayDate] = useState("");
   const [holidayName, setHolidayName] = useState("");
   const [holidayDistrictId, setHolidayDistrictId] = useState("");
+  const [holidaySchoolId, setHolidaySchoolId] = useState("");
 
   // Expanded sections
   const [expandedDistrict, setExpandedDistrict] = useState(null);
   const [expandedSchool, setExpandedSchool] = useState(null);
+
+  // Edit class state
+  const [editingClassId, setEditingClassId] = useState(null);
+  const [editDays, setEditDays] = useState([]);
+  const [editTime, setEditTime] = useState("");
+  const [editStartDate, setEditStartDate] = useState("");
+  const [editTargetSessions, setEditTargetSessions] = useState(null);
+  const [editProgram, setEditProgram] = useState("wellness");
+
+  // Edit school state
+  const [editingSchoolId, setEditingSchoolId] = useState(null);
+  const [editSchoolName, setEditSchoolName] = useState("");
+  const [editSchoolAddress, setEditSchoolAddress] = useState("");
 
   if (!open) return null;
 
@@ -94,34 +103,9 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
     setError("");
 
     try {
-      await createSchoolAction(selectedDistrictId, schoolName.trim());
+      await createSchoolAction(selectedDistrictId, schoolName.trim(), schoolAddress.trim() || null);
       setSchoolName("");
-      await onDataChange();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateClass = async (e) => {
-    e.preventDefault();
-    if (!selectedSchoolId || classDays.length === 0 || !classTime.trim()) return;
-    setLoading(true);
-    setError("");
-
-    try {
-      await createClassAction(
-        selectedSchoolId,
-        classDays,
-        classTime.trim(),
-        classStartDate || null,
-        classNumWeeks
-      );
-      setClassDays([]);
-      setClassTime("");
-      setClassStartDate("");
-      setClassNumWeeks(8);
+      setSchoolAddress("");
       await onDataChange();
     } catch (err) {
       setError(err.message);
@@ -204,14 +188,31 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
     setError("");
 
     try {
+      // If school is selected, use its district; otherwise use selected district
+      let districtId = holidayDistrictId || null;
+      let schoolId = holidaySchoolId || null;
+
+      // If a school is selected, we need to ensure the district is correct
+      if (schoolId) {
+        const school = data.districts
+          .flatMap(d => d.schools || [])
+          .find(s => s.id === schoolId);
+        if (school) {
+          // School-specific holiday doesn't need district_id (it's implicit)
+          districtId = null;
+        }
+      }
+
       await createHolidayAction(
         holidayDate,
         holidayName.trim(),
-        holidayDistrictId || null
+        districtId,
+        schoolId
       );
       setHolidayDate("");
       setHolidayName("");
       setHolidayDistrictId("");
+      setHolidaySchoolId("");
       await onDataChange();
     } catch (err) {
       setError(err.message);
@@ -250,10 +251,80 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
     }
   };
 
-  const toggleDay = (day) => {
-    setClassDays((prev) =>
+  const toggleEditDay = (day) => {
+    setEditDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
     );
+  };
+
+  const startEditingSchool = (school) => {
+    setEditingSchoolId(school.id);
+    setEditSchoolName(school.name || "");
+    setEditSchoolAddress(school.address || "");
+  };
+
+  const cancelEditingSchool = () => {
+    setEditingSchoolId(null);
+  };
+
+  const handleUpdateSchool = async (schoolId) => {
+    if (!editSchoolName.trim()) {
+      setError("School name is required");
+      return;
+    }
+    setLoading(true);
+    setError("");
+
+    try {
+      await updateSchoolAction(schoolId, {
+        name: editSchoolName.trim(),
+        address: editSchoolAddress.trim() || null,
+      });
+      setEditingSchoolId(null);
+      await onDataChange();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startEditingClass = (cls) => {
+    setEditingClassId(cls.id);
+    setEditDays(cls.days || []);
+    setEditTime(cls.time || "");
+    setEditStartDate(cls.start_date || "");
+    setEditTargetSessions(cls.target_sessions);
+    setEditProgram(cls.program || "wellness");
+  };
+
+  const cancelEditingClass = () => {
+    setEditingClassId(null);
+  };
+
+  const handleUpdateClass = async (classId) => {
+    if (editDays.length === 0 || !editTime.trim()) {
+      setError("Days and time are required");
+      return;
+    }
+    setLoading(true);
+    setError("");
+
+    try {
+      await updateClassAction(classId, {
+        days: editDays,
+        time: editTime.trim(),
+        start_date: editStartDate || null,
+        target_sessions: editTargetSessions,
+        program: editProgram,
+      });
+      setEditingClassId(null);
+      await onDataChange();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Format date for display
@@ -407,6 +478,15 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
                     />
                   </div>
                 </div>
+                <div className={styles.field}>
+                  <label>Address (for directions)</label>
+                  <input
+                    type="text"
+                    value={schoolAddress}
+                    onChange={(e) => setSchoolAddress(e.target.value)}
+                    placeholder="e.g., 123 Main St, City, CA 90210"
+                  />
+                </div>
                 <button type="submit" className={styles.addBtn} disabled={loading}>
                   {loading ? "Adding..." : "Add School"}
                 </button>
@@ -441,21 +521,88 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
                     {expandedDistrict === district.id && (
                       <div className={styles.listGroupContent}>
                         {district.schools?.map((school) => (
-                          <div key={school.id} className={styles.listItem}>
-                            <span className={styles.listName}>{school.name}</span>
-                            <span className={styles.listCount}>
-                              {school.classes?.length || 0} classes
-                            </span>
-                            <button
-                              className={styles.deleteBtn}
-                              onClick={() => handleDeleteSchool(school.id)}
-                              disabled={loading}
-                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <polyline points="3 6 5 6 21 6" />
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                              </svg>
-                            </button>
+                          <div key={school.id} className={`${styles.schoolItem} ${editingSchoolId === school.id ? styles.classItemEditing : ""}`}>
+                            {editingSchoolId === school.id ? (
+                              <div className={styles.editClassForm}>
+                                <div className={styles.editRow}>
+                                  <div className={styles.field}>
+                                    <label>School Name</label>
+                                    <input
+                                      type="text"
+                                      value={editSchoolName}
+                                      onChange={(e) => setEditSchoolName(e.target.value)}
+                                      placeholder="School name"
+                                    />
+                                  </div>
+                                </div>
+                                <div className={styles.editRow}>
+                                  <div className={styles.field}>
+                                    <label>Address</label>
+                                    <input
+                                      type="text"
+                                      value={editSchoolAddress}
+                                      onChange={(e) => setEditSchoolAddress(e.target.value)}
+                                      placeholder="e.g., 123 Main St, City, CA 90210"
+                                    />
+                                  </div>
+                                </div>
+                                <div className={styles.editActions}>
+                                  <button
+                                    type="button"
+                                    className={styles.cancelEditBtn}
+                                    onClick={cancelEditingSchool}
+                                    disabled={loading}
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.saveEditBtn}
+                                    onClick={() => handleUpdateSchool(school.id)}
+                                    disabled={loading}
+                                  >
+                                    {loading ? "Saving..." : "Save"}
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className={styles.schoolInfo}>
+                                  <span className={styles.listName}>{school.name}</span>
+                                  {school.address && (
+                                    <span className={styles.schoolAddress}>{school.address}</span>
+                                  )}
+                                  {!school.address && (
+                                    <span className={styles.schoolNoAddress}>No address</span>
+                                  )}
+                                </div>
+                                <span className={styles.listCount}>
+                                  {school.classes?.length || 0} classes
+                                </span>
+                                <button
+                                  className={styles.editBtn}
+                                  onClick={() => startEditingSchool(school)}
+                                  disabled={loading}
+                                  title="Edit school"
+                                >
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                  </svg>
+                                </button>
+                                <button
+                                  className={styles.deleteBtn}
+                                  onClick={() => handleDeleteSchool(school.id)}
+                                  disabled={loading}
+                                  title="Delete school"
+                                >
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polyline points="3 6 5 6 21 6" />
+                                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                                  </svg>
+                                </button>
+                              </>
+                            )}
                           </div>
                         ))}
                         {(!district.schools || district.schools.length === 0) && (
@@ -472,80 +619,9 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
           {/* Classes Tab */}
           {tab === "classes" && (
             <>
-              <form className={styles.form} onSubmit={handleCreateClass}>
-                <div className={styles.formRow}>
-                  <div className={styles.field}>
-                    <label>School</label>
-                    <select
-                      value={selectedSchoolId}
-                      onChange={(e) => setSelectedSchoolId(e.target.value)}
-                      required
-                    >
-                      <option value="">Select school...</option>
-                      {data.districts.map((d) =>
-                        d.schools?.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {d.name} - {s.name}
-                          </option>
-                        ))
-                      )}
-                    </select>
-                  </div>
-                </div>
-                <div className={styles.formRow}>
-                  <div className={styles.field}>
-                    <label>Days</label>
-                    <div className={styles.dayCheckboxes}>
-                      {DAYS.map((day) => (
-                        <label key={day} className={styles.dayCheckbox}>
-                          <input
-                            type="checkbox"
-                            checked={classDays.includes(day)}
-                            onChange={() => toggleDay(day)}
-                          />
-                          <span>{day}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <div className={styles.field}>
-                    <label>Time</label>
-                    <input
-                      type="text"
-                      value={classTime}
-                      onChange={(e) => setClassTime(e.target.value)}
-                      placeholder="e.g., 2:30pm"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className={styles.formRow}>
-                  <div className={styles.field}>
-                    <label>Start Date (optional)</label>
-                    <input
-                      type="date"
-                      value={classStartDate}
-                      onChange={(e) => setClassStartDate(e.target.value)}
-                    />
-                  </div>
-                  <div className={styles.field}>
-                    <label>Program Length</label>
-                    <select
-                      value={classNumWeeks}
-                      onChange={(e) => setClassNumWeeks(parseInt(e.target.value))}
-                    >
-                      {[4, 6, 8, 10, 12, 16, 20].map((w) => (
-                        <option key={w} value={w}>
-                          {w} weeks
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <button type="submit" className={styles.addBtn} disabled={loading}>
-                  {loading ? "Adding..." : "Add Class"}
-                </button>
-              </form>
+              <p className={styles.tabDescription}>
+                Use the &quot;+ Add Class&quot; button on the Schedule Board to create new classes. Here you can view and edit existing classes.
+              </p>
 
               <div className={styles.list}>
                 {data.districts.map((district) =>
@@ -579,36 +655,137 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
                       {expandedSchool === school.id && (
                         <div className={styles.listGroupContent}>
                           {school.classes?.map((cls) => (
-                            <div key={cls.id} className={styles.listItem}>
-                              <span className={styles.listName}>
-                                {cls.days?.join(", ")} @ {cls.time}
-                                {cls.start_date && (
-                                  <span className={styles.classMeta}>
-                                    {" "}
-                                    (starts {new Date(cls.start_date + "T00:00:00").toLocaleDateString()}, {cls.num_weeks || 8} wks)
-                                  </span>
-                                )}
-                              </span>
-                              <label className={styles.reviewToggle}>
-                                <input
-                                  type="checkbox"
-                                  checked={cls.is_review_day}
-                                  onChange={() =>
-                                    handleToggleReviewDay(cls.id, cls.is_review_day)
-                                  }
-                                />
-                                <span>Review</span>
-                              </label>
-                              <button
-                                className={styles.deleteBtn}
-                                onClick={() => handleDeleteClass(cls.id)}
-                                disabled={loading}
-                              >
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <polyline points="3 6 5 6 21 6" />
-                                  <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                                </svg>
-                              </button>
+                            <div key={cls.id} className={`${styles.classItem} ${editingClassId === cls.id ? styles.classItemEditing : ""}`}>
+                              {editingClassId === cls.id ? (
+                                <div className={styles.editClassForm}>
+                                  <div className={styles.editRow}>
+                                    <div className={styles.field}>
+                                      <label>Days</label>
+                                      <div className={styles.dayCheckboxes}>
+                                        {DAYS.map((day) => (
+                                          <label key={day} className={styles.dayCheckbox}>
+                                            <input
+                                              type="checkbox"
+                                              checked={editDays.includes(day)}
+                                              onChange={() => toggleEditDay(day)}
+                                            />
+                                            <span>{day}</span>
+                                          </label>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    <div className={styles.field}>
+                                      <label>Time</label>
+                                      <input
+                                        type="text"
+                                        value={editTime}
+                                        onChange={(e) => setEditTime(e.target.value)}
+                                        placeholder="e.g., 2:30pm"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className={styles.editRow}>
+                                    <div className={styles.field}>
+                                      <label>Start Date</label>
+                                      <input
+                                        type="date"
+                                        value={editStartDate}
+                                        onChange={(e) => setEditStartDate(e.target.value)}
+                                      />
+                                    </div>
+                                    <div className={styles.field}>
+                                      <label>Sessions</label>
+                                      <input
+                                        type="number"
+                                        value={editTargetSessions || ""}
+                                        onChange={(e) => setEditTargetSessions(e.target.value ? parseInt(e.target.value) : null)}
+                                        placeholder="Ongoing"
+                                        min="1"
+                                      />
+                                    </div>
+                                    <div className={styles.field}>
+                                      <label>Program</label>
+                                      <select
+                                        value={editProgram}
+                                        onChange={(e) => setEditProgram(e.target.value)}
+                                      >
+                                        <option value="wellness">Wellness</option>
+                                        <option value="soccer">Soccer</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <div className={styles.editActions}>
+                                    <button
+                                      type="button"
+                                      className={styles.cancelEditBtn}
+                                      onClick={cancelEditingClass}
+                                      disabled={loading}
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className={styles.saveEditBtn}
+                                      onClick={() => handleUpdateClass(cls.id)}
+                                      disabled={loading}
+                                    >
+                                      {loading ? "Saving..." : "Save"}
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className={styles.classInfo}>
+                                    <span className={styles.listName}>
+                                      {cls.days?.join(", ")} @ {cls.time}
+                                    </span>
+                                    <span className={styles.classMeta}>
+                                      {cls.program === "soccer" ? "Soccer" : "Wellness"}
+                                      {cls.start_date && (
+                                        <> · starts {new Date(cls.start_date + "T00:00:00").toLocaleDateString()}</>
+                                      )}
+                                      {cls.target_sessions && (
+                                        <> · {cls.target_sessions} sessions</>
+                                      )}
+                                      {!cls.target_sessions && cls.start_date && (
+                                        <> · ongoing</>
+                                      )}
+                                    </span>
+                                  </div>
+                                  <label className={styles.reviewToggle}>
+                                    <input
+                                      type="checkbox"
+                                      checked={cls.is_review_day}
+                                      onChange={() =>
+                                        handleToggleReviewDay(cls.id, cls.is_review_day)
+                                      }
+                                    />
+                                    <span>Review</span>
+                                  </label>
+                                  <button
+                                    className={styles.editBtn}
+                                    onClick={() => startEditingClass(cls)}
+                                    disabled={loading}
+                                    title="Edit class"
+                                  >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    className={styles.deleteBtn}
+                                    onClick={() => handleDeleteClass(cls.id)}
+                                    disabled={loading}
+                                    title="Delete class"
+                                  >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <polyline points="3 6 5 6 21 6" />
+                                      <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                                    </svg>
+                                  </button>
+                                </>
+                              )}
                             </div>
                           ))}
                           {(!school.classes || school.classes.length === 0) && (
@@ -673,14 +850,33 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
                   <div className={styles.field}>
                     <label>Applies To</label>
                     <select
-                      value={holidayDistrictId}
-                      onChange={(e) => setHolidayDistrictId(e.target.value)}
+                      value={holidaySchoolId ? `school:${holidaySchoolId}` : (holidayDistrictId ? `district:${holidayDistrictId}` : "")}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "") {
+                          setHolidayDistrictId("");
+                          setHolidaySchoolId("");
+                        } else if (val.startsWith("district:")) {
+                          setHolidayDistrictId(val.replace("district:", ""));
+                          setHolidaySchoolId("");
+                        } else if (val.startsWith("school:")) {
+                          setHolidaySchoolId(val.replace("school:", ""));
+                          setHolidayDistrictId("");
+                        }
+                      }}
                     >
                       <option value="">All Districts</option>
                       {data.districts.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name} only
-                        </option>
+                        <optgroup key={d.id} label={d.name}>
+                          <option value={`district:${d.id}`}>
+                            All schools in {d.name}
+                          </option>
+                          {d.schools?.map((s) => (
+                            <option key={s.id} value={`school:${s.id}`}>
+                              {s.name} only
+                            </option>
+                          ))}
+                        </optgroup>
                       ))}
                     </select>
                   </div>
@@ -697,16 +893,36 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
                       <h4 className={styles.holidayMonthTitle}>{group.label}</h4>
                       <div className={styles.holidayMonthItems}>
                         {group.holidays.map((h) => {
-                          const district = h.district_id
-                            ? data.districts.find((d) => d.id === h.district_id)
-                            : null;
+                          // Find school and district for display
+                          let school = null;
+                          let district = null;
+                          if (h.school_id) {
+                            for (const d of data.districts) {
+                              const s = d.schools?.find((s) => s.id === h.school_id);
+                              if (s) {
+                                school = s;
+                                district = d;
+                                break;
+                              }
+                            }
+                          } else if (h.district_id) {
+                            district = data.districts.find((d) => d.id === h.district_id);
+                          }
                           return (
                             <div key={h.id} className={styles.holidayItem}>
                               <span className={styles.holidayDate}>
                                 {formatDate(h.date)}
                               </span>
                               <span className={styles.holidayName}>{h.name}</span>
-                              {district ? (
+                              {school ? (
+                                <span className={styles.holidayDistrict}>
+                                  <span
+                                    className={styles.districtDot}
+                                    style={{ background: district?.color || "#888" }}
+                                  />
+                                  {school.name}
+                                </span>
+                              ) : district ? (
                                 <span className={styles.holidayDistrict}>
                                   <span
                                     className={styles.districtDot}

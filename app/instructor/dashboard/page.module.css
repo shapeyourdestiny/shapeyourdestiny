@@ -1,13 +1,14 @@
-.section {
-  background: var(--tint);
-  min-height: calc(100vh - 200px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 24px;
+.page {
+  max-width: 900px;
 }
-@media (max-width: 480px) { .section { padding: 48px 20px; } }
 
+.pageTitle {
+  font-size: clamp(22px, 4vw, 28px);
+  color: var(--ink);
+  margin: 0 0 24px;
+}
+
+/* Legacy card styles - keep for fallback */
 .card {
   background: var(--paper);
   border-radius: 24px;

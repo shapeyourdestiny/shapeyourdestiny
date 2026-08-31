@@ -54,6 +54,29 @@
   color: #fff;
 }
 
+.addClassBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--orange);
+  border: none;
+  border-radius: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.addClassBtn:hover {
+  background: var(--orange-dark);
+}
+.addClassBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
 .manageBtn {
   display: flex;
   align-items: center;
@@ -78,173 +101,6 @@
   height: 18px;
 }
 
-/* ===== INSTRUCTOR POOL (shared between Day and Week views) ===== */
-.instructorPool {
-  width: 260px;
-  flex-shrink: 0;
-  background: var(--paper);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.06);
-  align-self: flex-start;
-  position: sticky;
-  top: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.poolTitle {
-  font-size: 16px;
-  margin: 0 0 12px;
-  color: var(--ink);
-}
-
-.poolSearch {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--tint);
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
-.poolSearch svg {
-  width: 16px;
-  height: 16px;
-  color: var(--ink-soft);
-  flex-shrink: 0;
-}
-.poolSearch input {
-  flex: 1;
-  border: none;
-  background: none;
-  font-size: 13px;
-  font-family: inherit;
-  color: var(--ink);
-  outline: none;
-}
-.poolSearch input::placeholder {
-  color: var(--ink-soft);
-}
-
-.poolContent {
-  max-height: 420px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--tint-deep) transparent;
-}
-.poolContent::-webkit-scrollbar {
-  width: 6px;
-}
-.poolContent::-webkit-scrollbar-track {
-  background: transparent;
-}
-.poolContent::-webkit-scrollbar-thumb {
-  background: var(--tint-deep);
-  border-radius: 3px;
-}
-
-.poolGroup {
-  background: var(--tint);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.poolGroupHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 10px 12px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  text-align: left;
-  font-family: inherit;
-  transition: background 0.15s ease;
-}
-.poolGroupHeader:hover {
-  background: var(--tint-deep);
-}
-
-.poolGroupName {
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--ink);
-  flex: 1;
-}
-
-.poolGroupCount {
-  font-size: 11px;
-  color: var(--ink-soft);
-}
-
-.poolChevron {
-  width: 16px;
-  height: 16px;
-  color: var(--ink-soft);
-  transition: transform 0.2s ease;
-}
-.poolChevron.expanded {
-  transform: rotate(180deg);
-}
-
-.poolGroupContent {
-  padding: 0 12px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.poolNoMatch {
-  color: var(--ink-soft);
-  font-size: 13px;
-  font-style: italic;
-  text-align: center;
-  padding: 16px 0;
-  margin: 0;
-}
-
-/* ===== INSTRUCTOR CHIP ===== */
-.instructorChip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--paper);
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink);
-  cursor: grab;
-  transition: all 0.15s ease;
-  border-left: 3px solid var(--chip-color);
-}
-.instructorChip:hover {
-  background: var(--tint-deep);
-}
-.instructorChip.assigned {
-  opacity: 0.5;
-  cursor: default;
-}
-.instructorChip:active {
-  cursor: grabbing;
-}
-
-.chipName {
-  flex: 1;
-}
-
-.chipAssigned {
-  font-size: 10px;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  letter-spacing: 0.05em;
-}
-
 /* ===== DISTRICT DOT ===== */
 .districtDot {
   width: 10px;
@@ -253,110 +109,11 @@
   flex-shrink: 0;
 }
 
-/* ===== DAY VIEW ===== */
-.dayView {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.dayNav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.dayNavDate {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--ink);
-  min-width: 180px;
-  text-align: center;
-}
-
-.dayTabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
-}
-
-.dayTab {
-  position: relative;
-  padding: 10px 20px;
-  border: none;
-  background: var(--paper);
-  border-radius: 10px;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.dayTab:hover {
-  color: var(--navy);
-}
-.dayTab.active {
-  background: var(--navy);
-  color: #fff;
-}
-.dayTab.hasHoliday {
-  border: 2px solid var(--gold);
-}
-.dayTab.active.hasHoliday {
-  border-color: transparent;
-}
-
-.holidayDot {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--gold);
-}
-.dayTab.active .holidayDot {
-  background: #fff;
-}
-
-.dayContent {
-  display: flex;
-  gap: 24px;
-  flex: 1;
-}
-
-.dayMain {
-  flex: 1;
-  min-width: 0;
-}
-
-.dayClassesList {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 /* ===== WEEK VIEW ===== */
 .weekView {
   display: flex;
-  gap: 24px;
-  flex: 1;
-}
-
-.weekMain {
-  flex: 1;
-  min-width: 0;
-  display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .weekNav {
@@ -439,6 +196,19 @@
   flex: 1;
 }
 
+/* Past day dimming */
+.weekColumn.pastDay {
+  opacity: 0.5;
+}
+
+.weekColumn.pastDay .weekColumnHeader {
+  border-bottom-color: var(--tint-deep);
+}
+
+.weekColumn.pastDay .gridCard {
+  box-shadow: none;
+}
+
 /* ===== GRID CLASS CARD (shared by Day and Week views) ===== */
 .gridCard {
   background: var(--paper);
@@ -451,12 +221,28 @@
   border-top-color: var(--gold);
 }
 
+.gridCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.programBadge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+}
+
 .gridCardTime {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
   font-size: 15px;
   color: var(--ink);
-  margin-bottom: 4px;
 }
 
 .gridCardSchool {
@@ -493,6 +279,10 @@
 }
 
 /* ===== SLOTS ===== */
+.slotWrapper {
+  position: relative;
+}
+
 .emptySlot {
   display: flex;
   justify-content: space-between;
@@ -508,23 +298,21 @@
   border-color: var(--navy);
   border-style: solid;
 }
+.emptySlot.slotActive {
+  border-color: var(--navy);
+  border-style: solid;
+  background: var(--tint-deep);
+}
 
 .slotLabel {
   font-size: 12px;
   color: var(--ink-soft);
 }
 
-.dropHint {
+.assignHint {
   font-size: 11px;
   color: var(--teal);
   font-weight: 600;
-}
-
-.desktopHint {
-  display: inline;
-}
-.mobileHint {
-  display: none;
 }
 
 .filledSlot {
@@ -535,6 +323,15 @@
   background: var(--tint);
   border-radius: 8px;
   border-left: 3px solid var(--slot-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.filledSlot:hover {
+  background: var(--tint-deep);
+}
+.filledSlot.slotActive {
+  background: var(--tint-deep);
+  box-shadow: 0 0 0 2px var(--navy);
 }
 
 .slotName {
@@ -563,6 +360,185 @@
   display: block;
 }
 
+/* ===== CLICK-TO-ASSIGN POPOVER ===== */
+.pickerPopover {
+  background: var(--paper);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(20, 44, 107, 0.2);
+  z-index: 1000;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pickerSearch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid var(--tint-deep);
+}
+.pickerSearch svg {
+  width: 16px;
+  height: 16px;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+.pickerSearch input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+}
+.pickerSearch input::placeholder {
+  color: var(--ink-soft);
+}
+
+.pickerList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.pickerEmpty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.pickerRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+.pickerRow:hover {
+  background: var(--tint);
+}
+.pickerRow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pickerAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.pickerName {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pickerDistrict {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* ===== MOBILE PICKER (Bottom Sheet) ===== */
+.mobilePickerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobilePickerSearch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--tint);
+  border-radius: 10px;
+}
+.mobilePickerSearch svg {
+  width: 18px;
+  height: 18px;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+.mobilePickerSearch input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+}
+.mobilePickerSearch input::placeholder {
+  color: var(--ink-soft);
+}
+
+.mobilePickerList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobilePickerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  background: var(--tint);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+.mobilePickerRow:hover {
+  background: var(--tint-deep);
+}
+.mobilePickerRow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mobilePickerInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobilePickerName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.mobilePickerDistrict {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
 /* ===== EMPTY PLACEHOLDER ===== */
 .emptyPlaceholder {
   display: flex;
@@ -578,13 +554,6 @@
   font-size: 13px;
   color: var(--ink-soft);
   font-style: italic;
-}
-
-.emptyState {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 48px 24px;
-  color: var(--ink-soft);
 }
 
 /* ===== HOLIDAY DISPLAY ===== */
@@ -633,12 +602,6 @@
   border-radius: 4px;
 }
 
-.holidayTagGlobal {
-  font-size: 11px;
-  color: var(--ink-soft);
-  font-style: italic;
-}
-
 /* ===== MONTH VIEW ===== */
 .monthView {
   background: var(--paper);
@@ -652,7 +615,7 @@
   justify-content: center;
   align-items: center;
   gap: 24px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .monthNavBtn {
@@ -681,6 +644,16 @@
   text-align: center;
 }
 
+.monthContent {
+  display: flex;
+  gap: 24px;
+}
+
+.monthCalendarSide {
+  flex: 1;
+  min-width: 0;
+}
+
 .calendarGrid {
   display: flex;
   flex-direction: column;
@@ -690,15 +663,15 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   border-bottom: 1px solid var(--tint-deep);
-  padding-bottom: 12px;
-  margin-bottom: 8px;
+  padding-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .calendarHeaderCell {
   text-align: center;
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--ink-soft);
@@ -707,221 +680,332 @@
 .calendarWeek {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
 }
 
 .calendarCell {
-  aspect-ratio: 1;
-  padding: 8px;
+  aspect-ratio: 1 / 0.78;
+  min-height: 70px;
+  max-height: 90px;
+  padding: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.15s ease;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  border: 2px solid transparent;
 }
 .calendarCell:hover {
-  background: var(--tint);
+  filter: brightness(0.95);
 }
-.calendarCell.hasClasses {
-  cursor: pointer;
+
+/* Day state backgrounds */
+.calendarCell.dayState_empty {
+  background: transparent;
+}
+.calendarCell.dayState_empty:hover {
+  background: var(--tint);
+  filter: none;
+}
+
+.calendarCell.dayState_wellness {
+  background: rgba(62, 143, 160, 0.12);
+}
+
+.calendarCell.dayState_soccer {
+  background: rgba(31, 63, 145, 0.09);
+}
+
+.calendarCell.dayState_multiple {
+  background: rgba(180, 91, 199, 0.14);
+}
+
+.calendarCell.dayState_holiday {
+  background: rgba(216, 174, 75, 0.16);
+}
+
+/* Today indicator - works on top of any background */
+.calendarCell.today {
+  box-shadow: inset 0 0 0 2px var(--teal);
+}
+
+/* Selected indicator */
+.calendarCell.selected {
+  border-color: var(--navy);
 }
 
 .calendarCellEmpty {
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 0.78;
+  min-height: 70px;
+  max-height: 90px;
 }
 
 .dayNumber {
   font-family: 'Baloo 2', sans-serif;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 500;
+  font-size: 13px;
   color: var(--ink);
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
 }
-.dayNumber.reviewRing {
-  box-shadow: inset 0 0 0 2px var(--gold);
+
+/* Bold colored number for days with content */
+.dayNumberActive {
+  font-weight: 700;
 }
 
-.districtDots {
+/* Day state specific number colors */
+.dayState_wellness .dayNumber {
+  color: #2C6E7D;
+  font-weight: 700;
+}
+
+.dayState_soccer .dayNumber {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.dayState_multiple .dayNumber {
+  color: #8E3F9E;
+  font-weight: 700;
+}
+
+.dayState_holiday .dayNumber {
+  color: #9C7A29;
+  font-weight: 700;
+}
+
+.cellIndicators {
   display: flex;
   gap: 3px;
   margin-top: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.calendarDot {
+.programDot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
 }
 
-/* ===== YEAR VIEW ===== */
-.yearView {
-  background: var(--paper);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.06);
+.holidayMarker {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
 }
 
-.yearNav {
+/* Month Legend */
+.monthLegend {
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--tint-deep);
+  margin-top: 16px;
+}
+
+.legendItem {
+  display: flex;
   align-items: center;
-  gap: 24px;
-  margin-bottom: 24px;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink);
 }
 
-.yearTitle {
-  font-size: 26px;
-  margin: 0;
+.legendSwatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
-.miniMonthsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-.miniMonth {
+/* Month Detail Panel */
+.monthDetailPanel {
+  width: 260px;
+  flex-shrink: 0;
   background: var(--tint);
   border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  max-height: 500px;
+}
+
+.detailPanelHeader {
   padding: 16px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.miniMonth:hover {
-  background: var(--tint-deep);
+  border-bottom: 1px solid var(--tint-deep);
 }
 
-.miniMonthTitle {
-  font-size: 14px;
-  margin: 0 0 12px;
-  text-align: center;
-}
-
-.miniMonthGrid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
-
-.miniDay {
-  aspect-ratio: 1;
-  border-radius: 2px;
-  background: var(--paper);
-}
-.miniDay.hasClasses {
-  background: var(--dot-color, var(--teal));
-}
-.miniDay.reviewDay {
-  box-shadow: inset 0 0 0 1px var(--gold);
-}
-
-.miniDayEmpty {
-  aspect-ratio: 1;
-}
-
-/* ===== MOBILE PICKER CONTENT ===== */
-.pickerContent {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.pickerGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.pickerGroupHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-
-.pickerGroupContent {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.pickerItem {
-  width: 100%;
-  padding: 12px 16px;
-  background: var(--tint);
-  border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 600;
+.detailPanelHeader h3 {
+  margin: 0;
+  font-size: 16px;
   color: var(--ink);
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.pickerItem:hover {
-  background: var(--tint-deep);
-}
-.pickerItem:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
-/* ===== DAY DETAIL CONTENT ===== */
-.dayDetailContent {
+.detailPanelContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.dayDetailClass {
-  background: var(--tint);
+.detailPanelEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+  color: var(--ink-soft);
+  text-align: center;
+  padding: 24px;
+}
+.detailPanelEmpty svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+.detailPanelEmpty p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.detailEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-style: italic;
+}
+.detailEmpty p {
+  margin: 0;
+}
+
+/* Detail Holidays */
+.detailHolidays {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailHolidayItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(216, 174, 75, 0.15);
+  border-radius: 8px;
+  border-left: 3px solid var(--gold);
+}
+.detailHolidayItem svg {
+  width: 16px;
+  height: 16px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.detailHolidayName {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.detailHolidayDistrict {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+
+.detailHolidayGlobal {
+  font-size: 10px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* Detail Classes */
+.detailClasses {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detailClassCard {
+  background: var(--paper);
   border-radius: 10px;
   padding: 12px;
 }
 
-.dayDetailHeader {
+.detailClassHeader {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 6px;
+}
+
+.detailProgramBadge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.detailClassTime {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.detailClassSchool {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.detailClassDistrict {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink-soft);
   margin-bottom: 8px;
 }
 
-.dayDetailTime {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.dayDetailSchool {
-  font-size: 12px;
-  color: var(--ink-soft);
-  margin-left: auto;
-}
-
-.dayDetailAssignments {
+.detailClassInstructors {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
-.dayDetailInstructor {
-  padding: 4px 10px;
-  background: var(--paper);
-  border-radius: 6px;
-  font-size: 12px;
+.detailInstructorChip {
+  padding: 3px 8px;
+  background: var(--tint);
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 600;
+  color: var(--ink);
 }
 
-.dayDetailEmpty {
-  font-size: 12px;
+.detailNoInstructors {
+  font-size: 11px;
   color: var(--ink-soft);
   font-style: italic;
 }
@@ -937,12 +1021,27 @@
 
 /* Under 900px */
 @media (max-width: 900px) {
-  .miniMonthsGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .monthContent {
+    flex-direction: column;
+  }
+
+  .monthDetailPanel {
+    width: 100%;
+    max-height: none;
+  }
+
+  .calendarCell {
+    min-height: 60px;
+    max-height: 75px;
+  }
+
+  .calendarCellEmpty {
+    min-height: 60px;
+    max-height: 75px;
   }
 }
 
-/* Under 760px: single column, hide desktop pool */
+/* Under 760px: single column */
 @media (max-width: 760px) {
   .header {
     flex-direction: column;
@@ -959,40 +1058,11 @@
     justify-content: center;
   }
 
-  .desktopHint {
-    display: none;
-  }
-  .mobileHint {
-    display: inline;
-  }
-
-  .instructorPool {
-    display: none;
-  }
-
-  .dayView {
-    flex-direction: column;
-  }
-
-  .dayContent {
-    flex-direction: column;
-  }
-
   .weekView {
     flex-direction: column;
   }
 
   .weekGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .dayTabs {
-    flex-wrap: nowrap;
-  }
-}
-
-@media (max-width: 520px) {
-  .miniMonthsGrid {
     grid-template-columns: 1fr;
   }
 }
@@ -1002,8 +1072,7 @@
     font-size: 24px;
   }
 
-  .monthView,
-  .yearView {
+  .monthView {
     padding: 16px;
     border-radius: 12px;
   }
@@ -1011,5 +1080,35 @@
   .monthTitle {
     font-size: 18px;
     min-width: 160px;
+  }
+
+  .calendarCell {
+    min-height: 50px;
+    max-height: 65px;
+    padding: 4px;
+  }
+
+  .calendarCellEmpty {
+    min-height: 50px;
+    max-height: 65px;
+  }
+
+  .dayNumber {
+    font-size: 12px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .monthLegend {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .legendItem {
+    font-size: 11px;
+  }
+
+  .detailPanelHeader h3 {
+    font-size: 14px;
   }
 }

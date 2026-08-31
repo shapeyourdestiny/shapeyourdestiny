@@ -1,78 +1,33 @@
 .page {
-  max-width: 900px;
+  max-width: 1000px;
 }
 
 .header {
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
+
 .header h1 {
-  font-size: 28px;
-  margin-bottom: 8px;
+  font-size: 22px;
+  margin-bottom: 4px;
 }
+
 .header p {
   color: var(--ink-soft);
-  font-size: 15px;
+  font-size: 13px;
 }
 
-.tableCard {
+/* Empty state card */
+.emptyCard {
   background: var(--paper);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(20,44,107,0.06);
-}
-
-.tableWrap {
-  overflow-x: auto;
-  margin: 0 -24px -24px;
-  padding: 0 24px 24px;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.table th,
-.table td {
-  text-align: left;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--tint-deep);
-}
-
-.table th {
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ink-soft);
-  background: var(--tint);
-}
-
-.table tr:last-child td {
-  border-bottom: none;
-}
-
-.name {
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  color: var(--ink);
-}
-
-.date {
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  color: var(--ink-soft);
-}
-
-.empty {
-  text-align: center;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(20, 44, 107, 0.08);
   padding: 40px 24px;
+  text-align: center;
 }
-.empty p {
+
+.emptyCard p {
   color: var(--ink-soft);
-  font-size: 15px;
+  font-size: 14px;
   margin-bottom: 16px;
 }
 
@@ -81,20 +36,13 @@
   font-weight: 600;
   text-decoration: none;
 }
+
 .link:hover {
   text-decoration: underline;
 }
 
 @media (max-width: 600px) {
   .header h1 {
-    font-size: 24px;
-  }
-  .tableCard {
-    padding: 20px;
-    border-radius: 12px;
-  }
-  .tableWrap {
-    margin: 0 -20px -20px;
-    padding: 0 20px 20px;
+    font-size: 20px;
   }
 }

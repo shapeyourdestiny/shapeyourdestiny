@@ -1,5 +1,3 @@
-"use client";
-
 import { Suspense } from "react";
 import RegisterForm from "./RegisterForm";
 import styles from "../page.module.css";

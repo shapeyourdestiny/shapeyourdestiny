@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instructor Mobile Week, Compact</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F3F91;--navy-deep:#142C6B;--gold:#D8AE4B;--orange:#F2A65E;--orange-dark:#E08A3C;
+    --teal:#3E8FA0;--paper:#fff;--tint:#EAF1FC;--tint-deep:#DCE8FB;--ink:#16193B;--ink-soft:#4A5170;
+    --shadow:0 8px 24px rgba(20,44,107,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--tint);color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;max-width:390px;}
+  h1,h2{font-family:'Baloo 2',sans-serif;font-weight:700;margin:0;}
+
+  .topbar{display:flex;align-items:center;gap:9px;background:var(--navy);padding:14px 18px;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;}
+  .topbar svg{width:18px;height:18px;color:var(--gold);}
+
+  .content{padding:16px 16px 90px;}
+  .page-head{margin-bottom:14px;}
+  .page-head h1{font-size:20px;}
+
+  .hero{background:linear-gradient(155deg, var(--navy) 0%, var(--navy-deep) 100%);border-radius:18px;padding:22px 20px;color:#fff;margin-bottom:18px;}
+  .hero-eyebrow{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:#9AABD6;margin-bottom:6px;}
+  .hero-when{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;margin-bottom:12px;}
+  .hero-school{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;margin-bottom:8px;}
+  .hero-meta{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#C4D0EE;margin-bottom:6px;}
+  .hero-meta svg{width:13px;height:13px;flex:none;}
+  .hero-btn{width:100%;background:rgba(255,255,255,0.1);color:#fff;border:1.5px solid rgba(255,255,255,0.25);border-radius:999px;padding:10px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;margin-top:12px;}
+
+  /* fixed: grouped pill toggle instead of two separate boxes */
+  .view-toggle{display:flex;gap:4px;background:var(--paper);border-radius:11px;padding:4px;box-shadow:var(--shadow);width:fit-content;margin-bottom:14px;}
+  .view-btn{border:none;background:none;padding:8px 20px;border-radius:8px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;color:var(--ink-soft);}
+  .view-btn.active{background:var(--navy);color:#fff;}
+
+  .nav-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
+  .nav-row button{background:var(--paper);border:none;border-radius:9px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:var(--navy);box-shadow:var(--shadow);}
+  .nav-row span{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;}
+
+  /* fixed: collapsed all-empty state, one card instead of 7 */
+  .all-empty-card{
+    background:var(--paper);border-radius:16px;padding:26px 20px;text-align:center;box-shadow:var(--shadow);
+  }
+  .all-empty-card svg{width:28px;height:28px;color:var(--tint-deep);margin-bottom:10px;}
+  .all-empty-card p{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:var(--ink-soft);margin:0 0 4px;}
+  .all-empty-card span{font-size:12px;color:#B7C1D8;}
+
+  /* fixed: compact day rows for a mixed week (some scheduled, some not) */
+  .day-row{display:flex;align-items:center;gap:12px;background:var(--paper);border-radius:12px;padding:10px 14px;margin-bottom:6px;box-shadow:var(--shadow);}
+  .day-row.has-session{border-left:3px solid var(--teal);}
+  .day-badge{width:42px;flex:none;}
+  .day-badge .dname{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11.5px;color:var(--navy);}
+  .day-badge .ddate{font-size:10px;color:var(--ink-soft);}
+  .day-empty-text{font-size:11.5px;color:#B7C1D8;font-style:italic;}
+  .day-session-info{flex:1;min-width:0;}
+  .day-session-school{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;}
+  .day-session-time{font-size:10.5px;color:var(--ink-soft);}
+
+  .bottom-tabs{display:flex;position:fixed;bottom:0;left:0;right:0;max-width:390px;background:var(--paper);border-top:1px solid var(--tint-deep);padding:8px 0;box-shadow:0 -6px 18px rgba(20,44,107,0.08);}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--ink-soft);}
+  .tab-btn svg{width:20px;height:20px;}
+  .tab-btn span{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;}
+  .tab-btn.active{color:var(--navy);}
+  .tab-btn.active svg{color:var(--orange);}
+</style>
+</head>
+<body>
+
+<div class="topbar"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.6L22 9.2l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.2L2 9.2l7.4-.6z"/></svg>Shape Your Destiny</div>
+
+<div class="content">
+  <div class="page-head"><h1>My Schedule</h1></div>
+
+  <div class="hero">
+    <div class="hero-eyebrow">Next Session</div>
+    <div class="hero-when">In 25 days</div>
+    <div class="hero-school">Palmetto Elementary</div>
+    <div class="hero-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>2:30&ndash;4:30p &middot; Sep 22</div>
+    <div class="hero-meta"><div style="width:16px;height:16px;border-radius:50%;background:#D8AE4B;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#142C6B;">H</div>with Heather Swear</div>
+    <button class="hero-btn">View Full Week</button>
+  </div>
+
+  <div class="view-toggle">
+    <button class="view-btn active">Week</button>
+    <button class="view-btn">Month</button>
+  </div>
+
+  <div class="nav-row">
+    <button>&lsaquo;</button>
+    <span>Aug 23&ndash;29, 2026</span>
+    <button>&rsaquo;</button>
+  </div>
+
+  <!-- all-empty state: one card, not seven -->
+  <div class="all-empty-card">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    <p>Nothing scheduled this week</p>
+    <span>Your next session is Sep 22</span>
+  </div>
+
+  <!-- example of a mixed week, for comparison, not shown by default -->
+  <div style="margin-top:24px;padding-top:20px;border-top:1.5px dashed var(--tint-deep);">
+    <p style="font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;font-weight:800;margin-bottom:10px;">For comparison: a week with a real session in it</p>
+    <div id="mixedWeek"></div>
+  </div>
+</div>
+
+<div class="bottom-tabs">
+  <button class="tab-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Schedule</span></button>
+  <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Coverage</span></button>
+  <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Profile</span></button>
+</div>
+
+<script>
+  const MIXED_WEEK = [
+    { day:'Sun', date:'Aug 23', session:null },
+    { day:'Mon', date:'Aug 24', session:null },
+    { day:'Tue', date:'Aug 25', session:null },
+    { day:'Wed', date:'Aug 26', session:{ school:'Palmetto Elementary', time:'2:30\u20134:30pm' } },
+    { day:'Thu', date:'Aug 27', session:null },
+    { day:'Fri', date:'Aug 28', session:null },
+  ];
+  const wrap = document.getElementById('mixedWeek');
+  MIXED_WEEK.forEach(d => {
+    const row = document.createElement('div');
+    row.className = 'day-row' + (d.session ? ' has-session' : '');
+    row.innerHTML = `
+      <div class="day-badge"><div class="dname">${d.day}</div><div class="ddate">${d.date}</div></div>
+      ${d.session
+        ? `<div class="day-session-info"><div class="day-session-school">${d.session.school}</div><div class="day-session-time">${d.session.time}</div></div>`
+        : `<span class="day-empty-text">No session</span>`}`;
+    wrap.appendChild(row);
+  });
+</script>
+
+</body>
+</html>

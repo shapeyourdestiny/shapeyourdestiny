@@ -1,62 +1,88 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import {
+  getNextSession,
+  getInstructorSessions,
+  getHolidaysInRange,
+} from "@/lib/schedule/instructor-queries";
+import { getCoverageRequestsInRange } from "@/lib/coverage/queries";
 import styles from "./page.module.css";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import LogoutButton from "./LogoutButton";
+import InstructorSchedule from "./InstructorSchedule";
 
 export const metadata = {
-  title: "Instructor Dashboard | Shape Your Destiny",
-  description: "Instructor dashboard for Shape Your Destiny wellness program.",
+  title: "My Schedule | Shape Your Destiny",
+  description: "View your teaching schedule for Shape Your Destiny wellness program.",
 };
+
+// Helper to format date as YYYY-MM-DD
+function formatDate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+// Get Sunday of the week containing a date
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  d.setDate(d.getDate() - day);
+  return d;
+}
 
 export default async function InstructorDashboardPage() {
   const supabase = await createClient();
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (userError || !user) {
-    redirect("/instructor-login");
+  // Calculate current week range (Sun-Sat)
+  const now = new Date();
+  const weekStart = getWeekStart(now);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  const startDate = formatDate(weekStart);
+  const endDate = formatDate(weekEnd);
+
+  // Fetch initial data in parallel
+  let nextSession, sessions, holidays, coverageRequests;
+  try {
+    [nextSession, sessions, holidays, coverageRequests] = await Promise.all([
+      getNextSession(user.id),
+      getInstructorSessions(user.id, startDate, endDate),
+      getHolidaysInRange(startDate, endDate),
+      getCoverageRequestsInRange(startDate, endDate).catch(() => []),
+    ]);
+  } catch (e) {
+    console.error("Error fetching dashboard data:", e);
+    nextSession = null;
+    sessions = [];
+    holidays = [];
+    coverageRequests = [];
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, role")
-    .eq("id", user.id)
-    .single();
-
-  // Redirect admins to admin dashboard
-  if (profile?.role === "admin") {
-    redirect("/admin/dashboard");
+  // Build a map of coverage statuses for sessions
+  const coverageStatuses = {};
+  for (const req of coverageRequests) {
+    const key = `${req.classId}-${req.date}`;
+    coverageStatuses[key] = {
+      hasCoverageRequest: true,
+      status: req.status,
+      isMyRequest: req.requester?.id === user.id,
+      isCoveredByMe: req.claimer?.id === user.id,
+      coverageId: req.id,
+    };
   }
 
   return (
-    <>
-      <Header />
+    <div className={styles.page}>
+      <h1 className={styles.pageTitle}>My Schedule</h1>
 
-      <section className={styles.section}>
-        <div className={styles.card}>
-          <div className={styles.iconBadge}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </div>
-
-          <span className={styles.eyebrow}>Instructor Dashboard</span>
-          <h1>Welcome{profile?.full_name ? `, ${profile.full_name}` : ""}!</h1>
-
-          <div className={styles.info}>
-            <p><strong>Logged in as:</strong> {profile?.full_name || user.email}</p>
-            <p><strong>Role:</strong> {profile?.role || "instructor"}</p>
-            <p><strong>Email:</strong> {user.email}</p>
-          </div>
-
-          <LogoutButton />
-        </div>
-      </section>
-
-      <Footer />
-    </>
+      <InstructorSchedule
+        initialNextSession={nextSession}
+        initialSessions={sessions}
+        initialHolidays={holidays}
+        initialCoverageStatuses={coverageStatuses}
+      />
+    </div>
   );
 }

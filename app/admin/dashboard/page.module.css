@@ -1,5 +1,5 @@
 .page {
-  max-width: 900px;
+  max-width: 1000px;
 }
 
 .header {
@@ -14,7 +14,25 @@
   font-size: 15px;
 }
 
-.formCard,
+.formsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+@media (max-width: 900px) {
+  .formsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formCard {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(20,44,107,0.06);
+}
+
 .tableCard {
   background: var(--paper);
   border-radius: 16px;
@@ -67,7 +85,7 @@
 
 .field input {
   width: 100%;
-  min-width: 280px;
+  min-width: 0;
   padding: 12px 14px;
   border: 2px solid var(--tint-deep);
   border-radius: 8px;
@@ -75,11 +93,6 @@
   font-family: inherit;
   transition: border-color 0.15s ease;
   background: var(--tint);
-}
-@media (max-width: 600px) {
-  .field input {
-    min-width: 0;
-  }
 }
 .field input:focus {
   outline: none;
@@ -262,20 +275,24 @@
 
 .resendBtn,
 .cancelBtn {
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   border-radius: 6px;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .resendBtn svg,
 .cancelBtn svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex-shrink: 0;
 }
 
 .resendBtn {

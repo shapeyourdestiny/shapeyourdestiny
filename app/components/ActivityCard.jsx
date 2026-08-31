@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import styles from "./ActivityCard.module.css";
 
 const ICONS = {
@@ -99,7 +100,14 @@ export default function ActivityCard({
             ×
           </button>
           {illustrationSrc && (
-            <img className={styles.illustration} src={illustrationSrc} alt="" />
+            <Image
+              className={styles.illustration}
+              src={illustrationSrc}
+              alt=""
+              width={200}
+              height={150}
+              style={{ objectFit: "contain" }}
+            />
           )}
           <h3 className={styles.titleDark}>{title}</h3>
           <p className={styles.body}>{fullText}</p>
