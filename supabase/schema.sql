@@ -218,3 +218,72 @@ CREATE POLICY "Admins can delete coverage requests"
       AND profiles.role = 'admin'
     )
   );
+
+-- =============================================================================
+-- INCIDENT REPORTS TABLE
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS incident_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  submitted_by UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  severity TEXT NOT NULL CHECK (severity IN ('minor', 'moderate', 'serious')),
+  type TEXT NOT NULL CHECK (type IN ('Injury', 'Medical situation', 'Behavioral incident', 'Conflict between kids', 'Property damage', 'Other')),
+  occurred_at TIMESTAMPTZ NOT NULL,
+  school_id UUID REFERENCES schools(id) ON DELETE SET NULL,
+  location_note TEXT,
+  involved TEXT,
+  what_happened TEXT NOT NULL,
+  actions_taken TEXT NOT NULL,
+  first_aid_administered BOOLEAN NOT NULL,
+  staff_notified BOOLEAN NOT NULL,
+  staff_notified_name TEXT,
+  parent_notified TEXT NOT NULL CHECK (parent_notified IN ('yes', 'no', 'n/a')),
+  witnesses TEXT,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'reviewed', 'closed')),
+  admin_notes TEXT,
+  reviewed_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  reviewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE incident_reports ENABLE ROW LEVEL SECURITY;
+
+-- Instructors can insert their own reports
+CREATE POLICY "Instructors can insert own incident reports"
+  ON incident_reports
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (submitted_by = auth.uid());
+
+-- Admins can read all incident reports
+CREATE POLICY "Admins can read incident reports"
+  ON incident_reports
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
+-- Admins can update incident reports
+CREATE POLICY "Admins can update incident reports"
+  ON incident_reports
+  FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );

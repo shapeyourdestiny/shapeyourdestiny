@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instructor: Incident Report Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F3F91;--navy-deep:#142C6B;--gold:#D8AE4B;--orange:#F2A65E;--orange-dark:#E08A3C;
+    --teal:#3E8FA0;--teal-dark:#2C6E7D;--green:#4FA347;--paper:#fff;--tint:#EAF1FC;--tint-deep:#DCE8FB;
+    --ink:#16193B;--ink-soft:#4A5170;--red:#E0594C;--shadow:0 10px 28px rgba(20,44,107,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--tint);color:var(--ink);font-family:'Nunito',sans-serif;font-size:14.5px;}
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;font-weight:700;margin:0;}
+  button{font-family:inherit;}
+
+  .app{display:flex;min-height:100vh;}
+  .sidebar{width:230px;flex:none;background:var(--navy-deep);padding:22px 16px;display:flex;flex-direction:column;}
+  .sidebar-brand{display:flex;align-items:center;gap:9px;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:0 6px 18px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:14px;}
+  .sidebar-brand svg{width:18px;height:18px;color:var(--gold);}
+  .nav-label{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#7488BE;padding:0 10px;margin-bottom:8px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;color:#C4D0EE;text-decoration:none;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;margin-bottom:2px;}
+  .nav-item svg{width:16px;height:16px;flex:none;}
+  .nav-item.active{background:var(--orange);color:#fff;}
+  .nav-item:not(.active):hover{background:rgba(255,255,255,0.06);color:#fff;}
+
+  .main{flex:1;min-width:0;}
+  .content{max-width:660px;margin:0 auto;padding:32px 28px 60px;}
+  .page-head{margin-bottom:22px;}
+  .page-head h1{font-size:22px;}
+  .page-head p{color:var(--ink-soft);font-size:13.5px;margin-top:4px;}
+
+  .form-card{background:var(--paper);border-radius:20px;padding:26px 28px;box-shadow:var(--shadow);}
+
+  .severity-group{margin-bottom:22px;}
+  .field-label{display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;margin-bottom:9px;}
+  .required-star{color:var(--red);}
+  .severity-options{display:flex;gap:8px;}
+  .sev-btn{
+    flex:1;border:1.5px solid var(--tint-deep);background:var(--tint);border-radius:12px;padding:12px 8px;
+    cursor:pointer;text-align:center;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;color:var(--ink-soft);
+  }
+  .sev-btn.selected.minor{border-color:var(--teal);background:rgba(62,143,160,0.1);color:var(--teal-dark);}
+  .sev-btn.selected.moderate{border-color:var(--orange);background:rgba(242,166,94,0.12);color:var(--orange-dark);}
+  .sev-btn.selected.serious{border-color:var(--red);background:rgba(224,89,76,0.1);color:var(--red);}
+  .sev-sub{display:block;font-size:9.5px;font-weight:400;font-family:'Nunito',sans-serif;margin-top:2px;opacity:.8;}
+
+  .field-group{margin-bottom:18px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  input, select, textarea{
+    width:100%;border:1.5px solid var(--tint-deep);border-radius:10px;padding:10px 13px;
+    font-family:'Nunito',sans-serif;font-size:13.5px;background:var(--tint);color:var(--ink);
+  }
+  input:focus, select:focus, textarea:focus{outline:none;border-color:var(--navy);background:#fff;}
+  textarea{resize:vertical;min-height:90px;}
+  .field-hint{font-size:11px;color:var(--ink-soft);margin-top:5px;}
+
+  .toggle-row{display:flex;gap:8px;}
+  .toggle-btn{flex:1;border:1.5px solid var(--tint-deep);background:var(--tint);border-radius:10px;padding:10px;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;color:var(--ink-soft);text-align:center;}
+  .toggle-btn.selected{border-color:var(--navy);background:#fff;color:var(--navy);}
+
+  .privacy-note{
+    background:rgba(31,63,145,0.05);border-radius:12px;padding:12px 16px;margin-bottom:22px;
+    font-size:11.5px;color:var(--ink-soft);display:flex;gap:9px;align-items:flex-start;
+  }
+  .privacy-note svg{width:15px;height:15px;color:var(--navy);flex:none;margin-top:1px;}
+
+  .submit-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:999px;padding:14px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14.5px;cursor:pointer;}
+  .submit-btn:hover{background:var(--navy-deep);}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-brand"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.6L22 9.2l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.2L2 9.2l7.4-.6z"/></svg>Shape Your Destiny</div>
+    <div class="nav-label">Menu</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Schedule</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Coverage</div>
+    <div class="nav-label" style="margin-top:14px;">Resources</div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      Incident Report
+    </div>
+    <div class="nav-label" style="margin-top:14px;">Menu</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profile</div>
+  </div>
+
+  <div class="main">
+    <div class="content">
+      <div class="page-head">
+        <h1>Report an Incident</h1>
+        <p>File this as soon as possible after anything happens, even if it seems minor.</p>
+      </div>
+
+      <div class="form-card">
+        <div class="severity-group">
+          <label class="field-label">How serious was it? <span class="required-star">*</span></label>
+          <div class="severity-options">
+            <button class="sev-btn selected minor">Minor<span class="sev-sub">No injury, resolved on the spot</span></button>
+            <button class="sev-btn moderate">Moderate<span class="sev-sub">Injury or needed real attention</span></button>
+            <button class="sev-btn serious">Serious<span class="sev-sub">Medical care, or needs immediate follow-up</span></button>
+          </div>
+        </div>
+
+        <div class="field-row field-group">
+          <div>
+            <label class="field-label">Type <span class="required-star">*</span></label>
+            <select>
+              <option>Injury</option>
+              <option>Medical situation</option>
+              <option>Behavioral incident</option>
+              <option>Conflict between kids</option>
+              <option>Property damage</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Date &amp; Time <span class="required-star">*</span></label>
+            <input type="datetime-local">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Where did this happen? <span class="required-star">*</span></label>
+          <select>
+            <option>Palmetto Elementary (Wed 2:30pm session)</option>
+            <option>Ruben S. Ayala High (Tue/Thu 4:00pm session)</option>
+            <option>Other / not during a session</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Who was involved</label>
+          <input type="text" placeholder="Names or initials of any kids or staff involved">
+          <p class="field-hint">Use whatever you're comfortable with, first names are fine, this stays with admin only.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">What happened? <span class="required-star">*</span></label>
+          <textarea placeholder="Walk through it as clearly as you can, what led up to it, what happened, in what order."></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">What did you do about it? <span class="required-star">*</span></label>
+          <textarea placeholder="First aid given, how it was resolved, who you notified in the moment, etc."></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Was first aid administered?</label>
+          <div class="toggle-row">
+            <button class="toggle-btn faid-btn selected" data-val="yes">Yes</button>
+            <button class="toggle-btn faid-btn" data-val="no">No</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Was a staff member notified at the time?</label>
+          <div class="toggle-row">
+            <button class="toggle-btn staff-btn" data-val="yes">Yes</button>
+            <button class="toggle-btn staff-btn selected" data-val="no">No</button>
+          </div>
+          <div id="staffNameField" style="display:none;margin-top:10px;">
+            <input type="text" placeholder="Who was notified?">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Was a parent or guardian notified?</label>
+          <div class="toggle-row">
+            <button class="toggle-btn selected">Yes</button>
+            <button class="toggle-btn">No</button>
+            <button class="toggle-btn">N/A</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Anyone else who saw what happened</label>
+          <input type="text" placeholder="Co-instructor, other staff, witnesses">
+        </div>
+
+        <div class="privacy-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          This report goes directly to Destiny and Heather only. Thank you for taking the time to document this carefully, it genuinely helps us take care of the kids and back you up if anything needs to be revisited later.
+        </div>
+
+        <button class="submit-btn">Submit Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.sev-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sev-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+  document.querySelectorAll('.toggle-row').forEach(row => {
+    row.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        row.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+  });
+
+  document.querySelectorAll('.staff-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('staffNameField').style.display = btn.dataset.val === 'yes' ? 'block' : 'none';
+    });
+  });
+</script>
+
+</body>
+</html>

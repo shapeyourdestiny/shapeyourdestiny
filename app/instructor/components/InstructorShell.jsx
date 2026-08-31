@@ -5,7 +5,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./InstructorShell.module.css";
 
-const NAV_ITEMS = [
+const NAV_MENU = [
   {
     href: "/instructor/dashboard",
     label: "Schedule",
@@ -31,6 +31,22 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+];
+
+const NAV_RESOURCES = [
+  {
+    href: "/instructor/incident-report",
+    label: "Incident Report",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+        <path d="M12 9v4M12 17h.01" />
+      </svg>
+    ),
+  },
+];
+
+const NAV_PROFILE = [
   {
     href: "/instructor/profile",
     label: "Profile",
@@ -42,6 +58,9 @@ const NAV_ITEMS = [
     ),
   },
 ];
+
+// Flat array for mobile bottom tabs (all nav items)
+const NAV_ITEMS = [...NAV_MENU, ...NAV_RESOURCES, ...NAV_PROFILE];
 
 export default function InstructorShell({ profile, coverageCount = 0 }) {
   const pathname = usePathname();
@@ -78,7 +97,43 @@ export default function InstructorShell({ profile, coverageCount = 0 }) {
 
         <nav className={styles.nav}>
           <span className={styles.navLabel}>Menu</span>
-          {NAV_ITEMS.map((item) => {
+          {NAV_MENU.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const badgeCount = getBadgeCount(item);
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                {item.label}
+                {badgeCount > 0 && (
+                  <span className={styles.badge}>{badgeCount}</span>
+                )}
+              </a>
+            );
+          })}
+          <span className={styles.navLabel} style={{ marginTop: 16 }}>Resources</span>
+          {NAV_RESOURCES.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const badgeCount = getBadgeCount(item);
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                {item.label}
+                {badgeCount > 0 && (
+                  <span className={styles.badge}>{badgeCount}</span>
+                )}
+              </a>
+            );
+          })}
+          <span className={styles.navLabel} style={{ marginTop: 16 }}>Account</span>
+          {NAV_PROFILE.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             const badgeCount = getBadgeCount(item);
             return (

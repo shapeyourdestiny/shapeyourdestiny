@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminCoverageCount } from "@/lib/coverage/queries";
+import { getOpenIncidentCount } from "@/lib/incidents/queries";
 import Sidebar from "./components/Sidebar";
 import styles from "./layout.module.css";
 
@@ -37,9 +38,18 @@ export default async function AdminLayout({ children }) {
     console.error("Error fetching coverage count:", e);
   }
 
+  // Get incident count for badge
+  let incidentCount = 0;
+  try {
+    incidentCount = await getOpenIncidentCount();
+  } catch (e) {
+    // incident_reports table might not exist yet
+    console.error("Error fetching incident count:", e);
+  }
+
   return (
     <div className={styles.layout}>
-      <Sidebar profile={profile} coverageCount={coverageCount} />
+      <Sidebar profile={profile} coverageCount={coverageCount} incidentCount={incidentCount} />
       <main className={styles.main}>
         {children}
       </main>

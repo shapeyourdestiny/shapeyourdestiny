@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin: Incident Reports</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F3F91;--navy-deep:#142C6B;--gold:#D8AE4B;--orange:#F2A65E;--orange-dark:#E08A3C;
+    --teal:#3E8FA0;--teal-dark:#2C6E7D;--green:#4FA347;--paper:#fff;--tint:#EAF1FC;--tint-deep:#DCE8FB;
+    --ink:#16193B;--ink-soft:#4A5170;--red:#E0594C;--shadow:0 8px 24px rgba(20,44,107,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--tint);color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;}
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;font-weight:700;margin:0;}
+  button{font-family:inherit;}
+
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{width:230px;flex:none;background:var(--navy-deep);padding:22px 16px;}
+  .sidebar-brand{display:flex;align-items:center;gap:9px;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;padding:0 6px 18px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:14px;}
+  .nav-label{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#7488BE;padding:0 10px;margin-bottom:8px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;color:#C4D0EE;text-decoration:none;font-family:'Baloo 2',sans-serif;font-weight:600;font-size:13px;margin-bottom:2px;}
+  .nav-item svg{width:16px;height:16px;flex:none;}
+  .nav-item.active{background:var(--orange);color:#fff;}
+  .nav-badge{margin-left:auto;background:var(--red);color:#fff;font-family:'Nunito',sans-serif;font-weight:800;font-size:10px;padding:1px 7px;border-radius:999px;}
+
+  .main{flex:1;min-width:0;}
+  .content{max-width:920px;margin:0 auto;padding:34px 30px 60px;}
+
+  .page-head{margin-bottom:20px;}
+  .page-head h1{font-size:22px;}
+  .page-head p{color:var(--ink-soft);font-size:13px;margin-top:4px;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+  @media(max-width:700px){.stat-row{grid-template-columns:1fr;}}
+  .stat-card{background:var(--paper);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;}
+  .stat-icon{width:36px;height:36px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;}
+  .stat-icon svg{width:18px;height:18px;color:#fff;}
+  .stat-num{font-family:'Nunito',sans-serif;font-weight:800;font-size:21px;line-height:1;}
+  .stat-label{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .stat-card.serious .stat-icon{background:var(--red);} .stat-card.serious .stat-num{color:var(--red);}
+  .stat-card.review .stat-icon{background:var(--orange);} .stat-card.review .stat-num{color:var(--orange-dark);}
+  .stat-card.month .stat-icon{background:var(--navy);} .stat-card.month .stat-num{color:var(--navy);}
+
+  .filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .filter-pill{border:1.5px solid var(--tint-deep);background:var(--paper);color:var(--ink-soft);padding:7px 14px;border-radius:999px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12px;cursor:pointer;}
+  .filter-pill.active{border-color:var(--navy);background:var(--navy);color:#fff;}
+
+  .report-row{background:var(--paper);border-radius:14px;box-shadow:var(--shadow);margin-bottom:8px;overflow:hidden;}
+  .report-summary{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;}
+  .report-summary:hover{background:var(--tint);}
+  .sev-dot{width:10px;height:10px;border-radius:50%;flex:none;}
+  .sev-dot.minor{background:var(--teal);}
+  .sev-dot.moderate{background:var(--orange);}
+  .sev-dot.serious{background:var(--red);}
+  .report-info{flex:1;min-width:0;}
+  .report-type{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13.5px;}
+  .report-meta{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .avatar{width:22px;height:22px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-family:'Nunito',sans-serif;font-weight:800;}
+  .report-by{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);}
+  .status-tag{font-family:'Nunito',sans-serif;font-weight:800;font-size:10px;padding:3px 9px;border-radius:999px;flex:none;}
+  .status-tag.open{background:rgba(224,89,76,0.1);color:var(--red);}
+  .status-tag.reviewed{background:rgba(242,166,94,0.12);color:var(--orange-dark);}
+  .status-tag.closed{background:rgba(79,163,71,0.1);color:var(--green);}
+  .chevron{width:14px;height:14px;color:var(--ink-soft);transition:transform .15s ease;flex:none;}
+  .report-row.open .chevron{transform:rotate(180deg);}
+
+  .report-detail{display:none;padding:0 18px 18px;border-top:1px solid var(--tint);}
+  .report-row.open .report-detail{display:block;padding-top:16px;}
+  .detail-block{margin-bottom:14px;}
+  .detail-block h4{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);margin-bottom:5px;}
+  .detail-block p{font-size:13px;color:var(--ink);margin:0;line-height:1.6;}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .admin-notes{width:100%;border:1.5px solid var(--tint-deep);border-radius:10px;padding:10px 12px;font-family:'Nunito',sans-serif;font-size:12.5px;background:var(--tint);resize:vertical;min-height:60px;margin-bottom:12px;}
+  .detail-actions{display:flex;gap:8px;justify-content:flex-end;}
+  .status-btn{border:1.5px solid var(--tint-deep);background:var(--paper);color:var(--ink-soft);border-radius:999px;padding:8px 15px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11.5px;cursor:pointer;}
+  .status-btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-brand"><span style="color:#D8AE4B;">\u2605</span> Shape Your Destiny</div>
+    <div class="nav-label">Overview</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Invite Codes</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Instructors</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 6l8 7 8-7"/></svg>Messages</div>
+    <div class="nav-label" style="margin-top:14px;">Operations</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Schedule Board</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Coverage</div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      Incident Reports
+      <span class="nav-badge">2</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="content">
+      <div class="page-head">
+        <h1>Incident Reports</h1>
+        <p>Everything instructors have filed, most recent first.</p>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card serious">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
+          <div><div class="stat-num">1</div><div class="stat-label">Serious &amp; Unreviewed</div></div>
+        </div>
+        <div class="stat-card review">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div><div class="stat-num">2</div><div class="stat-label">Awaiting Review</div></div>
+        </div>
+        <div class="stat-card month">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div>
+          <div><div class="stat-num">5</div><div class="stat-label">Filed This Month</div></div>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <button class="filter-pill active">All</button>
+        <button class="filter-pill">Open</button>
+        <button class="filter-pill">Reviewed</button>
+        <button class="filter-pill">Closed</button>
+        <button class="filter-pill" style="margin-left:auto;">Serious Only</button>
+      </div>
+
+      <div id="reportList"></div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const REPORTS = [
+    {
+      severity:'serious', type:'Medical situation', date:'Sep 16, 2026 &middot; 3:10pm', school:'Palmetto Elementary',
+      by:'Heather Swear', byColor:'#D8AE4B', status:'open',
+      involved:'Marcus B. (student)', what:'Marcus complained of dizziness and sat down during warm-up stretches, then briefly lost consciousness for a few seconds.', actions:'Had him lie down, elevated his legs, called school nurse immediately, nurse arrived within 3 minutes and took over.',
+      firstAid:'Yes', staffNotified:'Yes, school nurse and front office', notified:'Yes, called mother directly', witnesses:'Co-instructor James Rivera, school nurse'
+    },
+    {
+      severity:'moderate', type:'Injury', date:'Sep 12, 2026 &middot; 4:20pm', school:'Ruben S. Ayala High',
+      by:'Devon Price', byColor:'#2B4FA3', status:'open',
+      involved:'Sofia R. (student)', what:'Sofia rolled her ankle during a soccer drill, landed awkwardly after a jump.', actions:'Applied ice, had her rest and elevate, informed front office.',
+      firstAid:'Yes', staffNotified:'Yes, front office', notified:'Yes, front office called parent', witnesses:'None other than instructor'
+    },
+    {
+      severity:'minor', type:'Behavioral incident', date:'Sep 8, 2026 &middot; 2:45pm', school:'Palmetto Elementary',
+      by:'James Rivera', byColor:'#6FCB55', status:'reviewed',
+      involved:'Two students, names on file', what:'Brief disagreement over turn-taking during a group activity, raised voices but no physical contact.', actions:'Separated them, talked it through, both calmed down within a few minutes and rejoined the group.',
+      firstAid:'No', staffNotified:'No', notified:'No', witnesses:'None'
+    },
+  ];
+
+  function initials(n){ return n.split(' ').map(w=>w[0]).join(''); }
+
+  const list = document.getElementById('reportList');
+  REPORTS.forEach((r, i) => {
+    const row = document.createElement('div');
+    row.className = 'report-row';
+    row.innerHTML = `
+      <div class="report-summary">
+        <span class="sev-dot ${r.severity}"></span>
+        <div class="report-info">
+          <div class="report-type">${r.type} &middot; ${r.school}</div>
+          <div class="report-meta">${r.date}</div>
+          <div class="report-by"><div class="avatar" style="background:${r.byColor}">${initials(r.by)}</div>Filed by ${r.by}</div>
+        </div>
+        <span class="status-tag ${r.status}">${r.status[0].toUpperCase()+r.status.slice(1)}</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="report-detail">
+        <div class="detail-grid">
+          <div class="detail-block"><h4>Who was involved</h4><p>${r.involved}</p></div>
+          <div class="detail-block"><h4>First Aid Administered</h4><p>${r.firstAid}</p></div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-block"><h4>Staff Notified</h4><p>${r.staffNotified}</p></div>
+          <div class="detail-block"><h4>Parent/Guardian Notified</h4><p>${r.notified}</p></div>
+        </div>
+        <div class="detail-block"><h4>What happened</h4><p>${r.what}</p></div>
+        <div class="detail-block"><h4>Actions taken</h4><p>${r.actions}</p></div>
+        <div class="detail-block"><h4>Witnesses</h4><p>${r.witnesses}</p></div>
+        <div class="detail-block">
+          <h4>Admin notes</h4>
+          <textarea class="admin-notes" placeholder="Notes for your own records, follow-up needed, resolution, etc."></textarea>
+        </div>
+        <div class="detail-actions">
+          <button class="status-btn">Mark Reviewed</button>
+          <button class="status-btn primary">Close Report</button>
+        </div>
+      </div>
+    `;
+    row.querySelector('.report-summary').addEventListener('click', () => row.classList.toggle('open'));
+    list.appendChild(row);
+  });
+</script>
+
+</body>
+</html>
