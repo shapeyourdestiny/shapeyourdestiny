@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./ResearchArticle.module.css";
 
 const ICONS = {
@@ -18,12 +19,12 @@ export default function ResearchArticle({ topic, allSlugs }) {
     <>
       <div className={styles.backbar}>
         <div className="wrap">
-          <a href="/#research">
+          <Link href="/#research">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
             Back to Youth Wellness Program
-          </a>
+          </Link>
         </div>
       </div>
 

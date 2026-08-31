@@ -73,32 +73,6 @@
   color: #9aabd6;
 }
 
-/* Post Session Button */
-.postSessionBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-  padding: 10px 18px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 999px;
-  color: #fff;
-  font-family: "Baloo 2", sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.postSessionBtn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-.postSessionBtn svg {
-  width: 16px;
-  height: 16px;
-}
-
 /* Body */
 .bodyWrap {
   padding: 0 24px 60px;
@@ -274,6 +248,20 @@
   margin-left: auto;
   font-size: 11px;
   color: #b7c1d8;
+}
+
+.postedByAdmin {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+.postedByAdmin svg {
+  width: 12px;
+  height: 12px;
+  color: var(--navy);
 }
 
 .listingNote {
@@ -484,172 +472,6 @@
 .claimConfirm:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* Post Modal */
-.postModal {
-  max-width: 420px;
-  min-width: 320px;
-}
-.postModal h3 {
-  font-size: 17px;
-  margin-bottom: 6px;
-}
-.postModalSubtext {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin: 0 0 16px;
-}
-
-.noSessionsNote {
-  text-align: center;
-  color: var(--ink-soft);
-  font-size: 13px;
-  padding: 32px 16px;
-  font-style: italic;
-  background: var(--tint);
-  border-radius: 12px;
-}
-
-/* Session Picker */
-.sessionPicker {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 320px;
-  overflow-y: auto;
-}
-
-.sessionOption {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: var(--tint);
-  border: 2px solid transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
-}
-.sessionOption:hover {
-  border-color: var(--navy);
-  background: var(--tint-deep);
-}
-
-.sessionOptionDate {
-  width: 44px;
-  height: 44px;
-  background: var(--paper);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.sessionOptionDow {
-  font-family: "Nunito", sans-serif;
-  font-weight: 800;
-  font-size: 9px;
-  color: var(--orange-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-.sessionOptionDom {
-  font-family: "Baloo 2", sans-serif;
-  font-weight: 800;
-  font-size: 16px;
-  color: var(--navy);
-  line-height: 1;
-}
-
-.sessionOptionInfo {
-  flex: 1;
-  min-width: 0;
-}
-.sessionOptionSchool {
-  display: block;
-  font-family: "Baloo 2", sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.sessionOptionMeta {
-  display: block;
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
-.sessionOptionArrow {
-  width: 18px;
-  height: 18px;
-  color: var(--ink-soft);
-  flex-shrink: 0;
-}
-
-/* Post Reminder Text */
-.postReminder {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-  line-height: 1.6;
-  margin: 0 0 16px;
-  padding: 14px 16px;
-  background: rgba(216, 174, 75, 0.08);
-  border-radius: 12px;
-  border-left: 3px solid var(--gold);
-}
-
-/* Post Note Field */
-.postNoteField {
-  margin-bottom: 16px;
-}
-.postNoteField label {
-  display: block;
-  font-family: "Baloo 2", sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--ink);
-  margin-bottom: 6px;
-}
-.postNoteField textarea {
-  width: 100%;
-  min-height: 70px;
-  padding: 12px 14px;
-  border: 2px solid var(--tint-deep);
-  border-radius: 10px;
-  font-size: 14px;
-  font-family: inherit;
-  resize: vertical;
-  background: var(--paper);
-  transition: border-color 0.15s ease;
-}
-.postNoteField textarea:focus {
-  outline: none;
-  border-color: var(--navy);
-}
-.postNoteField textarea::placeholder {
-  color: var(--ink-soft);
-  opacity: 0.6;
-}
-
-/* Post Error */
-.postError {
-  background: rgba(224, 89, 76, 0.1);
-  color: #e0594c;
-  font-size: 13px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-/* Post Actions */
-.postActions {
-  display: flex;
-  gap: 10px;
 }
 
 /* Responsive */

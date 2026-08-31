@@ -1,11 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import styles from "./InstructorSchedule.module.css";
 import { getDirectionsUrl } from "@/lib/maps";
-import Modal from "@/app/admin/components/Modal";
-import { createCoverageRequest } from "@/lib/coverage/actions";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [
@@ -49,27 +46,19 @@ export default function InstructorSchedule({
   initialNextSession,
   initialSessions,
   initialHolidays,
-  profileId,
   initialCoverageStatuses = {},
 }) {
-  const router = useRouter();
   const [view, setView] = useState("week");
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState(null);
 
-  const [nextSession, setNextSession] = useState(initialNextSession);
+  const [nextSession] = useState(initialNextSession);
   const [sessions, setSessions] = useState(initialSessions);
   const [holidays, setHolidays] = useState(initialHolidays);
   const [loading, setLoading] = useState(false);
   const [coverageStatuses, setCoverageStatuses] = useState(initialCoverageStatuses);
-
-  // Coverage request modal state
-  const [coverageModalOpen, setCoverageModalOpen] = useState(false);
-  const [coverageSession, setCoverageSession] = useState(null);
-  const [coverageNote, setCoverageNote] = useState("");
-  const [submittingCoverage, setSubmittingCoverage] = useState(false);
 
   // Fetch data for a date range
   const fetchData = useCallback(async (startDate, endDate) => {
@@ -170,35 +159,6 @@ export default function InstructorSchedule({
   const getCoverageStatus = (session) => {
     const key = `${session.classId}-${session.date}`;
     return coverageStatuses[key] || null;
-  };
-
-  // Open coverage request modal
-  const handleCantMakeIt = (session) => {
-    setCoverageSession(session);
-    setCoverageNote("");
-    setCoverageModalOpen(true);
-  };
-
-  // Submit coverage request
-  const handleSubmitCoverage = async () => {
-    if (!coverageSession) return;
-
-    setSubmittingCoverage(true);
-    const result = await createCoverageRequest(
-      coverageSession.classId,
-      coverageSession.date,
-      coverageNote.trim() || null
-    );
-    setSubmittingCoverage(false);
-
-    if (result.error) {
-      alert(result.error);
-    } else {
-      setCoverageModalOpen(false);
-      setCoverageSession(null);
-      setCoverageNote("");
-      router.refresh();
-    }
   };
 
   // Render Next Session hero card
@@ -418,19 +378,6 @@ export default function InstructorSchedule({
                               <span className={`${styles.coverageStatus} ${styles.covering}`}>
                                 You&apos;re Covering
                               </span>
-                            )}
-                            {!hasCoverage && (
-                              <button
-                                type="button"
-                                className={styles.cantMakeItBtn}
-                                onClick={() => handleCantMakeIt(session)}
-                              >
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                                  <circle cx="12" cy="12" r="10" />
-                                  <path d="M12 8v4M12 16h.01" />
-                                </svg>
-                                Can&apos;t make it?
-                              </button>
                             )}
                             {session.school.address && (
                               <a
@@ -665,53 +612,6 @@ export default function InstructorSchedule({
       {loading && <div className={styles.loading}>Loading...</div>}
 
       {view === "week" ? renderWeekView() : renderMonthView()}
-
-      {/* Coverage Request Modal */}
-      <Modal open={coverageModalOpen} onClose={() => setCoverageModalOpen(false)}>
-        <div className={styles.coverageModal}>
-          <h3>Request Coverage</h3>
-          {coverageSession && (
-            <>
-              <div className={styles.coverageSessionInfo}>
-                <div className={styles.coverageSchool}>{coverageSession.school.name}</div>
-                <div className={styles.coverageMeta}>
-                  {coverageSession.dayName}, {SHORT_MONTHS[new Date(coverageSession.date + "T00:00:00").getMonth()]} {new Date(coverageSession.date + "T00:00:00").getDate()} · {coverageSession.time}
-                </div>
-              </div>
-              <div className={styles.coverageNote}>
-                <label htmlFor="coverageNote">Note (optional)</label>
-                <textarea
-                  id="coverageNote"
-                  value={coverageNote}
-                  onChange={(e) => setCoverageNote(e.target.value)}
-                  placeholder="Let others know why you need coverage..."
-                />
-              </div>
-              <p className={styles.coverageWarning}>
-                A quick reminder: most of our programs only run 4 to 8 weeks, so having the same instructor each week really matters for the kids in this class. We know life happens, and coverage is here for real situations — we just want to keep it as a last resort rather than a first option. Thanks for everything you do for these kids.
-              </p>
-              <div className={styles.coverageActions}>
-                <button
-                  type="button"
-                  className={styles.coverageCancelBtn}
-                  onClick={() => setCoverageModalOpen(false)}
-                  disabled={submittingCoverage}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className={styles.coverageSubmitBtn}
-                  onClick={handleSubmitCoverage}
-                  disabled={submittingCoverage}
-                >
-                  {submittingCoverage ? "Posting..." : "Post to Coverage Board"}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </Modal>
     </div>
   );
 }

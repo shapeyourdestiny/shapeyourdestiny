@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./AdminCoverage.module.css";
+import Modal from "@/app/admin/components/Modal";
 import {
   getAllCoverageRequests,
   getCoverageTrends,
   getFrequentRequesters,
   getReliableCoverers,
   adminAssignCoverage,
+  getSchoolsForDistrict,
+  getClassesForSchool,
+  getClassOccurrenceDates,
+  adminCreateCoverageRequest,
 } from "@/lib/coverage/admin-queries";
 
 // Program colors
@@ -56,11 +62,13 @@ export default function AdminCoverage({
   initialFrequentAlert,
   initialRequests,
   instructors,
+  districts,
   initialTrends,
   initialChartData,
   initialFrequentRequesters,
   initialReliableCoverers,
 }) {
+  const router = useRouter();
   const [tab, setTab] = useState("requests");
   const [filter, setFilter] = useState("all");
   const [requests, setRequests] = useState(initialRequests);
@@ -76,6 +84,21 @@ export default function AdminCoverage({
   const [assignOpen, setAssignOpen] = useState(null); // { requestId, anchorRect }
   const [assignSearch, setAssignSearch] = useState("");
   const popoverRef = useRef(null);
+
+  // Post modal state
+  const [postModalOpen, setPostModalOpen] = useState(false);
+  const [postDistrictId, setPostDistrictId] = useState("");
+  const [postSchools, setPostSchools] = useState([]);
+  const [postSchoolId, setPostSchoolId] = useState("");
+  const [postClasses, setPostClasses] = useState([]);
+  const [postClassId, setPostClassId] = useState("");
+  const [postDates, setPostDates] = useState([]);
+  const [postDate, setPostDate] = useState("");
+  const [postInstructors, setPostInstructors] = useState([]);
+  const [postSelectedInstructor, setPostSelectedInstructor] = useState("");
+  const [postNote, setPostNote] = useState("");
+  const [postError, setPostError] = useState("");
+  const [postLoading, setPostLoading] = useState(false);
 
   // Close popover on outside click
   useEffect(() => {
@@ -173,6 +196,135 @@ export default function AdminCoverage({
   // Count open requests for badge
   const openCount = initialStats.open;
 
+  // Post modal handlers
+  const openPostModal = () => {
+    setPostModalOpen(true);
+    setPostDistrictId("");
+    setPostSchools([]);
+    setPostSchoolId("");
+    setPostClasses([]);
+    setPostClassId("");
+    setPostDates([]);
+    setPostDate("");
+    setPostInstructors([]);
+    setPostSelectedInstructor("");
+    setPostNote("");
+    setPostError("");
+  };
+
+  const handleDistrictChange = async (districtId) => {
+    setPostDistrictId(districtId);
+    setPostSchoolId("");
+    setPostSchools([]);
+    setPostClasses([]);
+    setPostClassId("");
+    setPostDates([]);
+    setPostDate("");
+    setPostInstructors([]);
+    setPostSelectedInstructor("");
+
+    if (!districtId) return;
+
+    setPostLoading(true);
+    try {
+      const schools = await getSchoolsForDistrict(districtId);
+      setPostSchools(schools);
+    } catch (e) {
+      console.error("Error fetching schools:", e);
+    } finally {
+      setPostLoading(false);
+    }
+  };
+
+  const handleSchoolChange = async (schoolId) => {
+    setPostSchoolId(schoolId);
+    setPostClasses([]);
+    setPostClassId("");
+    setPostDates([]);
+    setPostDate("");
+    setPostInstructors([]);
+    setPostSelectedInstructor("");
+
+    if (!schoolId) return;
+
+    setPostLoading(true);
+    try {
+      const classes = await getClassesForSchool(schoolId);
+      setPostClasses(classes);
+    } catch (e) {
+      console.error("Error fetching classes:", e);
+    } finally {
+      setPostLoading(false);
+    }
+  };
+
+  const handleClassChange = async (classId) => {
+    setPostClassId(classId);
+    setPostDates([]);
+    setPostDate("");
+    setPostInstructors([]);
+    setPostSelectedInstructor("");
+
+    if (!classId) return;
+
+    const selectedClass = postClasses.find((c) => c.id === classId);
+    if (!selectedClass) return;
+
+    // Set instructors from the class
+    setPostInstructors(selectedClass.instructors || []);
+
+    // Fetch dates
+    setPostLoading(true);
+    try {
+      const dates = await getClassOccurrenceDates(
+        classId,
+        selectedClass.startDate,
+        selectedClass.targetSessions,
+        selectedClass.days
+      );
+      setPostDates(dates);
+    } catch (e) {
+      console.error("Error fetching dates:", e);
+    } finally {
+      setPostLoading(false);
+    }
+  };
+
+  const handleSubmitPost = async () => {
+    if (!postClassId || !postDate || !postSelectedInstructor) {
+      setPostError("Please fill in all required fields");
+      return;
+    }
+
+    setPostLoading(true);
+    setPostError("");
+
+    try {
+      const result = await adminCreateCoverageRequest(
+        postClassId,
+        postDate,
+        postSelectedInstructor,
+        postNote.trim() || null
+      );
+
+      if (result.error) {
+        setPostError(result.error);
+      } else {
+        // Success - close modal and refresh
+        setPostModalOpen(false);
+        router.refresh();
+        // Also fetch new requests
+        const newRequests = await getAllCoverageRequests(filter);
+        setRequests(newRequests);
+      }
+    } catch (e) {
+      console.error("Error creating coverage request:", e);
+      setPostError("Failed to post coverage opening");
+    } finally {
+      setPostLoading(false);
+    }
+  };
+
   return (
     <div className={styles.page}>
       {/* Header */}
@@ -205,6 +357,16 @@ export default function AdminCoverage({
       {/* Requests Tab */}
       {tab === "requests" && (
         <div className={styles.tabPanel}>
+          {/* Post Coverage Button */}
+          <button className={styles.postBtn} onClick={openPostModal}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+            Post Coverage Opening
+          </button>
+
           {/* Stats Row */}
           <div className={styles.statRow}>
             <div className={`${styles.statCard} ${styles.urgent}`}>
@@ -322,7 +484,13 @@ export default function AdminCoverage({
                         >
                           {getInitials(req.requester?.name)}
                         </div>
-                        Posted by {req.requester?.name || "Unknown"}
+                        Coverage for {req.requester?.name || "Unknown"}
+                        {req.postedBy && (
+                          <>
+                            <span className={styles.dot}>&middot;</span>
+                            Posted by {req.postedBy.name}
+                          </>
+                        )}
                         {req.status === "claimed" && req.claimer && (
                           <>
                             <span className={styles.dot}>&middot;</span>
@@ -557,6 +725,142 @@ export default function AdminCoverage({
           </div>
         </div>
       )}
+
+      {/* Post Coverage Modal */}
+      <Modal open={postModalOpen} onClose={() => setPostModalOpen(false)}>
+        <div className={styles.postModal}>
+          <h3>Post a Coverage Opening</h3>
+          <p className={styles.postModalSub}>
+            For a session where you&apos;ve already heard from the instructor directly.
+          </p>
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>District &amp; School</label>
+            <div className={styles.fieldRow}>
+              <select
+                className={styles.fieldSelect}
+                value={postDistrictId}
+                onChange={(e) => handleDistrictChange(e.target.value)}
+                disabled={postLoading}
+              >
+                <option value="">Select district...</option>
+                {districts.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                className={styles.fieldSelect}
+                value={postSchoolId}
+                onChange={(e) => handleSchoolChange(e.target.value)}
+                disabled={!postDistrictId || postLoading}
+              >
+                <option value="">Select school...</option>
+                {postSchools.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Which Class</label>
+            <select
+              className={styles.fieldSelect}
+              value={postClassId}
+              onChange={(e) => handleClassChange(e.target.value)}
+              disabled={!postSchoolId || postLoading}
+            >
+              <option value="">Select class...</option>
+              {postClasses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Which Date</label>
+            <select
+              className={styles.fieldSelect}
+              value={postDate}
+              onChange={(e) => setPostDate(e.target.value)}
+              disabled={!postClassId || postDates.length === 0 || postLoading}
+            >
+              <option value="">Select date...</option>
+              {postDates.map((d) => (
+                <option key={d.value} value={d.value}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {postInstructors.length > 0 && (
+            <div className={styles.whoOut}>
+              <div className={styles.whoOutLabel}>Who&apos;s out</div>
+              <div className={styles.instructorPick}>
+                {postInstructors.map((inst) => (
+                  <button
+                    key={inst.id}
+                    type="button"
+                    className={`${styles.ipOption} ${postSelectedInstructor === inst.id ? styles.selected : ""}`}
+                    onClick={() => setPostSelectedInstructor(inst.id)}
+                  >
+                    <div
+                      className={styles.ipAvatar}
+                      style={{ background: getAvatarColor(inst.name) }}
+                    >
+                      {getInitials(inst.name)}
+                    </div>
+                    <span className={styles.ipName}>{inst.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Note for whoever picks this up (optional)</label>
+            <textarea
+              className={styles.fieldTextarea}
+              placeholder="Anything the covering instructor should know."
+              value={postNote}
+              onChange={(e) => setPostNote(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.postSummary}>
+            <p>
+              This posts <strong>immediately</strong> to the Coverage Board for all active
+              instructors to see and claim. First to claim gets it.
+            </p>
+          </div>
+
+          {postError && <div className={styles.postError}>{postError}</div>}
+
+          <div className={styles.modalActions}>
+            <button
+              className={styles.btnCancel}
+              onClick={() => setPostModalOpen(false)}
+              disabled={postLoading}
+            >
+              Cancel
+            </button>
+            <button
+              className={styles.btnPost}
+              onClick={handleSubmitPost}
+              disabled={postLoading || !postClassId || !postDate || !postSelectedInstructor}
+            >
+              {postLoading ? "Posting..." : "Post to Board"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

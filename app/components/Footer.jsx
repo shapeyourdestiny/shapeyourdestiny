@@ -1,5 +1,5 @@
-"use client";
-
+import Image from "next/image";
+import Link from "next/link";
 import styles from "./Footer.module.css";
 
 const DONATE_URL = "https://www.paypal.com/donate/?hosted_button_id=263FBTTYYBNLY";
@@ -15,34 +15,40 @@ export default function Footer() {
       <footer className={styles.footer}>
         <div className={styles.container}>
           <div className={styles.brand}>
-            <img src="/Images/footer_logo_gold.png" alt="Shape Your Destiny" className={styles.logo} />
+            <Image
+              src="/Images/footer_logo_gold.png"
+              alt="Shape Your Destiny"
+              className={styles.logo}
+              width={180}
+              height={60}
+            />
             <p className={styles.tagline}>Wellness and confidence for every child.</p>
           </div>
 
           <div className={styles.links}>
             <div className={styles.column}>
               <h4>Programs</h4>
-              <a href="/">Children&apos;s Wellness</a>
+              <Link href="/">Children&apos;s Wellness</Link>
               <a href="http://campshape.org" target="_blank" rel="noopener noreferrer">Camp Shape Summer Camp</a>
-              <a href="/corporate-training">Corporate Training</a>
+              <Link href="/corporate-training">Corporate Training</Link>
             </div>
 
             <div className={styles.column}>
               <h4>Resources</h4>
-              <a href="/youth-program/yoga-breathwork">Yoga & Breathwork</a>
-              <a href="/youth-program/mindfulness">Mindfulness</a>
-              <a href="/youth-program/nutrition">Nutrition</a>
+              <Link href="/youth-program/yoga-breathwork">Yoga &amp; Breathwork</Link>
+              <Link href="/youth-program/mindfulness">Mindfulness</Link>
+              <Link href="/youth-program/nutrition">Nutrition</Link>
             </div>
 
             <div className={styles.column}>
               <h4>Connect</h4>
-              <a href="/contact">Contact Us</a>
-              <a href="/contact">Bring Us to Your School</a>
+              <Link href="/contact">Contact Us</Link>
+              <Link href="/contact">Bring Us to Your School</Link>
             </div>
 
             <div className={styles.column}>
               <h4>Instructors</h4>
-              <a href="/instructor-login">Instructor Sign In</a>
+              <Link href="/instructor-login">Instructor Sign In</Link>
             </div>
           </div>
 

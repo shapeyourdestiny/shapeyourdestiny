@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
@@ -10,15 +10,11 @@ import Footer from "../components/Footer";
 function ForgotPasswordForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() =>
+    searchParams.get("error") === "expired" ? "Your reset link has expired. Please request a new one." : ""
+  );
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (searchParams.get("error") === "expired") {
-      setError("Your reset link has expired. Please request a new one.");
-    }
-  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,7 +52,7 @@ function ForgotPasswordForm() {
       {success ? (
         <>
           <p className={styles.body}>
-            Check your email for a password reset link. If you don't see it, check your spam folder.
+            Check your email for a password reset link. If you don&apos;t see it, check your spam folder.
           </p>
           <a href="/instructor-login" className="btn btnPrimary">
             Back to Sign In
@@ -65,7 +61,7 @@ function ForgotPasswordForm() {
       ) : (
         <>
           <p className={styles.body}>
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
 
           <form className={styles.form} onSubmit={handleSubmit}>

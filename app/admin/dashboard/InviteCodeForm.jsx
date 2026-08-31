@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 
 export default function InviteCodeForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("instructor");
   const [loading, setLoading] = useState(false);
@@ -48,7 +46,7 @@ export default function InviteCodeForm() {
   return (
     <div className={styles.formCard}>
       <h2>Send an Invite</h2>
-      <p className={styles.formDesc}>They'll get an email with a code and a link to register, pre-filled automatically.</p>
+      <p className={styles.formDesc}>They&apos;ll get an email with a code and a link to register, pre-filled automatically.</p>
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.formRow}>

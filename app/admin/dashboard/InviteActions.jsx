@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Modal from "../components/Modal";
 import styles from "./page.module.css";
 
 export default function InviteActions({ inviteId, email }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(null); // 'cancel' | 'resend' | null
 
@@ -61,8 +59,9 @@ export default function InviteActions({ inviteId, email }) {
           onClick={() => setModal("resend")}
           className={styles.resendBtn}
           title="Resend invite"
+          type="button"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M22 2L11 13" />
             <path d="M22 2L15 22L11 13L2 9L22 2Z" />
           </svg>
@@ -71,8 +70,9 @@ export default function InviteActions({ inviteId, email }) {
           onClick={() => setModal("cancel")}
           className={styles.cancelBtn}
           title="Cancel invite"
+          type="button"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6L6 18" />
             <path d="M6 6L18 18" />
           </svg>

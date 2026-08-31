@@ -123,7 +123,15 @@ async function getCoverageData() {
       districts: [],
     }));
 
-  return { stats, requests, instructors };
+  // Get districts for the post modal
+  const { data: districtsData } = await supabase
+    .from("districts")
+    .select("id, name, color")
+    .order("name");
+
+  const districts = districtsData || [];
+
+  return { stats, requests, instructors, districts };
 }
 
 export default async function CoveragePage() {
@@ -152,12 +160,14 @@ export default async function CoveragePage() {
   let stats = { urgent: 0, open: 0, coveredThisMonth: 0 };
   let requests = [];
   let instructors = [];
+  let districts = [];
 
   try {
     const data = await getCoverageData();
     stats = data.stats;
     requests = data.requests;
     instructors = data.instructors;
+    districts = data.districts;
   } catch (error) {
     console.error("Error fetching coverage data:", error);
   }
@@ -174,6 +184,7 @@ export default async function CoveragePage() {
       initialFrequentAlert={null}
       initialRequests={requests}
       instructors={instructors}
+      districts={districts}
       initialTrends={trends90}
       initialChartData={chartData}
       initialFrequentRequesters={frequentRequesters90}

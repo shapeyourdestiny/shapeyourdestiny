@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "../page.module.css";
@@ -8,94 +8,66 @@ import styles from "../page.module.css";
 export default function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [inviteCode, setInviteCode] = useState("");
+  // Prefill invite code from URL
+  const [inviteCode, setInviteCode] = useState(() => searchParams.get("code") || "");
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [cprExpires, setCprExpires] = useState("");
+  const [foodHandlerExpires, setFoodHandlerExpires] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Prefill invite code from URL
-  useEffect(() => {
-    const code = searchParams.get("code");
-    if (code) {
-      setInviteCode(code);
-    }
-  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const supabase = createClient();
-
-    // 1. Look up the invite code
-    const { data: inviteData, error: inviteError } = await supabase
-      .from("invite_codes")
-      .select("id, role, used_by")
-      .eq("code", inviteCode.trim())
-      .single();
-
-    if (inviteError || !inviteData) {
-      setError("Invalid invite code. Please check and try again.");
-      setLoading(false);
-      return;
-    }
-
-    if (inviteData.used_by) {
-      setError("This invite code has already been used.");
-      setLoading(false);
-      return;
-    }
-
-    // 2. Create the account
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (signUpError) {
-      setError(signUpError.message);
-      setLoading(false);
-      return;
-    }
-
-    const userId = signUpData.user?.id;
-    if (!userId) {
-      setError("Account creation failed. Please try again.");
-      setLoading(false);
-      return;
-    }
-
-    // 3. Insert profile with role from invite code
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .insert({
-        id: userId,
-        full_name: fullName.trim(),
-        role: inviteData.role,
+    try {
+      // Call the API route which uses admin client to bypass RLS
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          inviteCode: inviteCode.trim(),
+          fullName: fullName.trim(),
+          phone: phone.trim(),
+          email,
+          password,
+          cprExpires: cprExpires || null,
+          foodHandlerExpires: foodHandlerExpires || null,
+        }),
       });
 
-    if (profileError) {
-      setError("Failed to create profile. Please contact support.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Registration failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // Sign in the user after successful registration
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        // Registration succeeded but sign-in failed - redirect to login
+        router.push("/instructor-login?registered=true");
+        return;
+      }
+
+      // Redirect to dashboard
+      router.push("/instructor/dashboard");
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError("Something went wrong. Please try again.");
       setLoading(false);
-      return;
     }
-
-    // 4. Mark invite code as used
-    const { error: updateError } = await supabase
-      .from("invite_codes")
-      .update({ used_by: userId })
-      .eq("id", inviteData.id);
-
-    if (updateError) {
-      // Non-critical, continue anyway
-      console.error("Failed to mark invite code as used:", updateError);
-    }
-
-    // 5. Redirect to dashboard
-    router.push("/instructor/dashboard");
   };
 
   return (
@@ -127,6 +99,19 @@ export default function RegisterForm() {
       </div>
 
       <div className={styles.field}>
+        <label htmlFor="phone">Phone Number</label>
+        <input
+          type="tel"
+          id="phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          required
+          placeholder="(555) 123-4567"
+          autoComplete="tel"
+        />
+      </div>
+
+      <div className={styles.field}>
         <label htmlFor="email">Email</label>
         <input
           type="email"
@@ -151,6 +136,29 @@ export default function RegisterForm() {
           placeholder="At least 6 characters"
           autoComplete="new-password"
         />
+      </div>
+
+      <div className={styles.fieldRow}>
+        <div className={styles.field}>
+          <label htmlFor="cprExpires">CPR Certification Expires</label>
+          <input
+            type="date"
+            id="cprExpires"
+            value={cprExpires}
+            onChange={(e) => setCprExpires(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="foodHandlerExpires">Food Handler Expires <span className={styles.optional}>(optional)</span></label>
+          <input
+            type="date"
+            id="foodHandlerExpires"
+            value={foodHandlerExpires}
+            onChange={(e) => setFoodHandlerExpires(e.target.value)}
+          />
+        </div>
       </div>
 
       {error && <p className={styles.errorText}>{error}</p>}

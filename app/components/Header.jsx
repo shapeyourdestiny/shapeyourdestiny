@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import styles from "./Header.module.css";
 
 const NAV_LINKS = [
-  { href: "/", label: "Children's Wellness Program" },
-  { href: "http://campshape.org", label: "Camp Shape Summer Camp" },
-  { href: "/corporate-training", label: "Corporate Training" },
-  { href: "/contact", label: "Contact" },
-  { href: "/instructor-login", label: "Instructor Sign In" },
+  { href: "/", label: "Children's Wellness Program", external: false },
+  { href: "http://campshape.org", label: "Camp Shape Summer Camp", external: true },
+  { href: "/corporate-training", label: "Corporate Training", external: false },
+  { href: "/contact", label: "Contact", external: false },
+  { href: "/instructor-login", label: "Instructor Sign In", external: false },
 ];
 
 export default function Header() {
@@ -17,14 +19,23 @@ export default function Header() {
   return (
     <header className={styles.header}>
       <nav className={styles.nav}>
-        <a href="/" className={styles.logo}>
-          <img src="/Images/footer_logo_gold.png" alt="Shape Your Destiny" />
-        </a>
+        <Link href="/" className={styles.logo}>
+          <Image
+            src="/Images/footer_logo_gold.png"
+            alt="Shape Your Destiny"
+            width={140}
+            height={47}
+          />
+        </Link>
 
         <div className={styles.navLinks}>
-          {NAV_LINKS.map((l) => (
-            <a key={l.label} href={l.href}>{l.label}</a>
-          ))}
+          {NAV_LINKS.map((l) =>
+            l.external ? (
+              <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer">{l.label}</a>
+            ) : (
+              <Link key={l.label} href={l.href}>{l.label}</Link>
+            )
+          )}
         </div>
 
         <a
