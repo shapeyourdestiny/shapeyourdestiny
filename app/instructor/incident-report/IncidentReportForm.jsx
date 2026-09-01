@@ -567,16 +567,20 @@ export default function IncidentReportForm({ schools }) {
       </div>
 
       {/* Certification Checkbox */}
-      <div className={styles.certCheckRow}>
+      <div
+        className={styles.certCheckRow}
+        onClick={() => setCertified(!certified)}
+      >
         <input
           type="checkbox"
           id="certCheck"
           checked={certified}
           onChange={(e) => setCertified(e.target.checked)}
+          onClick={(e) => e.stopPropagation()}
         />
-        <label htmlFor="certCheck">
+        <span>
           I confirm this report is accurate to the best of my knowledge.
-        </label>
+        </span>
       </div>
 
       {/* Privacy note */}
