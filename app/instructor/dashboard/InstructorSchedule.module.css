@@ -1,226 +1,204 @@
 .schedule {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
-/* ===== HERO CARD ===== */
-.heroCard {
-  background: linear-gradient(135deg, var(--navy) 0%, #2a4fa8 100%);
-  border-radius: 20px;
-  padding: 32px;
-  color: #fff;
-  box-shadow: 0 10px 40px rgba(31, 63, 145, 0.3);
-}
-
-/* Orange hero for picked-up coverage sessions */
-.heroCardCovering {
-  background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%);
-  box-shadow: 0 10px 40px rgba(242, 166, 94, 0.35);
-}
-
-.heroEmpty {
+/* ===== MY CLASSES SECTION ===== */
+.myClassesSection {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 20px 0;
-}
-.heroEmpty svg {
-  width: 48px;
-  height: 48px;
-  opacity: 0.6;
-  margin-bottom: 16px;
-}
-.heroEmpty h2 {
-  font-size: 20px;
-  margin: 0 0 8px;
-  opacity: 0.9;
-}
-.heroEmpty p {
-  margin: 0;
-  opacity: 0.7;
-  font-size: 14px;
-}
-
-.heroContent {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.heroLabel {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  opacity: 0.7;
-}
-
-.heroCountdown {
-  font-family: 'Baloo 2', sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.heroDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.heroSchool {
-  font-size: 22px;
-  margin: 0;
-}
-
-.heroMeta {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 15px;
-}
-
-.heroTime {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  opacity: 0.9;
-}
-.heroTime svg {
-  width: 16px;
-  height: 16px;
-}
-
-.heroDate {
-  opacity: 0.7;
-}
-
-.heroCoTeacher {
-  display: flex;
-  align-items: center;
   gap: 10px;
-  font-size: 14px;
-  opacity: 0.9;
 }
 
-.heroCoveringFor {
+.sectionHeader {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  opacity: 0.95;
-}
-.heroCoveringFor svg {
-  width: 16px;
-  height: 16px;
 }
 
-.coTeacherAvatar {
+.sectionTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--navy);
+}
+
+.sectionCount {
+  background: var(--tint-deep);
+  color: var(--ink-soft);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.myClassesList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.myClassCard {
+  background: var(--paper);
+  border-radius: 14px;
+  padding: 14px 15px;
+  box-shadow: var(--shadow);
+  border-top: 3px solid var(--teal);
+}
+
+.myClassCard.coveringSoon {
+  border-top-color: var(--orange);
+}
+
+.mcBadgeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+
+.mcProgram {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.mcProgram[data-program="wellness"] {
+  background: rgba(62, 143, 160, 0.14);
+  color: #2C6E7D;
+}
+
+.mcProgram[data-program="soccer"] {
+  background: rgba(31, 63, 145, 0.09);
+  color: var(--navy);
+}
+
+.mcCoveringTag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 8.5px;
+  color: var(--orange-dark);
+}
+
+.mcCoveringTag svg {
+  width: 9px;
+  height: 9px;
+}
+
+.mcSchool {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 7px;
+}
+
+.mcRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.mcRow svg {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  color: var(--teal);
+  margin-top: 1px;
+}
+
+.mcDirectionsLink {
+  color: var(--navy);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.mcDirectionsLink:hover {
+  text-decoration: underline;
+}
+
+.emptyClassesCard {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 26px 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.emptyClassesCard svg {
   width: 28px;
   height: 28px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 12px;
+  color: var(--tint-deep);
+  margin-bottom: 10px;
 }
 
-.reviewPill {
-  display: inline-block;
-  padding: 4px 12px;
-  background: var(--gold);
-  color: var(--navy);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  border-radius: 20px;
-  align-self: flex-start;
-}
-
-.heroActions {
-  display: flex;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.directionsBtn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: #fff;
-  color: var(--navy);
-  border-radius: 10px;
+.emptyClassesCard p {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
-  font-size: 14px;
-  text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.directionsBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-.directionsBtn svg {
-  width: 16px;
-  height: 16px;
-}
-
-.directionsBtnCovering {
-  background: var(--navy);
-  color: #fff;
-}
-.directionsBtnCovering:hover {
-  background: var(--navy-deep);
-}
-
-.viewWeekBtn {
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.15);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
-  border-radius: 10px;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.viewWeekBtn:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* ===== VIEW TOGGLE ===== */
-.viewToggle {
-  display: flex;
-  background: var(--paper);
-  border-radius: 10px;
-  padding: 4px;
-  align-self: flex-start;
-  box-shadow: 0 2px 8px rgba(20, 44, 107, 0.08);
-}
-
-.toggleBtn {
-  padding: 10px 24px;
-  border: none;
-  background: none;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 600;
   font-size: 14px;
   color: var(--ink-soft);
-  border-radius: 8px;
+  margin: 0 0 4px;
+}
+
+.emptyClassesCard span {
+  font-size: 12px;
+  color: #B7C1D8;
+}
+
+/* ===== COMPACT VIEW TOGGLE ===== */
+.toggleNavWrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 4px;
+}
+
+.viewToggleSm {
+  display: flex;
+  gap: 3px;
+  background: var(--paper);
+  border-radius: 10px;
+  padding: 3px;
+  box-shadow: var(--shadow);
+}
+
+.toggleBtnSm {
+  border: none;
+  background: none;
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 11.5px;
+  color: var(--ink-soft);
   cursor: pointer;
   transition: all 0.15s ease;
 }
-.toggleBtn:hover {
+
+.toggleBtnSm:hover {
   color: var(--navy);
 }
-.toggleBtn.active {
+
+.toggleBtnSm.active {
   background: var(--navy);
   color: #fff;
+}
+
+/* Legacy view toggle - keep for desktop if needed */
+.viewToggle {
+  display: none;
 }
 
 .loading {

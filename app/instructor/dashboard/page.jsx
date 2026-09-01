@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   getNextSession,
   getInstructorSessions,
+  getInstructorClasses,
   getHolidaysInRange,
 } from "@/lib/schedule/instructor-queries";
 import { getCoverageRequestsInRange } from "@/lib/coverage/queries";
@@ -44,13 +45,14 @@ export default async function InstructorDashboardPage() {
   const endDate = formatDate(weekEnd);
 
   // Fetch initial data in parallel
-  let nextSession, sessions, holidays, coverageRequests;
+  let nextSession, sessions, holidays, coverageRequests, instructorClasses;
   try {
-    [nextSession, sessions, holidays, coverageRequests] = await Promise.all([
+    [nextSession, sessions, holidays, coverageRequests, instructorClasses] = await Promise.all([
       getNextSession(user.id),
       getInstructorSessions(user.id, startDate, endDate),
       getHolidaysInRange(startDate, endDate),
       getCoverageRequestsInRange(startDate, endDate).catch(() => []),
+      getInstructorClasses(user.id),
     ]);
   } catch (e) {
     console.error("Error fetching dashboard data:", e);
@@ -58,6 +60,7 @@ export default async function InstructorDashboardPage() {
     sessions = [];
     holidays = [];
     coverageRequests = [];
+    instructorClasses = [];
   }
 
   // Build a map of coverage statuses for sessions
@@ -71,7 +74,26 @@ export default async function InstructorDashboardPage() {
       isCoveredByMe: req.claimer?.id === user.id,
       coverageId: req.id,
       requesterName: req.requester?.name || null,
+      date: req.date,
     };
+  }
+
+  // Build a map of which classes have upcoming coverage pickups (where current user is covering)
+  // This week only, for the "COVERING [day]" tag on class cards
+  const classCoveringInfo = {};
+  for (const req of coverageRequests) {
+    if (req.claimer?.id === user.id && req.status === "claimed") {
+      const existingInfo = classCoveringInfo[req.classId];
+      // Keep the soonest date
+      if (!existingInfo || req.date < existingInfo.date) {
+        const dateObj = new Date(req.date + "T00:00:00");
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        classCoveringInfo[req.classId] = {
+          date: req.date,
+          dayName: dayNames[dateObj.getDay()],
+        };
+      }
+    }
   }
 
   return (
@@ -83,6 +105,8 @@ export default async function InstructorDashboardPage() {
         initialSessions={sessions}
         initialHolidays={holidays}
         initialCoverageStatuses={coverageStatuses}
+        initialClasses={instructorClasses}
+        initialClassCoveringInfo={classCoveringInfo}
       />
     </div>
   );

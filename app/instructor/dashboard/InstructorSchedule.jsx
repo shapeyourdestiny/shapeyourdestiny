@@ -47,6 +47,8 @@ export default function InstructorSchedule({
   initialSessions,
   initialHolidays,
   initialCoverageStatuses = {},
+  initialClasses = [],
+  initialClassCoveringInfo = {},
 }) {
   const [view, setView] = useState("week");
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
@@ -59,6 +61,8 @@ export default function InstructorSchedule({
   const [holidays, setHolidays] = useState(initialHolidays);
   const [loading, setLoading] = useState(false);
   const [coverageStatuses, setCoverageStatuses] = useState(initialCoverageStatuses);
+  const [classes] = useState(initialClasses);
+  const [classCoveringInfo] = useState(initialClassCoveringInfo);
 
   // Fetch data for a date range
   const fetchData = useCallback(async (startDate, endDate) => {
@@ -161,111 +165,97 @@ export default function InstructorSchedule({
     return coverageStatuses[key] || null;
   };
 
-  // Get coverage status for the next session
-  const getNextSessionCoverage = () => {
-    if (!nextSession) return null;
-    const key = `${nextSession.classId}-${nextSession.date}`;
-    return coverageStatuses[key] || null;
-  };
-
-  // Render Next Session hero card
-  const renderNextSessionCard = () => {
-    if (!nextSession) {
+  // Render My Classes section
+  const renderMyClasses = () => {
+    if (classes.length === 0) {
       return (
-        <div className={styles.heroCard}>
-          <div className={styles.heroEmpty}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
+        <div className={styles.myClassesSection}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionTitle}>My Classes</span>
+            <span className={styles.sectionCount}>0</span>
+          </div>
+          <div className={styles.emptyClassesCard}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <path d="M16 2v4M8 2v4M3 10h18" />
             </svg>
-            <h2>Nothing scheduled yet</h2>
-            <p>Your upcoming sessions will appear here</p>
+            <p>No classes assigned yet</p>
+            <span>Your classes will appear here once you&apos;re assigned</span>
           </div>
         </div>
       );
     }
 
-    const coverage = getNextSessionCoverage();
-    const isCoveringForSomeone = coverage?.isCoveredByMe;
-
-    const countdownText =
-      nextSession.daysUntil === 0
-        ? "Today"
-        : nextSession.daysUntil === 1
-        ? "Tomorrow"
-        : `In ${nextSession.daysUntil} days`;
-
     return (
-      <div className={`${styles.heroCard} ${isCoveringForSomeone ? styles.heroCardCovering : ""}`}>
-        <div className={styles.heroContent}>
-          <span className={styles.heroLabel}>
-            {isCoveringForSomeone ? "Next Up: You're Covering" : "Next Session"}
-          </span>
-          <span className={styles.heroCountdown}>{countdownText}</span>
+      <div className={styles.myClassesSection}>
+        <div className={styles.sectionHeader}>
+          <span className={styles.sectionTitle}>My Classes</span>
+          <span className={styles.sectionCount}>{classes.length}</span>
+        </div>
+        <div className={styles.myClassesList}>
+          {classes.map((cls) => {
+            const coveringInfo = classCoveringInfo[cls.id];
+            const isCoveringSoon = !!coveringInfo;
 
-          <div className={styles.heroDetails}>
-            <h2 className={styles.heroSchool}>{nextSession.school.name}</h2>
-            <div className={styles.heroMeta}>
-              <span className={styles.heroTime}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-                {nextSession.time}
-              </span>
-              <span className={styles.heroDate}>
-                {SHORT_MONTHS[new Date(nextSession.date + "T00:00:00").getMonth()]}{" "}
-                {new Date(nextSession.date + "T00:00:00").getDate()}
-              </span>
-            </div>
-
-            {isCoveringForSomeone && coverage.requesterName && (
-              <div className={styles.heroCoveringFor}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                </svg>
-                Covering for {coverage.requesterName}
-              </div>
-            )}
-
-            {!isCoveringForSomeone && nextSession.coTeacher && (
-              <div className={styles.heroCoTeacher}>
-                <div className={styles.coTeacherAvatar}>
-                  {nextSession.coTeacher.name.charAt(0)}
-                </div>
-                <span>with {nextSession.coTeacher.name}</span>
-              </div>
-            )}
-
-            {nextSession.isReviewDay && (
-              <span className={styles.reviewPill}>Review Day</span>
-            )}
-          </div>
-
-          <div className={styles.heroActions}>
-            {nextSession.school.address && (
-              <a
-                href={getDirectionsUrl(nextSession.school.address)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${styles.directionsBtn} ${isCoveringForSomeone ? styles.directionsBtnCovering : ""}`}
+            return (
+              <div
+                key={cls.id}
+                className={`${styles.myClassCard} ${isCoveringSoon ? styles.coveringSoon : ""}`}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polygon points="3 11 22 2 13 21 11 13 3 11" />
-                </svg>
-                Get Directions
-              </a>
-            )}
-            <button
-              className={styles.viewWeekBtn}
-              onClick={() => setView("week")}
-            >
-              View Full Week
-            </button>
-          </div>
+                <div className={styles.mcBadgeRow}>
+                  <span
+                    className={styles.mcProgram}
+                    data-program={cls.program}
+                  >
+                    {cls.program === "soccer" ? "Soccer" : "Youth Wellness"}
+                  </span>
+                  {isCoveringSoon && (
+                    <span className={styles.mcCoveringTag}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                      </svg>
+                      COVERING {coveringInfo.dayName.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className={styles.mcSchool}>{cls.school.name}</div>
+                <div className={styles.mcRow}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 3" />
+                  </svg>
+                  <span>{cls.daysDisplay}, {cls.time}</span>
+                </div>
+                <div className={styles.mcRow}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <path d="M16 2v4M8 2v4M3 10h18" />
+                  </svg>
+                  <span>{cls.durationText}</span>
+                </div>
+                {cls.school.address && (
+                  <div className={styles.mcRow}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                      <path d="M21 10c0 6-9 13-9 13s-9-7-9-13a9 9 0 0118 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span>
+                      {cls.school.address.split(",")[0]} ·{" "}
+                      <a
+                        href={getDirectionsUrl(cls.school.address)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.mcDirectionsLink}
+                      >
+                        Directions
+                      </a>
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
@@ -626,21 +616,23 @@ export default function InstructorSchedule({
 
   return (
     <div className={styles.schedule}>
-      {renderNextSessionCard()}
+      {renderMyClasses()}
 
-      <div className={styles.viewToggle}>
-        <button
-          className={`${styles.toggleBtn} ${view === "week" ? styles.active : ""}`}
-          onClick={() => setView("week")}
-        >
-          Week
-        </button>
-        <button
-          className={`${styles.toggleBtn} ${view === "month" ? styles.active : ""}`}
-          onClick={() => setView("month")}
-        >
-          Month
-        </button>
+      <div className={styles.toggleNavWrap}>
+        <div className={styles.viewToggleSm}>
+          <button
+            className={`${styles.toggleBtnSm} ${view === "week" ? styles.active : ""}`}
+            onClick={() => setView("week")}
+          >
+            Week
+          </button>
+          <button
+            className={`${styles.toggleBtnSm} ${view === "month" ? styles.active : ""}`}
+            onClick={() => setView("month")}
+          >
+            Month
+          </button>
+        </div>
       </div>
 
       {loading && <div className={styles.loading}>Loading...</div>}
