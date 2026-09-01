@@ -3,6 +3,12 @@
   padding: 32px 28px 60px;
 }
 
+@media (max-width: 600px) {
+  .page {
+    padding: 20px 16px 100px;
+  }
+}
+
 .pageHead {
   margin-bottom: 22px;
 }
@@ -26,6 +32,15 @@
   border-radius: 20px;
   padding: 26px 28px;
   box-shadow: var(--shadow);
+}
+
+@media (max-width: 600px) {
+  .formCard {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+  }
 }
 
 /* Severity Group */
@@ -53,7 +68,12 @@
 
 @media (max-width: 600px) {
   .severityOptions {
-    grid-template-columns: 1fr;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 4px;
   }
 }
 
@@ -69,6 +89,16 @@
   align-items: center;
   gap: 9px;
   transition: all 0.15s ease;
+}
+
+@media (max-width: 600px) {
+  .sevBtn {
+    flex: 0 0 auto;
+    min-width: 120px;
+    padding: 14px 12px;
+    scroll-snap-align: start;
+    background: var(--paper);
+  }
 }
 
 .sevBtn:hover {
@@ -137,16 +167,22 @@
 
 .sevSub {
   display: block;
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 400;
   font-family: var(--font-body);
   margin-top: 2px;
-  opacity: 0.8;
+  color: var(--ink-soft);
 }
 
 /* Field Groups */
 .fieldGroup {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+  .fieldGroup {
+    margin-bottom: 24px;
+  }
 }
 
 .fieldRow {
@@ -158,6 +194,7 @@
 @media (max-width: 500px) {
   .fieldRow {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
@@ -167,11 +204,21 @@
   width: 100%;
   border: 1.5px solid var(--tint-deep);
   border-radius: 10px;
-  padding: 10px 13px;
+  padding: 12px 14px;
   font-family: var(--font-body);
-  font-size: 13.5px;
+  font-size: 16px;
   background: var(--tint);
   color: var(--ink);
+  -webkit-appearance: none;
+}
+
+@media (min-width: 601px) {
+  .formCard input,
+  .formCard select,
+  .formCard textarea {
+    padding: 10px 13px;
+    font-size: 13.5px;
+  }
 }
 
 .formCard input:focus,
@@ -327,10 +374,19 @@
   padding: 11px 14px;
 }
 
+@media (max-width: 400px) {
+  .autofillChip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
 .autofillLeft {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .autofillAvatar {
@@ -351,6 +407,7 @@
 .autofillInfo {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .autofillName {
@@ -365,13 +422,15 @@
 }
 
 .autofillFix {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--navy);
   font-weight: 700;
   background: none;
   border: none;
   cursor: pointer;
   text-decoration: underline;
+  flex: none;
+  padding: 4px 0;
 }
 
 .autofillFix:hover {
