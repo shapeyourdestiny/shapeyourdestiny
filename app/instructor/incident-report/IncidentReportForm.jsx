@@ -275,53 +275,20 @@ export default function IncidentReportForm({ schools }) {
   return (
     <form className={styles.formCard} onSubmit={handleSubmit}>
       {/* Severity */}
-      <div className={styles.severityGroup}>
+      <div className={styles.fieldGroup}>
         <label className={styles.fieldLabel}>
           How serious was it? <span className={styles.requiredStar}>*</span>
         </label>
-        <div className={styles.severityOptions}>
-          <button
-            type="button"
-            className={`${styles.sevBtn} ${styles.minor} ${severity === "minor" ? styles.selected : ""}`}
-            onClick={() => setSeverity("minor")}
-          >
-            <span className={`${styles.sevIcon} ${styles.minorIcon}`}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-            </span>
-            <span className={styles.sevName}>Minor</span>
-            <span className={styles.sevSub}>No injury, resolved on the spot</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.sevBtn} ${styles.moderate} ${severity === "moderate" ? styles.selected : ""}`}
-            onClick={() => setSeverity("moderate")}
-          >
-            <span className={`${styles.sevIcon} ${styles.moderateIcon}`}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                <path d="M12 9v4M12 17h.01" />
-                <circle cx="12" cy="12" r="9" />
-              </svg>
-            </span>
-            <span className={styles.sevName}>Moderate</span>
-            <span className={styles.sevSub}>Injury or needed real attention</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.sevBtn} ${styles.serious} ${severity === "serious" ? styles.selected : ""}`}
-            onClick={() => setSeverity("serious")}
-          >
-            <span className={`${styles.sevIcon} ${styles.seriousIcon}`}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                <path d="M12 8v5M12 16h.01" />
-                <circle cx="12" cy="12" r="9" />
-              </svg>
-            </span>
-            <span className={styles.sevName}>Serious</span>
-            <span className={styles.sevSub}>Medical care, immediate follow-up</span>
-          </button>
-        </div>
+        <select
+          value={severity || ""}
+          onChange={(e) => setSeverity(e.target.value || null)}
+          className={severity ? styles[`severity${severity.charAt(0).toUpperCase() + severity.slice(1)}`] : ""}
+        >
+          <option value="">Select severity...</option>
+          <option value="minor">Minor — No injury, resolved on the spot</option>
+          <option value="moderate">Moderate — Injury or needed real attention</option>
+          <option value="serious">Serious — Medical care, immediate follow-up</option>
+        </select>
       </div>
 
       {/* Type & Date/Time */}

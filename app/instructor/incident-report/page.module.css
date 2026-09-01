@@ -43,11 +43,6 @@
   }
 }
 
-/* Severity Group */
-.severityGroup {
-  margin-bottom: 22px;
-}
-
 .fieldLabel {
   display: block;
   font-family: var(--font-display);
@@ -60,118 +55,20 @@
   color: var(--red);
 }
 
-.severityOptions {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+/* Severity dropdown color states */
+.severityMinor {
+  border-color: var(--teal) !important;
+  background: rgba(62, 143, 160, 0.08) !important;
 }
 
-@media (max-width: 600px) {
-  .severityOptions {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    padding-bottom: 4px;
-  }
+.severityModerate {
+  border-color: var(--orange) !important;
+  background: rgba(242, 166, 94, 0.1) !important;
 }
 
-.sevBtn {
-  border: 1.5px solid var(--tint-deep);
-  background: var(--tint);
-  border-radius: 14px;
-  padding: 18px 14px;
-  cursor: pointer;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 9px;
-  transition: all 0.15s ease;
-}
-
-@media (max-width: 600px) {
-  .sevBtn {
-    flex: 0 0 auto;
-    min-width: 120px;
-    padding: 14px 12px;
-    scroll-snap-align: start;
-    background: var(--paper);
-  }
-}
-
-.sevBtn:hover {
-  border-color: var(--ink-soft);
-}
-
-/* Minor - Teal (selected state) */
-.sevBtn.minor.selected {
-  border-color: var(--teal);
-  background: rgba(62, 143, 160, 0.08);
-}
-.sevBtn.minor.selected .sevName {
-  color: var(--teal);
-}
-
-/* Moderate - Orange (selected state) */
-.sevBtn.moderate.selected {
-  border-color: var(--orange);
-  background: rgba(242, 166, 94, 0.1);
-}
-.sevBtn.moderate.selected .sevName {
-  color: var(--orange-dark);
-}
-
-/* Serious - Red (selected state) */
-.sevBtn.serious.selected {
-  border-color: var(--red);
-  background: rgba(224, 89, 76, 0.08);
-}
-.sevBtn.serious.selected .sevName {
-  color: var(--red);
-}
-
-/* Severity Icon Badges - SOLID colored backgrounds, white icons */
-.sevIcon {
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.sevIcon svg {
-  width: 19px;
-  height: 19px;
-  color: #fff;
-}
-
-/* Each severity level has its own solid background color */
-.sevIcon.minorIcon {
-  background: var(--teal);
-}
-.sevIcon.moderateIcon {
-  background: var(--orange);
-}
-.sevIcon.seriousIcon {
-  background: var(--red);
-}
-
-.sevName {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--ink);
-}
-
-.sevSub {
-  display: block;
-  font-size: 10px;
-  font-weight: 400;
-  font-family: var(--font-body);
-  margin-top: 2px;
-  color: var(--ink-soft);
+.severitySerious {
+  border-color: var(--red) !important;
+  background: rgba(224, 89, 76, 0.08) !important;
 }
 
 /* Field Groups */
