@@ -17,3 +17,10 @@
   width: 100%;
   box-shadow: 0 20px 50px rgba(20, 44, 107, 0.25);
 }
+
+@media (max-width: 760px) {
+  .overlay {
+    align-items: flex-start;
+    padding: 12px;
+  }
+}
