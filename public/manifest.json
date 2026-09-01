@@ -1,0 +1,29 @@
+{
+  "name": "Shape Your Destiny",
+  "short_name": "SYD",
+  "description": "Youth wellness programs - schedule, coverage, and resources for instructors",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EAF1FC",
+  "theme_color": "#1F3F91",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
