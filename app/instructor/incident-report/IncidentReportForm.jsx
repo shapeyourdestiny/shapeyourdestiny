@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { createIncidentReport } from "@/lib/incidents/queries";
+import { useState, useEffect, useRef } from "react";
+import { createIncidentReport, getCoInstructorForSchool, uploadIncidentPhoto } from "@/lib/incidents/queries";
 import styles from "./page.module.css";
 
 const INCIDENT_TYPES = [
@@ -34,11 +34,48 @@ export default function IncidentReportForm({ schools }) {
   const [parentNotified, setParentNotified] = useState(null);
   const [witnesses, setWitnesses] = useState("");
 
+  // New fields
+  const [coInstructor, setCoInstructor] = useState(null);
+  const [coInstructorOverride, setCoInstructorOverride] = useState("");
+  const [showCoInstructorOverride, setShowCoInstructorOverride] = useState(false);
+  const [activityContext, setActivityContext] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [certified, setCertified] = useState(false);
+  const fileInputRef = useRef(null);
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const isOther = schoolId === "other";
+
+  // Fetch co-instructor when school is selected
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchCoInstructor() {
+      if (schoolId && schoolId !== "other") {
+        const result = await getCoInstructorForSchool(schoolId);
+        if (!cancelled) {
+          setCoInstructor(result);
+          setShowCoInstructorOverride(false);
+          setCoInstructorOverride("");
+        }
+      } else {
+        if (!cancelled) {
+          setCoInstructor(null);
+        }
+      }
+    }
+
+    fetchCoInstructor();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [schoolId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,10 +118,31 @@ export default function IncidentReportForm({ schools }) {
       setError("Please indicate if a parent/guardian was notified.");
       return;
     }
+    if (!certified) {
+      setError("Please confirm that the report is accurate.");
+      return;
+    }
 
     setSubmitting(true);
 
     try {
+      // Upload photo if one was selected
+      let photoUrl = null;
+      if (photoFile) {
+        setPhotoUploading(true);
+        const formData = new FormData();
+        formData.append("file", photoFile);
+        const uploadResult = await uploadIncidentPhoto(formData);
+        setPhotoUploading(false);
+
+        if (uploadResult.error) {
+          setError(uploadResult.error);
+          setSubmitting(false);
+          return;
+        }
+        photoUrl = uploadResult.path;
+      }
+
       const result = await createIncidentReport({
         severity,
         type,
@@ -99,6 +157,12 @@ export default function IncidentReportForm({ schools }) {
         staffNotifiedName: staffNotified ? staffNotifiedName.trim() : null,
         parentNotified,
         witnesses: witnesses.trim() || null,
+        // New fields
+        coInstructorId: showCoInstructorOverride ? null : coInstructor?.id || null,
+        coInstructorOverride: showCoInstructorOverride ? coInstructorOverride.trim() : null,
+        activityContext: activityContext.trim() || null,
+        photoUrl,
+        certified,
       });
 
       if (result.error) {
@@ -135,6 +199,54 @@ export default function IncidentReportForm({ schools }) {
     setStaffNotifiedName("");
     setParentNotified(null);
     setWitnesses("");
+    // New fields
+    setCoInstructor(null);
+    setCoInstructorOverride("");
+    setShowCoInstructorOverride(false);
+    setActivityContext("");
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    setCertified(false);
+  };
+
+  // Handle file selection
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/heic"];
+    if (!allowedTypes.includes(file.type)) {
+      setError("Invalid file type. Please upload a JPEG, PNG, or WebP image.");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File too large. Maximum size is 10MB.");
+      return;
+    }
+
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+    setError("");
+  };
+
+  const removePhoto = () => {
+    setPhotoFile(null);
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview);
+    }
+    setPhotoPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
   if (success) {
@@ -174,11 +286,11 @@ export default function IncidentReportForm({ schools }) {
             onClick={() => setSeverity("minor")}
           >
             <span className={`${styles.sevIcon} ${styles.minorIcon}`}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
                 <path d="M20 6L9 17l-5-5" />
               </svg>
             </span>
-            Minor
+            <span className={styles.sevName}>Minor</span>
             <span className={styles.sevSub}>No injury, resolved on the spot</span>
           </button>
           <button
@@ -187,13 +299,12 @@ export default function IncidentReportForm({ schools }) {
             onClick={() => setSeverity("moderate")}
           >
             <span className={`${styles.sevIcon} ${styles.moderateIcon}`}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                <path d="M12 9v4M12 17h.01" />
                 <circle cx="12" cy="12" r="9" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
             </span>
-            Moderate
+            <span className={styles.sevName}>Moderate</span>
             <span className={styles.sevSub}>Injury or needed real attention</span>
           </button>
           <button
@@ -202,12 +313,13 @@ export default function IncidentReportForm({ schools }) {
             onClick={() => setSeverity("serious")}
           >
             <span className={`${styles.sevIcon} ${styles.seriousIcon}`}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M12 9v4M12 17h.01M4.93 19h14.14a2 2 0 001.73-3L13.73 4a2 2 0 00-3.46 0L3.2 16a2 2 0 001.73 3z" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                <path d="M12 8v5M12 16h.01" />
+                <circle cx="12" cy="12" r="9" />
               </svg>
             </span>
-            Serious
-            <span className={styles.sevSub}>Medical care, or needs immediate follow-up</span>
+            <span className={styles.sevName}>Serious</span>
+            <span className={styles.sevSub}>Medical care, immediate follow-up</span>
           </button>
         </div>
       </div>
@@ -260,6 +372,40 @@ export default function IncidentReportForm({ schools }) {
         )}
       </div>
 
+      {/* Co-Instructor Present */}
+      {schoolId && schoolId !== "other" && (
+        <div className={styles.fieldGroup}>
+          <label className={styles.fieldLabel}>Co-Instructor Present</label>
+          {showCoInstructorOverride ? (
+            <input
+              type="text"
+              value={coInstructorOverride}
+              onChange={(e) => setCoInstructorOverride(e.target.value)}
+              placeholder="Enter the co-instructor's name"
+            />
+          ) : coInstructor ? (
+            <div className={styles.autofillChip}>
+              <div className={styles.autofillLeft}>
+                <div className={styles.autofillAvatar}>{coInstructor.initials}</div>
+                <div className={styles.autofillInfo}>
+                  <span className={styles.autofillName}>{coInstructor.name}</span>
+                  <span className={styles.autofillSub}>Pulled from your schedule for this session</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className={styles.autofillFix}
+                onClick={() => setShowCoInstructorOverride(true)}
+              >
+                Not right? Fix it
+              </button>
+            </div>
+          ) : (
+            <p className={styles.noCoInstructor}>No co-instructor on file for this session</p>
+          )}
+        </div>
+      )}
+
       {/* Who was involved */}
       <div className={styles.fieldGroup}>
         <label className={styles.fieldLabel}>Who was involved</label>
@@ -272,6 +418,19 @@ export default function IncidentReportForm({ schools }) {
         <p className={styles.fieldHint}>
           Use whatever you&apos;re comfortable with, first names are fine, this stays with admin only.
         </p>
+      </div>
+
+      {/* Activity Context */}
+      <div className={styles.fieldGroup}>
+        <label className={styles.fieldLabel}>
+          What were the kids doing when this happened?
+        </label>
+        <input
+          type="text"
+          value={activityContext}
+          onChange={(e) => setActivityContext(e.target.value)}
+          placeholder="e.g. warm-up stretches, free play, a soccer drill"
+        />
       </div>
 
       {/* What happened */}
@@ -397,6 +556,62 @@ export default function IncidentReportForm({ schools }) {
         />
       </div>
 
+      {/* Photo Upload */}
+      <div className={styles.fieldGroup}>
+        <label className={styles.fieldLabel}>
+          Attach a Photo <span className={styles.optionalLabel}>(optional)</span>
+        </label>
+        {photoPreview ? (
+          <div className={styles.photoPreview}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photoPreview} alt="Preview" className={styles.photoThumb} />
+            <div className={styles.photoInfo}>
+              <div className={styles.photoName}>{photoFile?.name}</div>
+              <div className={styles.photoSize}>{formatFileSize(photoFile?.size || 0)}</div>
+            </div>
+            <button type="button" className={styles.photoRemove} onClick={removePhoto}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div
+            className={styles.dropzone}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+            <p>Click to upload, or drag a photo here</p>
+            <div className={styles.dropzoneSub}>Useful for an injury or property damage, not required</div>
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/heic"
+          onChange={handleFileSelect}
+          className={styles.dropzoneInput}
+        />
+      </div>
+
+      {/* Certification Checkbox */}
+      <div className={styles.certCheckRow}>
+        <input
+          type="checkbox"
+          id="certCheck"
+          checked={certified}
+          onChange={(e) => setCertified(e.target.checked)}
+        />
+        <label htmlFor="certCheck">
+          I confirm this report is accurate to the best of my knowledge.
+        </label>
+      </div>
+
       {/* Privacy note */}
       <div className={styles.privacyNote}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -412,8 +627,8 @@ export default function IncidentReportForm({ schools }) {
 
       {error && <div className={styles.errorText}>{error}</div>}
 
-      <button type="submit" className={styles.submitBtn} disabled={submitting}>
-        {submitting ? "Submitting..." : "Submit Report"}
+      <button type="submit" className={styles.submitBtn} disabled={submitting || photoUploading}>
+        {photoUploading ? "Uploading photo..." : submitting ? "Submitting..." : "Submit Report"}
       </button>
     </form>
   );

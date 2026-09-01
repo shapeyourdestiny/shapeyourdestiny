@@ -248,6 +248,18 @@ CREATE TABLE IF NOT EXISTS incident_reports (
 
 ALTER TABLE incident_reports ENABLE ROW LEVEL SECURITY;
 
+-- Add new columns for enhanced incident reports (run manually)
+-- co_instructor_id: auto-filled from schedule, nullable if no co-instructor
+-- co_instructor_override: free-text if actual pairing differed from schedule
+-- activity_context: what kids were doing when incident occurred
+-- photo_url: path to uploaded photo in Supabase Storage
+-- certified: instructor confirms report accuracy
+ALTER TABLE incident_reports ADD COLUMN IF NOT EXISTS co_instructor_id UUID REFERENCES profiles(id) ON DELETE SET NULL;
+ALTER TABLE incident_reports ADD COLUMN IF NOT EXISTS co_instructor_override TEXT;
+ALTER TABLE incident_reports ADD COLUMN IF NOT EXISTS activity_context TEXT;
+ALTER TABLE incident_reports ADD COLUMN IF NOT EXISTS photo_url TEXT;
+ALTER TABLE incident_reports ADD COLUMN IF NOT EXISTS certified BOOLEAN NOT NULL DEFAULT false;
+
 -- Instructors can insert their own reports
 CREATE POLICY "Instructors can insert own incident reports"
   ON incident_reports
@@ -281,6 +293,62 @@ CREATE POLICY "Admins can update incident reports"
     )
   )
   WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
+-- =============================================================================
+-- SUPABASE STORAGE: INCIDENT PHOTOS BUCKET
+-- =============================================================================
+-- Private bucket for incident report photos (may include injury photos of minors)
+-- Only accessible by admins and the instructor who submitted the report
+
+-- Create the bucket (run in Supabase Dashboard > Storage if this doesn't work via SQL)
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('incident-photos', 'incident-photos', false)
+ON CONFLICT (id) DO NOTHING;
+
+-- Policy: Authenticated users can upload to incident-photos bucket
+CREATE POLICY "Instructors can upload incident photos"
+  ON storage.objects
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (bucket_id = 'incident-photos');
+
+-- Policy: Admins can read all incident photos
+CREATE POLICY "Admins can read incident photos"
+  ON storage.objects
+  FOR SELECT
+  TO authenticated
+  USING (
+    bucket_id = 'incident-photos' AND
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'admin'
+    )
+  );
+
+-- Policy: Instructors can read their own uploaded photos
+CREATE POLICY "Instructors can read own incident photos"
+  ON storage.objects
+  FOR SELECT
+  TO authenticated
+  USING (
+    bucket_id = 'incident-photos' AND
+    owner = auth.uid()
+  );
+
+-- Policy: Admins can delete incident photos
+CREATE POLICY "Admins can delete incident photos"
+  ON storage.objects
+  FOR DELETE
+  TO authenticated
+  USING (
+    bucket_id = 'incident-photos' AND
     EXISTS (
       SELECT 1 FROM profiles
       WHERE profiles.id = auth.uid()

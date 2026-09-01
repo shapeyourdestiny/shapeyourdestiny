@@ -47,32 +47,28 @@
 }
 
 .severityOptions {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
 @media (max-width: 600px) {
   .severityOptions {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 }
 
 .sevBtn {
-  flex: 1;
   border: 1.5px solid var(--tint-deep);
   background: var(--tint);
-  border-radius: 12px;
-  padding: 12px 8px;
+  border-radius: 14px;
+  padding: 18px 14px;
   cursor: pointer;
   text-align: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 12.5px;
-  color: var(--ink-soft);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 9px;
   transition: all 0.15s ease;
 }
 
@@ -80,84 +76,64 @@
   border-color: var(--ink-soft);
 }
 
-/* Minor - Teal */
-.sevBtn.minor {
-  border-color: rgba(62, 143, 160, 0.3);
-}
-.sevBtn.minor:hover {
-  border-color: var(--teal);
-}
+/* Minor - Teal (selected state) */
 .sevBtn.minor.selected {
   border-color: var(--teal);
-  background: rgba(62, 143, 160, 0.1);
+  background: rgba(62, 143, 160, 0.08);
+}
+.sevBtn.minor.selected .sevName {
   color: var(--teal);
 }
 
-/* Moderate - Orange */
-.sevBtn.moderate {
-  border-color: rgba(242, 166, 94, 0.35);
-}
-.sevBtn.moderate:hover {
-  border-color: var(--orange);
-}
+/* Moderate - Orange (selected state) */
 .sevBtn.moderate.selected {
   border-color: var(--orange);
-  background: rgba(242, 166, 94, 0.12);
+  background: rgba(242, 166, 94, 0.1);
+}
+.sevBtn.moderate.selected .sevName {
   color: var(--orange-dark);
 }
 
-/* Serious - Red */
-.sevBtn.serious {
-  border-color: rgba(224, 89, 76, 0.3);
-}
-.sevBtn.serious:hover {
-  border-color: var(--red);
-}
+/* Serious - Red (selected state) */
 .sevBtn.serious.selected {
   border-color: var(--red);
-  background: rgba(224, 89, 76, 0.1);
+  background: rgba(224, 89, 76, 0.08);
+}
+.sevBtn.serious.selected .sevName {
   color: var(--red);
 }
 
-/* Severity Icon Badges */
+/* Severity Icon Badges - SOLID colored backgrounds, white icons */
 .sevIcon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .sevIcon svg {
-  width: 14px;
-  height: 14px;
+  width: 19px;
+  height: 19px;
+  color: #fff;
 }
 
+/* Each severity level has its own solid background color */
 .sevIcon.minorIcon {
-  background: rgba(62, 143, 160, 0.15);
-  color: var(--teal);
-}
-.sevBtn.minor.selected .minorIcon {
   background: var(--teal);
-  color: #fff;
 }
-
 .sevIcon.moderateIcon {
-  background: rgba(242, 166, 94, 0.18);
-  color: var(--orange-dark);
-}
-.sevBtn.moderate.selected .moderateIcon {
   background: var(--orange);
-  color: #fff;
+}
+.sevIcon.seriousIcon {
+  background: var(--red);
 }
 
-.sevIcon.seriousIcon {
-  background: rgba(224, 89, 76, 0.12);
-  color: var(--red);
-}
-.sevBtn.serious.selected .seriousIcon {
-  background: var(--red);
-  color: #fff;
+.sevName {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
 }
 
 .sevSub {
@@ -338,4 +314,201 @@
   max-width: 400px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Co-Instructor Autofill Chip */
+.autofillChip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(62, 143, 160, 0.08);
+  border: 1.5px solid rgba(62, 143, 160, 0.25);
+  border-radius: 12px;
+  padding: 11px 14px;
+}
+
+.autofillLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.autofillAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 800;
+  background: #6FCB55;
+}
+
+.autofillInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.autofillName {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.autofillSub {
+  font-size: 10.5px;
+  color: var(--ink-soft);
+}
+
+.autofillFix {
+  font-size: 11.5px;
+  color: var(--navy);
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.autofillFix:hover {
+  color: var(--navy-deep);
+}
+
+.noCoInstructor {
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Photo Dropzone */
+.dropzone {
+  border: 1.5px dashed var(--tint-deep);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  background: var(--tint);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dropzone:hover {
+  border-color: var(--navy);
+  background: rgba(31, 63, 145, 0.04);
+}
+
+.dropzone svg {
+  width: 24px;
+  height: 24px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.dropzone p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.dropzoneSub {
+  font-size: 11px;
+  color: #B7C1D8;
+  margin-top: 2px;
+}
+
+.dropzoneInput {
+  display: none;
+}
+
+/* Photo Preview */
+.photoPreview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--tint);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.photoThumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex: none;
+}
+
+.photoInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.photoName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photoSize {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.photoRemove {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.photoRemove:hover {
+  background: rgba(224, 89, 76, 0.1);
+  color: var(--red);
+}
+
+.photoRemove svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* Certification Checkbox */
+.certCheckRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--tint);
+  border-radius: 12px;
+  padding: 13px 15px;
+  margin-bottom: 18px;
+}
+
+.certCheckRow input[type="checkbox"] {
+  width: auto;
+  margin-top: 2px;
+  flex: none;
+  accent-color: var(--navy);
+}
+
+.certCheckRow label {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+/* Optional label */
+.optionalLabel {
+  font-weight: 400;
+  color: var(--ink-soft);
 }
