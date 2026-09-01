@@ -1,6 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
-import styles from "./page.module.css";
-import LogoutButton from "./LogoutButton";
+import { redirect } from "next/navigation";
+import { getMyProfile } from "@/lib/instructors/self-service";
+import ProfileClient from "./ProfileClient";
 
 export const metadata = {
   title: "Profile | Shape Your Destiny",
@@ -8,44 +8,11 @@ export const metadata = {
 };
 
 export default async function InstructorProfilePage() {
-  const supabase = await createClient();
+  const profile = await getMyProfile();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  if (!profile) {
+    redirect("/instructor-login");
+  }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, role")
-    .eq("id", user.id)
-    .single();
-
-  const initial = profile?.full_name?.charAt(0)?.toUpperCase() || "I";
-
-  return (
-    <div className={styles.page}>
-      <h1 className={styles.pageTitle}>Profile</h1>
-
-      <div className={styles.card}>
-        <div className={styles.avatar}>{initial}</div>
-
-        <div className={styles.fields}>
-          <div className={styles.field}>
-            <span className={styles.label}>Name</span>
-            <span className={styles.value}>{profile?.full_name || "—"}</span>
-          </div>
-
-          <div className={styles.field}>
-            <span className={styles.label}>Email</span>
-            <span className={styles.value}>{user?.email || "—"}</span>
-          </div>
-
-          <div className={styles.field}>
-            <span className={styles.label}>Role</span>
-            <span className={styles.roleBadge}>{profile?.role || "instructor"}</span>
-          </div>
-        </div>
-
-        <LogoutButton />
-      </div>
-    </div>
-  );
+  return <ProfileClient profile={profile} />;
 }

@@ -119,6 +119,19 @@ export default function CoverageBoard({ openRequests, myRequests }) {
 
       {/* Body */}
       <div className={styles.bodyWrap}>
+        {/* Reliability Note */}
+        <div className={styles.reliabilityNote}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <path d="M12 2l2.6 6.6L22 9.2l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.2L2 9.2l7.4-.6z" />
+          </svg>
+          <p>
+            <strong>Our programs typically run just 4 to 8 weeks</strong>, so the kids in each
+            class come to count on seeing the same instructors, week after week. That consistency
+            is a real part of what makes this work for them—thank you for treating every session
+            like it matters, because it does.
+          </p>
+        </div>
+
         {/* Filter Pills */}
         <div className={styles.filterRow}>
           <button
@@ -147,8 +160,55 @@ export default function CoverageBoard({ openRequests, myRequests }) {
           <span className={styles.sectionCount}>{filteredRequests.length}</span>
         </div>
 
+        {/* You're Covering Section */}
+        {myRequests.claimed.length > 0 && (
+          <>
+            <div className={styles.sectionLabel}>
+              You&apos;re Covering
+              <span className={styles.sectionCount}>{myRequests.claimed.length}</span>
+            </div>
+            {myRequests.claimed.map((request) => (
+              <div key={request.id} className={styles.coveringCard}>
+                <div className={styles.coveringTag}>YOU&apos;RE COVERING</div>
+                <div className={styles.ccSchool}>{request.school?.name}</div>
+                <div className={styles.ccMeta}>
+                  {formatFullDate(request.date)} · {request.time}
+                </div>
+                <div className={styles.ccFor}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                  </svg>
+                  Covering for {request.requester?.name}
+                </div>
+                <button
+                  className={styles.releaseBtn}
+                  onClick={() => handleUnclaim(request.id)}
+                  disabled={loading}
+                >
+                  Release
+                </button>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* Open Requests */}
+        <div className={styles.sectionLabel} style={myRequests.claimed.length > 0 ? { marginTop: 26 } : {}}>
+          Open Requests
+          <span className={styles.sectionCount}>{filteredRequests.length}</span>
+        </div>
+
         {filteredRequests.length === 0 ? (
-          <p className={styles.emptyNote}>No open coverage requests right now.</p>
+          <div className={styles.emptyCard}>
+            <div className={styles.emptyIcon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            </div>
+            <p>Nothing open right now</p>
+            <span>Every session&apos;s covered, check back anytime.</span>
+          </div>
         ) : (
           filteredRequests.map((request) => {
             const dateBlock = formatDateBlock(request.date);
@@ -237,30 +297,6 @@ export default function CoverageBoard({ openRequests, myRequests }) {
                 <span className={`${styles.mineStatus} ${request.status === "claimed" ? styles.covered : styles.open}`}>
                   {request.status === "claimed" ? "Covered" : "Open"}
                 </span>
-              </div>
-            ))}
-          </>
-        )}
-
-        {/* Sessions I'm Covering */}
-        {myRequests.claimed.length > 0 && (
-          <>
-            <div className={styles.sectionLabel}>Sessions You&apos;re Covering</div>
-            {myRequests.claimed.map((request) => (
-              <div key={request.id} className={styles.mineCard}>
-                <div className={styles.mineInfo}>
-                  <div className={styles.mineSchool}>{request.school?.name}</div>
-                  <div className={styles.mineMeta}>
-                    {formatFullDate(request.date)} · For {request.requester?.name}
-                  </div>
-                </div>
-                <button
-                  className={styles.unclaimBtn}
-                  onClick={() => handleUnclaim(request.id)}
-                  disabled={loading}
-                >
-                  Release
-                </button>
               </div>
             ))}
           </>

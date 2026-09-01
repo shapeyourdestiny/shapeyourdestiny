@@ -170,25 +170,42 @@ export default function IncidentReportForm({ schools }) {
         <div className={styles.severityOptions}>
           <button
             type="button"
-            className={`${styles.sevBtn} ${severity === "minor" ? `${styles.selected} ${styles.minor}` : ""}`}
+            className={`${styles.sevBtn} ${styles.minor} ${severity === "minor" ? styles.selected : ""}`}
             onClick={() => setSeverity("minor")}
           >
+            <span className={`${styles.sevIcon} ${styles.minorIcon}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            </span>
             Minor
             <span className={styles.sevSub}>No injury, resolved on the spot</span>
           </button>
           <button
             type="button"
-            className={`${styles.sevBtn} ${severity === "moderate" ? `${styles.selected} ${styles.moderate}` : ""}`}
+            className={`${styles.sevBtn} ${styles.moderate} ${severity === "moderate" ? styles.selected : ""}`}
             onClick={() => setSeverity("moderate")}
           >
+            <span className={`${styles.sevIcon} ${styles.moderateIcon}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="12" cy="12" r="9" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </span>
             Moderate
             <span className={styles.sevSub}>Injury or needed real attention</span>
           </button>
           <button
             type="button"
-            className={`${styles.sevBtn} ${severity === "serious" ? `${styles.selected} ${styles.serious}` : ""}`}
+            className={`${styles.sevBtn} ${styles.serious} ${severity === "serious" ? styles.selected : ""}`}
             onClick={() => setSeverity("serious")}
           >
+            <span className={`${styles.sevIcon} ${styles.seriousIcon}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M12 9v4M12 17h.01M4.93 19h14.14a2 2 0 001.73-3L13.73 4a2 2 0 00-3.46 0L3.2 16a2 2 0 001.73 3z" />
+              </svg>
+            </span>
             Serious
             <span className={styles.sevSub}>Medical care, or needs immediate follow-up</span>
           </button>

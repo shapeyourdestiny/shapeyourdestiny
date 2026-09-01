@@ -56,6 +56,7 @@ export async function GET(request) {
         isMyRequest: req.requester?.id === user.id,
         isCoveredByMe: req.claimer?.id === user.id,
         coverageId: req.id,
+        requesterName: req.requester?.name || null,
       };
     }
 

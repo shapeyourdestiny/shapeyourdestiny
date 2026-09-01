@@ -161,6 +161,13 @@ export default function InstructorSchedule({
     return coverageStatuses[key] || null;
   };
 
+  // Get coverage status for the next session
+  const getNextSessionCoverage = () => {
+    if (!nextSession) return null;
+    const key = `${nextSession.classId}-${nextSession.date}`;
+    return coverageStatuses[key] || null;
+  };
+
   // Render Next Session hero card
   const renderNextSessionCard = () => {
     if (!nextSession) {
@@ -180,6 +187,9 @@ export default function InstructorSchedule({
       );
     }
 
+    const coverage = getNextSessionCoverage();
+    const isCoveringForSomeone = coverage?.isCoveredByMe;
+
     const countdownText =
       nextSession.daysUntil === 0
         ? "Today"
@@ -188,9 +198,11 @@ export default function InstructorSchedule({
         : `In ${nextSession.daysUntil} days`;
 
     return (
-      <div className={styles.heroCard}>
+      <div className={`${styles.heroCard} ${isCoveringForSomeone ? styles.heroCardCovering : ""}`}>
         <div className={styles.heroContent}>
-          <span className={styles.heroLabel}>Next Session</span>
+          <span className={styles.heroLabel}>
+            {isCoveringForSomeone ? "Next Up: You're Covering" : "Next Session"}
+          </span>
           <span className={styles.heroCountdown}>{countdownText}</span>
 
           <div className={styles.heroDetails}>
@@ -209,7 +221,17 @@ export default function InstructorSchedule({
               </span>
             </div>
 
-            {nextSession.coTeacher && (
+            {isCoveringForSomeone && coverage.requesterName && (
+              <div className={styles.heroCoveringFor}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+                Covering for {coverage.requesterName}
+              </div>
+            )}
+
+            {!isCoveringForSomeone && nextSession.coTeacher && (
               <div className={styles.heroCoTeacher}>
                 <div className={styles.coTeacherAvatar}>
                   {nextSession.coTeacher.name.charAt(0)}
@@ -229,7 +251,7 @@ export default function InstructorSchedule({
                 href={getDirectionsUrl(nextSession.school.address)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles.directionsBtn}
+                className={`${styles.directionsBtn} ${isCoveringForSomeone ? styles.directionsBtnCovering : ""}`}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polygon points="3 11 22 2 13 21 11 13 3 11" />
@@ -315,11 +337,16 @@ export default function InstructorSchedule({
             {days.map((day) => {
               const hasSession = day.sessions.length > 0;
               const hasHoliday = !!day.holiday;
+              // Check if any session on this day is a picked-up coverage
+              const hasCoveringSession = day.sessions.some((s) => {
+                const c = getCoverageStatus(s);
+                return c?.isCoveredByMe;
+              });
 
               return (
                 <div
                   key={day.date}
-                  className={`${styles.dayRow} ${hasSession ? styles.hasSession : ""} ${day.isToday ? styles.today : ""} ${hasHoliday ? styles.isHoliday : ""}`}
+                  className={`${styles.dayRow} ${hasSession ? styles.hasSession : ""} ${day.isToday ? styles.today : ""} ${hasHoliday ? styles.isHoliday : ""} ${hasCoveringSession ? styles.isCovering : ""}`}
                 >
                   <div className={styles.dayBadge}>
                     <span className={styles.dayName}>{day.dayName}</span>
@@ -347,19 +374,26 @@ export default function InstructorSchedule({
                         const isClaimed = coverage?.status === "claimed";
 
                         return (
-                          <div key={session.id} className={styles.sessionCard}>
+                          <div
+                            key={session.id}
+                            className={`${styles.sessionCard} ${isCoveredByMe ? styles.sessionCardCovering : ""}`}
+                          >
                             <div
                               className={styles.sessionColor}
-                              style={{ background: session.school.color }}
+                              style={{ background: isCoveredByMe ? "var(--orange)" : session.school.color }}
                             />
                             <div className={styles.sessionInfo}>
                               <span className={styles.sessionSchool}>{session.school.name}</span>
                               <span className={styles.sessionTime}>{session.time}</span>
-                              {session.coTeacher && (
+                              {isCoveredByMe && coverage.requesterName ? (
+                                <span className={styles.sessionCoveringFor}>
+                                  Covering for {coverage.requesterName}
+                                </span>
+                              ) : session.coTeacher ? (
                                 <span className={styles.sessionCoTeacher}>
                                   with {session.coTeacher.name}
                                 </span>
-                              )}
+                              ) : null}
                             </div>
                             {session.isReviewDay && (
                               <span className={styles.reviewBadge}>Review</span>
@@ -376,7 +410,7 @@ export default function InstructorSchedule({
                             )}
                             {hasCoverage && isCoveredByMe && (
                               <span className={`${styles.coverageStatus} ${styles.covering}`}>
-                                You&apos;re Covering
+                                Covering
                               </span>
                             )}
                             {session.school.address && (

@@ -13,6 +13,12 @@
   box-shadow: 0 10px 40px rgba(31, 63, 145, 0.3);
 }
 
+/* Orange hero for picked-up coverage sessions */
+.heroCardCovering {
+  background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%);
+  box-shadow: 0 10px 40px rgba(242, 166, 94, 0.35);
+}
+
 .heroEmpty {
   display: flex;
   flex-direction: column;
@@ -97,6 +103,19 @@
   opacity: 0.9;
 }
 
+.heroCoveringFor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  opacity: 0.95;
+}
+.heroCoveringFor svg {
+  width: 16px;
+  height: 16px;
+}
+
 .coTeacherAvatar {
   width: 28px;
   height: 28px;
@@ -148,6 +167,14 @@
 .directionsBtn svg {
   width: 16px;
   height: 16px;
+}
+
+.directionsBtnCovering {
+  background: var(--navy);
+  color: #fff;
+}
+.directionsBtnCovering:hover {
+  background: var(--navy-deep);
 }
 
 .viewWeekBtn {
@@ -377,6 +404,18 @@
   color: var(--ink-soft);
 }
 
+.sessionCoveringFor {
+  font-size: 12px;
+  color: var(--orange-dark);
+  font-weight: 700;
+}
+
+/* Orange treatment for picked-up coverage sessions */
+.sessionCardCovering {
+  border: 1.5px solid var(--orange);
+  background: rgba(242, 166, 94, 0.06);
+}
+
 .reviewBadge {
   padding: 4px 10px;
   background: rgba(216, 174, 75, 0.2);
@@ -455,6 +494,9 @@
 .dayRow.isHoliday {
   border: 2px solid var(--gold);
 }
+.dayRow.isCovering {
+  border-left: 3px solid var(--orange);
+}
 
 .daySessionsWrap {
   flex: 1;
@@ -524,8 +566,8 @@
   color: #4fa347;
 }
 .coverageStatus.covering {
-  background: rgba(62, 143, 160, 0.12);
-  color: var(--teal);
+  background: var(--orange);
+  color: #fff;
 }
 
 /* Coverage Request Modal */
@@ -968,6 +1010,9 @@
   }
   .dayRow.hasSession {
     border-left: 3px solid var(--teal);
+  }
+  .dayRow.isCovering {
+    border-left: 3px solid var(--orange);
   }
 
   .dayRow .dayBadge {

@@ -134,8 +134,8 @@ CREATE POLICY "Users can update own profile"
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone TEXT;
 
 -- Add certification expiration dates for instructors
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS cpr_expires DATE;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS food_handler_expires DATE;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS cpr_expiration DATE;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS food_handler_expiration DATE;
 
 -- Add status column to replace archived boolean
 -- Status values: 'active', 'invited', 'archived'
