@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "../page.module.css";
@@ -8,6 +8,8 @@ import styles from "../page.module.css";
 export default function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const fileInputRef = useRef(null);
+
   // Prefill invite code from URL
   const [inviteCode, setInviteCode] = useState(() => searchParams.get("code") || "");
   const [fullName, setFullName] = useState("");
@@ -16,16 +18,76 @@ export default function RegisterForm() {
   const [password, setPassword] = useState("");
   const [cprExpires, setCprExpires] = useState("");
   const [foodHandlerExpires, setFoodHandlerExpires] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handlePhotoSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setError("Please upload a JPEG, PNG, or WebP image.");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Photo must be under 5MB.");
+      return;
+    }
+
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+    setError("");
+  };
+
+  const removePhoto = () => {
+    setPhotoFile(null);
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview);
+    }
+    setPhotoPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    // Validate photo is required
+    if (!photoFile) {
+      setError("Please upload a profile photo.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Call the API route which uses admin client to bypass RLS
+      // First, upload the photo
+      const formData = new FormData();
+      formData.append("file", photoFile);
+      formData.append("inviteCode", inviteCode.trim());
+
+      const uploadRes = await fetch("/api/auth/upload-avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      const uploadData = await uploadRes.json();
+
+      if (!uploadRes.ok) {
+        setError(uploadData.error || "Failed to upload photo.");
+        setLoading(false);
+        return;
+      }
+
+      // Now call the registration API with the avatar URL
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -37,6 +99,7 @@ export default function RegisterForm() {
           password,
           cprExpires: cprExpires || null,
           foodHandlerExpires: foodHandlerExpires || null,
+          avatarUrl: uploadData.url,
         }),
       });
 
@@ -82,6 +145,44 @@ export default function RegisterForm() {
           required
           placeholder="Enter your invite code"
           autoComplete="off"
+        />
+      </div>
+
+      {/* Profile Photo Upload */}
+      <div className={styles.field}>
+        <label>Profile Photo <span className={styles.required}>*</span></label>
+        <p className={styles.photoHint}>
+          This photo will be visible to other instructors and admin.
+        </p>
+        {photoPreview ? (
+          <div className={styles.photoPreview}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photoPreview} alt="Preview" className={styles.photoThumb} />
+            <div className={styles.photoInfo}>
+              <span className={styles.photoName}>{photoFile?.name}</span>
+              <button type="button" className={styles.photoRemove} onClick={removePhoto}>
+                Remove
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div
+            className={styles.photoDropzone}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+            </svg>
+            <span>Click to upload your photo</span>
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handlePhotoSelect}
+          style={{ display: "none" }}
         />
       </div>
 

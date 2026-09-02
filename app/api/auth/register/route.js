@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request) {
-  const { inviteCode, fullName, phone, email, password, cprExpires, foodHandlerExpires } = await request.json();
+  const { inviteCode, fullName, phone, email, password, cprExpires, foodHandlerExpires, avatarUrl } = await request.json();
 
   if (!inviteCode || !fullName || !phone || !email || !password) {
     return Response.json({ error: "All fields are required" }, { status: 400 });
@@ -60,6 +60,9 @@ export async function POST(request) {
   }
   if (foodHandlerExpires) {
     profileData.food_handler_expires = foodHandlerExpires;
+  }
+  if (avatarUrl) {
+    profileData.avatar_url = avatarUrl;
   }
 
   const { error: profileError } = await adminClient

@@ -22,7 +22,7 @@ export default async function InstructorLayout({ children }) {
   let profile;
   const { data: profileWithStatus, error: statusError } = await supabase
     .from("profiles")
-    .select("full_name, role, status")
+    .select("full_name, role, status, avatar_url")
     .eq("id", user.id)
     .single();
 
@@ -37,7 +37,7 @@ export default async function InstructorLayout({ children }) {
     // status column doesn't exist, fall back to archived
     const { data: profileWithArchived } = await supabase
       .from("profiles")
-      .select("full_name, role, archived")
+      .select("full_name, role, archived, avatar_url")
       .eq("id", user.id)
       .single();
 

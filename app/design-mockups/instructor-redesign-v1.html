@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instructor Side Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F3F91;--navy-deep:#142C6B;--gold:#D8AE4B;--orange:#F2A65E;--orange-dark:#E08A3C;
+    --teal:#3E8FA0;--teal-dark:#2C6E7D;--green:#4FA347;--paper:#fff;--tint:#EAF1FC;--tint-deep:#DCE8FB;
+    --ink:#16193B;--ink-soft:#4A5170;--red:#E0594C;--shadow:0 10px 28px rgba(20,44,107,0.09);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#c7cfe8;font-family:'Nunito',sans-serif;padding:30px 16px;}
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;font-weight:700;margin:0;}
+  button{font-family:inherit;}
+
+  .frame{max-width:390px;margin:0 auto 50px;background:var(--tint);border-radius:28px;overflow:hidden;box-shadow:0 20px 50px rgba(20,44,107,0.25);}
+  .frame-label{max-width:390px;margin:0 auto 10px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;color:var(--navy-deep);text-transform:uppercase;letter-spacing:.04em;text-align:center;}
+
+  .topbar{display:flex;align-items:center;justify-content:center;background:var(--navy);padding:14px;}
+  .topbar img{height:30px;display:block;}
+  .topbar .logo-fallback{display:none;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:14px;align-items:center;gap:7px;}
+  .topbar svg{width:20px;height:20px;color:var(--gold);}
+
+  .content{padding:18px 18px 20px;min-height:400px;}
+
+  /* ============ COVERAGE BOARD ============ */
+  .hero{background:linear-gradient(155deg, var(--navy) 0%, var(--navy-deep) 100%);border-radius:20px;padding:22px 20px;color:#fff;margin-bottom:18px;position:relative;overflow:hidden;}
+  .hero::before{content:"";position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle, rgba(216,174,75,0.18), transparent 70%);}
+  .hero-eyebrow{position:relative;z-index:1;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+  .hero h2{position:relative;z-index:1;color:#fff;font-size:19px;line-height:1.25;margin-bottom:8px;}
+  .hero p{position:relative;z-index:1;color:#C4D0EE;font-size:12.5px;margin:0 0 16px;line-height:1.5;}
+  .hero-stats{position:relative;z-index:1;display:flex;gap:10px;}
+  .hstat{flex:1;background:rgba(255,255,255,0.09);border-radius:14px;padding:12px 14px;}
+  .hstat-num{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;}
+  .hstat-label{font-size:10.5px;color:#9AABD6;margin-top:2px;}
+
+  .filter-row{display:flex;gap:7px;margin-bottom:18px;overflow-x:auto;}
+  .reliability-note{
+    display:flex;gap:10px;align-items:flex-start;background:rgba(31,63,145,0.05);
+    border:1.5px solid rgba(31,63,145,0.14);border-radius:14px;padding:13px 15px;margin-bottom:16px;
+  }
+  .reliability-note svg{width:16px;height:16px;color:var(--navy);flex:none;margin-top:1px;}
+  .reliability-note p{margin:0;font-size:11.5px;line-height:1.55;color:var(--ink-soft);}
+  .reliability-note strong{color:var(--ink);}
+  .filter-pill{border:1.5px solid var(--tint-deep);background:var(--paper);color:var(--ink-soft);padding:8px 15px;border-radius:999px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;white-space:nowrap;}
+  .filter-pill.active{border-color:var(--navy);background:var(--navy);color:#fff;}
+
+  .section-title{display:flex;align-items:center;gap:8px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;color:var(--navy);margin-bottom:12px;}
+  .section-count{background:var(--tint-deep);color:var(--ink-soft);font-family:'Nunito',sans-serif;font-weight:800;font-size:10.5px;padding:2px 8px;border-radius:999px;}
+
+  /* fixed empty state: real card, icon, friendly copy, not floating text */
+  .empty-card{background:var(--paper);border-radius:18px;padding:34px 24px;text-align:center;box-shadow:var(--shadow);}
+  .empty-icon{width:52px;height:52px;border-radius:50%;background:var(--tint);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+  .empty-icon svg{width:24px;height:24px;color:var(--teal);}
+  .empty-card p{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);margin:0 0 4px;}
+  .empty-card span{font-size:12px;color:var(--ink-soft);}
+
+  /* picked-up coverage: deliberately louder than a normal session, orange not program-teal/navy */
+  .covering-card{
+    background:var(--paper);border-radius:16px;padding:14px 15px;margin-bottom:10px;box-shadow:var(--shadow);
+    border:1.5px solid var(--orange);position:relative;overflow:hidden;
+  }
+  .covering-card::before{content:"YOU'RE COVERING";position:absolute;top:0;right:0;background:var(--orange);color:#fff;font-family:'Nunito',sans-serif;font-weight:800;font-size:8.5px;letter-spacing:.04em;padding:3px 10px 3px 12px;border-radius:0 0 0 10px;}
+  .cc-school{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13.5px;margin-top:6px;}
+  .cc-meta{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .cc-for{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--orange-dark);margin-top:6px;font-weight:800;}
+
+  /* ============ INCIDENT REPORT ============ */
+  .ir-head{margin-bottom:16px;}
+  .ir-head h1{font-size:20px;}
+  .ir-head p{font-size:12.5px;color:var(--ink-soft);margin-top:5px;line-height:1.5;}
+
+  .ir-card{background:var(--paper);border-radius:20px;padding:22px 20px;box-shadow:var(--shadow);}
+  .field-label{display:block;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;margin-bottom:10px;}
+  .required-star{color:var(--red);}
+
+  /* fixed: real color-coded severity, not identical gray boxes */
+  .sev-group{display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
+  .sev-btn{
+    display:flex;align-items:center;gap:12px;border-radius:14px;padding:13px 15px;cursor:pointer;text-align:left;
+    border:1.5px solid var(--tint-deep);background:var(--tint);
+  }
+  .sev-icon{width:34px;height:34px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;}
+  .sev-icon svg{width:17px;height:17px;color:#fff;}
+  .sev-name{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13.5px;}
+  .sev-sub{font-size:11px;color:var(--ink-soft);margin-top:1px;}
+  .sev-btn.minor{border-color:var(--teal);background:rgba(62,143,160,0.07);}
+  .sev-btn.minor .sev-icon{background:var(--teal);}
+  .sev-btn.minor .sev-name{color:var(--teal-dark);}
+  .sev-btn.moderate .sev-icon{background:var(--orange);}
+  .sev-btn.serious .sev-icon{background:var(--red);}
+
+  .field-group{margin-bottom:16px;}
+  select, textarea, input{width:100%;border:1.5px solid var(--tint-deep);border-radius:12px;padding:11px 14px;font-family:'Nunito',sans-serif;font-size:13.5px;background:var(--tint);color:var(--ink);}
+  select:focus, textarea:focus, input:focus{outline:none;border-color:var(--navy);background:#fff;}
+
+  /* ============ PROFILE ============ */
+  .profile-hero{background:linear-gradient(155deg, var(--navy) 0%, var(--navy-deep) 100%);border-radius:20px;padding:24px 20px;color:#fff;text-align:center;margin-bottom:16px;}
+  .profile-avatar{width:64px;height:64px;border-radius:50%;background:var(--gold);color:var(--navy-deep);display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;margin:0 auto 12px;}
+  .profile-name{font-size:18px;color:#fff;}
+  .profile-role{display:inline-block;background:rgba(255,255,255,0.15);color:#fff;font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;padding:3px 11px;border-radius:999px;margin-top:6px;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+  .pstat{background:var(--paper);border-radius:16px;padding:15px;box-shadow:var(--shadow);text-align:center;}
+  .pstat-num{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:21px;color:var(--navy);}
+  .pstat-label{font-size:10.5px;color:var(--ink-soft);margin-top:3px;}
+
+  .info-card{background:var(--paper);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--tint);}
+  .info-row:last-child{border-bottom:none;}
+  .info-row-label{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;font-weight:800;}
+  .info-row-val{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;}
+
+  .logout-btn{width:100%;background:none;border:1.5px solid var(--red);color:var(--red);border-radius:999px;padding:13px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:14px;cursor:pointer;}
+
+  .cert-card{background:var(--paper);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .cert-card h3{font-size:13px;margin-bottom:12px;}
+  .cert-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--tint);}
+  .cert-row:last-child{border-bottom:none;}
+  .cert-icon{width:34px;height:34px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;}
+  .cert-icon svg{width:16px;height:16px;color:#fff;}
+  .cert-info{flex:1;min-width:0;}
+  .cert-name{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;}
+  .cert-meta{font-size:11px;color:var(--ink-soft);margin-top:1px;}
+  .cert-right{display:flex;align-items:center;gap:8px;flex:none;}
+  .cert-status{font-family:'Nunito',sans-serif;font-weight:800;font-size:10px;padding:3px 9px;border-radius:999px;}
+  .cert-status.valid{background:rgba(79,163,71,0.12);color:var(--green);}
+  .cert-status.expiring{background:rgba(242,166,94,0.14);color:var(--orange-dark);}
+  .cert-status.expired{background:rgba(224,89,76,0.12);color:var(--red);}
+  .cert-status.optional{background:var(--tint-deep);color:var(--ink-soft);}
+  .cert-edit-btn{background:var(--tint);border:none;border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);}
+  .cert-edit-btn svg{width:13px;height:13px;}
+
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,44,107,0.4);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .cert-modal{background:var(--paper);border-radius:20px;max-width:340px;width:100%;padding:24px;}
+  .cert-modal h3{font-size:16px;margin-bottom:14px;}
+  .cert-modal .field-label{margin-bottom:8px;}
+  .cert-modal input[type=date]{margin-bottom:14px;}
+  .no-cert-toggle{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:12.5px;color:var(--ink-soft);}
+  .cert-modal-actions{display:flex;gap:10px;}
+  .cert-cancel{flex:1;background:none;border:1.5px solid var(--tint-deep);border-radius:999px;padding:10px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink-soft);}
+  .cert-save{flex:1;background:var(--navy);color:#fff;border:none;border-radius:999px;padding:10px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;}
+  .sync-note{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--ink-soft);margin-top:12px;padding-top:12px;border-top:1px solid var(--tint);}
+  .sync-note svg{width:12px;height:12px;color:var(--teal);flex:none;}
+
+  /* ============ SCHEDULE, with a picked-up session ============ */
+  .sched-hero{background:linear-gradient(155deg, var(--orange) 0%, var(--orange-dark) 100%);border-radius:20px;padding:22px 20px;color:#fff;margin-bottom:18px;position:relative;overflow:hidden;}
+  .sched-hero-eyebrow{display:flex;align-items:center;gap:6px;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#fff;margin-bottom:8px;}
+  .sched-hero-eyebrow svg{width:13px;height:13px;}
+  .sched-hero h2{color:#fff;font-size:18px;margin-bottom:8px;}
+  .sched-hero-meta{display:flex;align-items:center;gap:7px;font-size:12.5px;color:rgba(255,255,255,0.9);margin-bottom:6px;}
+  .sched-hero-meta svg{width:14px;height:14px;flex:none;}
+  .sched-hero-for{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border-radius:10px;padding:8px 12px;margin-top:12px;font-size:12px;}
+
+  .week-nav{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
+  .week-nav span{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;}
+  .week-nav button{background:var(--paper);border:none;border-radius:9px;width:26px;height:26px;color:var(--navy);box-shadow:var(--shadow);}
+
+  .day-row{display:flex;align-items:center;gap:12px;background:var(--paper);border-radius:12px;padding:10px 14px;margin-bottom:6px;box-shadow:var(--shadow);}
+  .day-row.regular{border-left:3px solid var(--teal);}
+  .day-row.picked-up{border:1.5px solid var(--orange);border-left-width:3px;background:rgba(242,166,94,0.05);}
+  .day-badge{width:42px;flex:none;}
+  .day-badge .dname{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:11.5px;color:var(--navy);}
+  .day-badge .ddate{font-size:10px;color:var(--ink-soft);}
+  .day-info{flex:1;min-width:0;}
+  .day-school{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:12.5px;}
+  .day-time{font-size:10.5px;color:var(--ink-soft);}
+  .day-empty-text{font-size:11.5px;color:#B7C1D8;font-style:italic;}
+  .picked-tag{font-family:'Nunito',sans-serif;font-weight:800;font-size:8.5px;color:#fff;background:var(--orange);padding:2px 7px;border-radius:999px;flex:none;}
+
+  .bottom-tabs{display:flex;background:var(--paper);border-top:1px solid var(--tint-deep);padding:9px 0;}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--ink-soft);}
+  .tab-btn svg{width:20px;height:20px;}
+  .tab-btn span{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:9.5px;}
+  .tab-btn.active{color:var(--navy);}
+  .tab-btn.active svg{color:var(--orange);}
+</style>
+</head>
+<body>
+
+<div class="frame-label">0. Main Schedule, with a picked-up session mixed in</div>
+<div class="frame">
+  <div class="topbar">
+    <img src="/images/footer_logo_gold.webp" alt="Shape Your Destiny" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-fallback"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.6L22 9.2l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.2L2 9.2l7.4-.6z"/></svg>Shape Your Destiny</div>
+  </div>
+  <div class="content">
+    <div class="sched-hero">
+      <div class="sched-hero-eyebrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Next Up: You're Covering
+      </div>
+      <h2>Palmetto Elementary</h2>
+      <div class="sched-hero-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Wed, Sep 23 &middot; 2:30&ndash;4:30pm</div>
+      <div class="sched-hero-for">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        This isn't your usual class, you're covering for Heather Swear
+      </div>
+    </div>
+
+    <div class="week-nav">
+      <button>&lsaquo;</button><span>Sep 21&ndash;25, 2026</span><button>&rsaquo;</button>
+    </div>
+
+    <div class="day-row"><div class="day-badge"><div class="dname">Mon</div><div class="ddate">Sep 21</div></div><span class="day-empty-text">No session</span></div>
+    <div class="day-row"><div class="day-badge"><div class="dname">Tue</div><div class="ddate">Sep 22</div></div><span class="day-empty-text">No session</span></div>
+    <div class="day-row picked-up">
+      <div class="day-badge"><div class="dname">Wed</div><div class="ddate">Sep 23</div></div>
+      <div class="day-info"><div class="day-school">Palmetto Elementary</div><div class="day-time">2:30&ndash;4:30pm &middot; Covering for Heather Swear</div></div>
+      <span class="picked-tag">COVERING</span>
+    </div>
+    <div class="day-row regular">
+      <div class="day-badge"><div class="dname">Thu</div><div class="ddate">Sep 24</div></div>
+      <div class="day-info"><div class="day-school">Ruben S. Ayala High</div><div class="day-time">4:00&ndash;5:30pm</div></div>
+    </div>
+    <div class="day-row"><div class="day-badge"><div class="dname">Fri</div><div class="ddate">Sep 25</div></div><span class="day-empty-text">No session</span></div>
+  </div>
+  <div class="bottom-tabs">
+    <button class="tab-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>SCHEDULE</span></button>
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>COVERAGE</span></button>
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg><span>INCIDENT</span></button>
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>PROFILE</span></button>
+  </div>
+</div>
+
+<div class="frame-label">1. Coverage Board, redesigned empty state</div>
+<div class="frame">
+  <div class="topbar">
+    <img src="/images/footer_logo_gold.webp" alt="Shape Your Destiny" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-fallback"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.6L22 9.2l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.2L2 9.2l7.4-.6z"/></svg>Shape Your Destiny</div>
+  </div>
+  <div class="content">
+    <div class="hero">
+      <div class="hero-eyebrow">Coverage Board</div>
+      <h2>Pick up a session, help a fellow instructor</h2>
+      <p>First to claim gets it, thank you for stepping up when a teammate needs you.</p>
+      <div class="hero-stats">
+        <div class="hstat"><div class="hstat-num">0</div><div class="hstat-label">Open Now</div></div>
+        <div class="hstat"><div class="hstat-num">0</div><div class="hstat-label">You're Covering</div></div>
+      </div>
+    </div>
+    <div class="reliability-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2l2.6 6.6L22 9.2l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.2L2 9.2l7.4-.6z"/></svg>
+      <p><strong>Our programs typically run just 4 to 8 weeks</strong>, so the kids in each class come to count on seeing the same instructors, week after week. That consistency is a real part of what makes this work for them, thank you for treating every session like it matters, because it does.</p>
+    </div>
+    <div class="filter-row">
+      <button class="filter-pill active">All</button>
+      <button class="filter-pill">Youth Wellness</button>
+      <button class="filter-pill">Soccer</button>
+    </div>
+    <div class="section-title">You're Covering <span class="section-count">1</span></div>
+    <div class="covering-card">
+      <div class="cc-school">Palmetto Elementary</div>
+      <div class="cc-meta">Wed, Sep 23 &middot; 2:30&ndash;4:30pm</div>
+      <div class="cc-for">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Covering for Heather Swear
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:20px;">Open Requests <span class="section-count">0</span></div>
+    <div class="empty-card">
+      <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <p>Nothing open right now</p>
+      <span>Every session's covered, check back anytime.</span>
+    </div>
+  </div>
+  <div class="bottom-tabs">
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>SCHEDULE</span></button>
+    <button class="tab-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>COVERAGE</span></button>
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg><span>INCIDENT</span></button>
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>PROFILE</span></button>
+  </div>
+</div>
+
+<div class="frame-label">2. Incident Report, color-coded severity restored</div>
+<div class="frame">
+  <div class="topbar">
+    <img src="/images/footer_logo_gold.webp" alt="Shape Your Destiny" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-fallback"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.6L22 9.2l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.2L2 9.2l7.4-.6z"/></svg>Shape Your Destiny</div>
+  </div>
+  <div class="content">
+    <div class="ir-head">
+      <h1>Report an Incident</h1>
+      <p>File this as soon as possible after anything happens, even if it seems minor.</p>
+    </div>
+    <div class="ir-card">
+      <label class="field-label">How serious was it? <span class="required-star">*</span></label>
+      <div class="sev-group">
+        <button class="sev-btn minor">
+          <div class="sev-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></div>
+          <div><div class="sev-name">Minor</div><div class="sev-sub">No injury, resolved on the spot</div></div>
+        </button>
+        <button class="sev-btn moderate">
+          <div class="sev-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
+          <div><div class="sev-name">Moderate</div><div class="sev-sub">Injury or needed real attention</div></div>
+        </button>
+        <button class="sev-btn serious">
+          <div class="sev-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
+          <div><div class="sev-name">Serious</div><div class="sev-sub">Medical care, or immediate follow-up</div></div>
+        </button>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Type <span class="required-star">*</span></label>
+        <select><option>Select type&hellip;</option></select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Date &amp; Time <span class="required-star">*</span></label>
+        <input type="text" value="Sep 1, 2026 at 3:26 PM">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Where did this happen? <span class="required-star">*</span></label>
+        <select><option>Select location&hellip;</option></select>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-tabs">
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>SCHEDULE</span></button>
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>COVERAGE</span></button>
+    <button class="tab-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg><span>INCIDENT</span></button>
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>PROFILE</span></button>
+  </div>
+</div>
+
+<div class="frame-label">3. Profile, given real content instead of empty space</div>
+<div class="frame">
+  <div class="topbar">
+    <img src="/images/footer_logo_gold.webp" alt="Shape Your Destiny" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="logo-fallback"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.6L22 9.2l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.2L2 9.2l7.4-.6z"/></svg>Shape Your Destiny</div>
+  </div>
+  <div class="content">
+    <div class="profile-hero">
+      <div class="profile-avatar">J</div>
+      <div class="profile-name">Jane Doe</div>
+      <span class="profile-role">Instructor</span>
+    </div>
+    <div class="stat-row">
+      <div class="pstat"><div class="pstat-num">14</div><div class="pstat-label">Sessions Taught</div></div>
+      <div class="pstat"><div class="pstat-num">2</div><div class="pstat-label">Districts</div></div>
+    </div>
+    <div class="info-card">
+      <div class="info-row"><span class="info-row-label">Email</span><span class="info-row-val">swearheather@gmail.com</span></div>
+      <div class="info-row"><span class="info-row-label">Joined</span><span class="info-row-val">Aug 2026</span></div>
+    </div>
+
+    <div class="cert-card">
+      <h3>Certifications</h3>
+      <div class="cert-row">
+        <div class="cert-icon" style="background:var(--orange-dark);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <div class="cert-info">
+          <div class="cert-name">CPR Certification</div>
+          <div class="cert-meta" id="cprMeta">Expires Oct 3, 2026</div>
+        </div>
+        <div class="cert-right">
+          <span class="cert-status expiring" id="cprStatus">Expiring Soon</span>
+          <button class="cert-edit-btn" id="editCpr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg></button>
+        </div>
+      </div>
+      <div class="cert-row">
+        <div class="cert-icon" style="background:#B7C1D8;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3h18v4H3zM5 7v13h14V7M9 12h6"/></svg></div>
+        <div class="cert-info">
+          <div class="cert-name">Food Handler's Card <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></div>
+          <div class="cert-meta" id="foodMeta">Not on file</div>
+        </div>
+        <div class="cert-right">
+          <span class="cert-status optional" id="foodStatus">Optional</span>
+          <button class="cert-edit-btn" id="editFood"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg></button>
+        </div>
+      </div>
+      <div class="sync-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>
+        Updates here save directly, Destiny and Heather see the same info immediately.
+      </div>
+    </div>
+
+    <div style="height:2px;"></div>
+    <button class="logout-btn">Log Out</button>
+  </div>
+  <div class="bottom-tabs">
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>SCHEDULE</span></button>
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>COVERAGE</span></button>
+    <button class="tab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg><span>INCIDENT</span></button>
+    <button class="tab-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>PROFILE</span></button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="certModal">
+  <div class="cert-modal">
+    <h3 id="certModalTitle">Update CPR Certification</h3>
+    <div id="noCertToggleWrap" class="no-cert-toggle" style="display:none;">
+      <input type="checkbox" id="noCertCheck">
+      <label for="noCertCheck">I don't have this certification</label>
+    </div>
+    <label class="field-label">Expiration Date</label>
+    <input type="date" id="certDateInput">
+    <div class="cert-modal-actions">
+      <button class="cert-cancel" id="certCancel">Cancel</button>
+      <button class="cert-save" id="certSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function computeStatus(dateStr){
+    if(!dateStr) return null;
+    const exp = new Date(dateStr);
+    const today = new Date('2026-09-01');
+    const daysLeft = (exp - today) / 86400000;
+    if(daysLeft < 0) return { label:'Expired', cls:'expired' };
+    if(daysLeft <= 45) return { label:'Expiring Soon', cls:'expiring' };
+    return { label:'Valid', cls:'valid' };
+  }
+  function fmtDate(dateStr){
+    return new Date(dateStr).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  let editingCert = null; // 'cpr' | 'food'
+
+  function openCertModal(type){
+    editingCert = type;
+    const modal = document.getElementById('certModal');
+    const toggleWrap = document.getElementById('noCertToggleWrap');
+    const noCertCheck = document.getElementById('noCertCheck');
+    document.getElementById('certModalTitle').textContent = type === 'cpr' ? 'Update CPR Certification' : "Update Food Handler's Card";
+    toggleWrap.style.display = type === 'food' ? 'flex' : 'none';
+    noCertCheck.checked = false;
+    document.getElementById('certDateInput').value = '';
+    document.getElementById('certDateInput').style.display = 'block';
+    modal.classList.add('open');
+  }
+
+  document.getElementById('editCpr').addEventListener('click', () => openCertModal('cpr'));
+  document.getElementById('editFood').addEventListener('click', () => openCertModal('food'));
+  document.getElementById('certCancel').addEventListener('click', () => document.getElementById('certModal').classList.remove('open'));
+
+  document.getElementById('noCertCheck').addEventListener('change', (e) => {
+    document.getElementById('certDateInput').style.display = e.target.checked ? 'none' : 'block';
+  });
+
+  document.getElementById('certSave').addEventListener('click', () => {
+    const dateVal = document.getElementById('certDateInput').value;
+    const noCert = document.getElementById('noCertCheck').checked;
+
+    if(editingCert === 'cpr'){
+      const status = computeStatus(dateVal);
+      document.getElementById('cprMeta').textContent = dateVal ? `Expires ${fmtDate(dateVal)}` : 'Expires Oct 3, 2026';
+      if(status){
+        const el = document.getElementById('cprStatus');
+        el.textContent = status.label;
+        el.className = 'cert-status ' + status.cls;
+      }
+    } else {
+      const metaEl = document.getElementById('foodMeta');
+      const statusEl = document.getElementById('foodStatus');
+      if(noCert || !dateVal){
+        metaEl.textContent = 'Not on file';
+        statusEl.textContent = 'Optional';
+        statusEl.className = 'cert-status optional';
+      } else {
+        const status = computeStatus(dateVal);
+        metaEl.textContent = `Expires ${fmtDate(dateVal)}`;
+        statusEl.textContent = status.label;
+        statusEl.className = 'cert-status ' + status.cls;
+      }
+    }
+    document.getElementById('certModal').classList.remove('open');
+  });
+</script>
+
+</body>
+</html>
