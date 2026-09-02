@@ -109,10 +109,6 @@ export default function CoverageBoard({ openRequests, myRequests }) {
               <div className={styles.heroStatNum}>{openCount}</div>
               <div className={styles.heroStatLabel}>Open Now</div>
             </div>
-            <div className={styles.heroStat}>
-              <div className={styles.heroStatNum}>{claimedCount}</div>
-              <div className={styles.heroStatLabel}>You&apos;re Covering</div>
-            </div>
           </div>
         </div>
       </div>
