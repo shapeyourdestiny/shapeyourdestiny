@@ -56,10 +56,10 @@ export async function POST(request) {
 
   // Add certification dates if the columns exist (may need migration)
   if (cprExpires) {
-    profileData.cpr_expires = cprExpires;
+    profileData.cpr_expiration = cprExpires;
   }
   if (foodHandlerExpires) {
-    profileData.food_handler_expires = foodHandlerExpires;
+    profileData.food_handler_expiration = foodHandlerExpires;
   }
   if (avatarUrl) {
     profileData.avatar_url = avatarUrl;
