@@ -419,6 +419,255 @@
   cursor: not-allowed;
 }
 
+/* Staff Page Section */
+.staffSection {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 24px rgba(20, 44, 107, 0.08);
+  margin-bottom: 18px;
+}
+
+.staffHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.staffHeader h3 {
+  font-size: 13.5px;
+  margin: 0;
+}
+
+.staffBadge {
+  display: inline-flex;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 10.5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.staffBadge.live {
+  background: rgba(79, 163, 71, 0.12);
+  color: #4FA347;
+}
+
+.staffBadge.hidden {
+  background: rgba(242, 166, 94, 0.14);
+  color: var(--orange-dark);
+}
+
+.staffBadge.deactivated {
+  background: var(--tint-deep);
+  color: var(--ink-soft);
+}
+
+.staffGrid {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.headshotArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.headshotPreview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid var(--tint-deep);
+}
+
+.headshotPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.headshotPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #d0ddf0 0%, #b8c9e6 100%);
+}
+
+.headshotPlaceholder svg {
+  width: 50%;
+  height: 50%;
+  opacity: 0.4;
+}
+
+.uploadBtn,
+.removeBtn {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+
+.uploadBtn {
+  background: var(--navy);
+  color: #fff;
+}
+
+.uploadBtn:hover {
+  background: var(--navy-deep);
+}
+
+.removeBtn {
+  background: transparent;
+  color: #E0594C;
+  border: 1.5px solid #E0594C;
+}
+
+.removeBtn:hover {
+  background: rgba(224, 89, 76, 0.08);
+}
+
+.staffFields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fieldGroup.full {
+  grid-column: 1 / -1;
+}
+
+.fieldGroup label {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.fieldGroup input,
+.fieldGroup select,
+.fieldGroup textarea {
+  padding: 10px 12px;
+  border: 2px solid var(--tint-deep);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--paper);
+  transition: border-color 0.15s ease;
+}
+
+.fieldGroup input:focus,
+.fieldGroup select:focus,
+.fieldGroup textarea:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+.fieldGroup textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.charCount {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-align: right;
+  margin-top: 2px;
+}
+
+.charCount.over {
+  color: #E0594C;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 1px solid var(--tint);
+}
+
+.toggleLabel {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.toggleLabel span {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--tint-deep);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.toggle.on {
+  background: #4FA347;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toggle.on::after {
+  transform: translateX(20px);
+}
+
+.staffActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--tint);
+}
+
 /* Responsive */
 @media (max-width: 700px) {
   .statRow {
@@ -445,5 +694,23 @@
 
   .editBtn {
     align-self: flex-start;
+  }
+
+  .staffGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .headshotArea {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .headshotPreview {
+    width: 80px;
+    height: 80px;
+  }
+
+  .fieldRow {
+    grid-template-columns: 1fr;
   }
 }

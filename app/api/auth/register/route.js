@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { revalidateTag } from "next/cache";
 
 export async function POST(request) {
   const { inviteCode, fullName, phone, email, password, cprExpires, foodHandlerExpires, avatarUrl } = await request.json();
@@ -79,6 +80,9 @@ export async function POST(request) {
     .from("invite_codes")
     .update({ used_by: userId })
     .eq("id", inviteData.id);
+
+  // 5. Revalidate staff page cache
+  revalidateTag("staff");
 
   return Response.json({ success: true });
 }

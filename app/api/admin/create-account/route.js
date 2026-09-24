@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWelcomeEmail } from "@/lib/email";
+import { revalidateTag } from "next/cache";
 
 export async function POST(request) {
   const supabase = await createClient();
@@ -98,6 +99,9 @@ export async function POST(request) {
     await adminClient.auth.admin.deleteUser(userId);
     return Response.json({ error: "Failed to create profile: " + profileError.message }, { status: 500 });
   }
+
+  // Revalidate staff page cache
+  revalidateTag("staff");
 
   // Send welcome email
   try {

@@ -10,6 +10,7 @@ import {
   updateInstructorAction,
 } from "@/lib/instructors/actions";
 import Modal from "@/app/admin/components/Modal";
+import StaffPageSection from "./StaffPageSection";
 
 const AVATAR_COLORS = [
   "#D8AE4B",
@@ -312,6 +313,8 @@ export default function InstructorDetail({ instructor }) {
           <div className={styles.emptyNote}>No upcoming sessions scheduled</div>
         )}
       </div>
+
+      <StaffPageSection instructor={instructor} />
 
       <div className={styles.sectionCard}>
         <h3>Account Actions</h3>
