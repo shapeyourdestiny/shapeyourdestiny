@@ -1,19 +1,20 @@
 .container {
   width: 100%;
+  position: relative;
 }
 
 /* Controls row */
 .controlsRow {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 16px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .searchWrap {
   position: relative;
-  flex: 1;
-  min-width: 200px;
+  width: 240px;
 }
 
 .searchIcon {
@@ -42,12 +43,22 @@
   border-color: var(--navy);
 }
 
+.filterRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 1;
+}
+
 .statusFilter {
   display: flex;
   gap: 6px;
 }
 
 .filterPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border: 1.5px solid var(--tint-deep);
   background: var(--paper);
   color: var(--ink-soft);
@@ -76,6 +87,84 @@
   color: #fff;
 }
 
+.pillCount {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.needsChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid #F2A65E;
+  background: rgba(242, 166, 94, 0.08);
+  color: #E08A3C;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.needsChip:hover {
+  background: rgba(242, 166, 94, 0.15);
+}
+
+.needsChipActive {
+  background: #F2A65E;
+  color: #fff;
+}
+
+.headerActions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.arrangeBtn,
+.viewBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.arrangeBtn {
+  background: var(--paper);
+  border: 1.5px solid var(--tint-deep);
+  color: var(--ink);
+}
+
+.arrangeBtn:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+
+.arrangeBtn svg,
+.viewBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.viewBtn {
+  background: var(--navy);
+  border: none;
+  color: #fff;
+}
+
+.viewBtn:hover {
+  background: var(--navy-deep);
+}
+
 /* List card */
 .listCard {
   background: var(--paper);
@@ -86,7 +175,7 @@
 
 .listHead {
   display: grid;
-  grid-template-columns: 2fr 1fr 1.2fr 0.8fr 1fr;
+  grid-template-columns: 2fr 0.8fr 1.2fr 0.6fr 0.9fr 1.1fr;
   gap: 10px;
   padding: 14px 20px;
   border-bottom: 2px solid var(--tint);
@@ -108,7 +197,7 @@
 
 .listRow {
   display: grid;
-  grid-template-columns: 2fr 1fr 1.2fr 0.8fr 1fr;
+  grid-template-columns: 2fr 0.8fr 1.2fr 0.6fr 0.9fr 1.1fr;
   gap: 10px;
   align-items: center;
   padding: 14px 20px;
@@ -119,6 +208,10 @@
 
 .listRow:hover {
   background: var(--tint);
+}
+
+.listRowSelected {
+  background: rgba(31, 63, 145, 0.06);
 }
 
 .listRow:last-child {
@@ -144,6 +237,14 @@
   color: #fff;
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
+}
+
+.avatarImg {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
 }
 
 .nameText {
@@ -194,6 +295,41 @@
   color: var(--ink-soft);
 }
 
+.staffPageCell {
+  font-size: 12px;
+}
+
+/* Staff page status labels */
+.spLiveWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.spLive {
+  color: #4FA347;
+  font-weight: 700;
+}
+
+.spHidden {
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
+.spPending {
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.spOff {
+  color: var(--ink-soft);
+}
+
+.spWarning {
+  color: #E08A3C;
+  font-size: 11px;
+}
+
 /* Empty state */
 .emptyRow {
   text-align: center;
@@ -205,17 +341,34 @@
   font-size: 14px;
 }
 
+/* Scrim overlay */
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 24, 52, 0.25);
+  z-index: 90;
+}
+
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
+  .headerActions {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 900px) {
   .controlsRow {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .searchWrap {
-    min-width: 100%;
+    width: 100%;
   }
 
-  .statusFilter {
+  .filterRow {
     flex-wrap: wrap;
   }
 
@@ -235,7 +388,8 @@
 
   .districtCell,
   .sessionsCell,
-  .joinedCell {
+  .joinedCell,
+  .staffPageCell {
     font-size: 12px;
   }
 
@@ -253,6 +407,12 @@
 
   .joinedCell::before {
     content: "Joined: ";
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+  .staffPageCell::before {
+    content: "Staff page: ";
     color: var(--ink-soft);
     font-weight: 600;
   }
