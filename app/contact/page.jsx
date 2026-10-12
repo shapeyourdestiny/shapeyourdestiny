@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import styles from "./page.module.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -32,7 +33,9 @@ export default function ContactPage() {
         <div className="wrap">
           <div className={styles.grid}>
             <div className={styles.formSection}>
-              <ContactForm />
+              <Suspense fallback={<div>Loading...</div>}>
+                <ContactForm />
+              </Suspense>
             </div>
 
             <div className={styles.infoSection}>

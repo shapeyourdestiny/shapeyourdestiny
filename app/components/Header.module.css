@@ -27,6 +27,7 @@
 @media (min-width: 920px) { .navLinks { display: flex; } }
 .navLinks a { text-decoration: none; color: var(--on-navy-soft); }
 .navLinks a:hover { color: var(--gold); }
+.activeLink { color: var(--gold) !important; }
 .navCta { display: none; }
 @media (min-width: 920px) { .navCta { display: inline-flex; padding: 11px 22px; font-size: 14.5px; } }
 .burger {
@@ -59,3 +60,4 @@
   display: flex;
   align-items: center;
 }
+.activeLinkMobile { color: var(--gold) !important; }

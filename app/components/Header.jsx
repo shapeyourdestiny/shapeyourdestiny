@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./Header.module.css";
 
 const NAV_LINKS = [
   { href: "/", label: "Children's Wellness Program", external: false },
+  { href: "/intramural-sports", label: "Intramural Sports", external: false },
   { href: "http://campshape.org", label: "Camp Shape Summer Camp", external: true },
   { href: "/corporate-training", label: "Corporate Training", external: false },
   { href: "/our-team", label: "Our Team", external: false },
@@ -16,6 +18,7 @@ const NAV_LINKS = [
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className={styles.header}>
@@ -34,7 +37,13 @@ export default function Header() {
             l.external ? (
               <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer">{l.label}</a>
             ) : (
-              <Link key={l.label} href={l.href}>{l.label}</Link>
+              <Link
+                key={l.label}
+                href={l.href}
+                className={pathname === l.href ? styles.activeLink : ""}
+              >
+                {l.label}
+              </Link>
             )
           )}
         </div>
@@ -63,7 +72,13 @@ export default function Header() {
       {open && (
         <div className={styles.mobileMenu}>
           {NAV_LINKS.map((l) => (
-            <a key={l.label} href={l.href}>{l.label}</a>
+            <a
+              key={l.label}
+              href={l.href}
+              className={pathname === l.href ? styles.activeLinkMobile : ""}
+            >
+              {l.label}
+            </a>
           ))}
           <a href="https://www.paypal.com/donate/?hosted_button_id=263FBTTYYBNLY" target="_blank" rel="noopener noreferrer">Donate to Shape</a>
         </div>

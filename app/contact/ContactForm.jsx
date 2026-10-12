@@ -1,17 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import styles from "./page.module.css";
 
 const REASONS = [
   { value: "school", label: "Bring the program to my school", caption: "Youth Wellness Program inquiry", messageLabel: "Tell us about your school", messagePlaceholder: "Grade levels, number of students, what you're hoping to achieve..." },
+  { value: "intramurals", label: "Intramural sports for my school", caption: "Intramural Sports inquiry", messageLabel: "Tell us about your school", messagePlaceholder: "Grade levels, which sports you're interested in, available outdoor space..." },
   { value: "corporate", label: "Corporate wellness for my staff", caption: "Educator training inquiry", messageLabel: "Tell us about your organization", messagePlaceholder: "Team size, current wellness initiatives, goals..." },
   { value: "general", label: "General questions", caption: "General inquiry", messageLabel: "Your message", messagePlaceholder: "How can we help?" },
   { value: "support", label: "Support with an existing program", caption: "Program support request", messageLabel: "How can we help?", messagePlaceholder: "Describe the issue or question..." },
 ];
 
 export default function ContactForm() {
-  const [reason, setReason] = useState("school");
+  const searchParams = useSearchParams();
+  const topicParam = searchParams.get("topic");
+  const initialReason = REASONS.find(r => r.value === topicParam)?.value || "school";
+  const [reason, setReason] = useState(initialReason);
   const [status, setStatus] = useState("idle"); // idle | sending | success | error
   const [form, setForm] = useState({
     name: "",

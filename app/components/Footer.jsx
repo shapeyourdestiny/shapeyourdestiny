@@ -29,6 +29,7 @@ export default function Footer() {
             <div className={styles.column}>
               <h4>Programs</h4>
               <Link href="/">Children&apos;s Wellness</Link>
+              <Link href="/intramural-sports">Intramural Sports</Link>
               <a href="http://campshape.org" target="_blank" rel="noopener noreferrer">Camp Shape Summer Camp</a>
               <Link href="/corporate-training">Corporate Training</Link>
             </div>
