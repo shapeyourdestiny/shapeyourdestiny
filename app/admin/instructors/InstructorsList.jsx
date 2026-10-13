@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./InstructorsList.module.css";
 import InstructorDrawer from "./InstructorDrawer";
-import ArrangePanel from "./ArrangePanel";
+import AddInstructorModal from "./AddInstructorModal";
 
 const AVATAR_COLORS = [
   "#D8AE4B",
@@ -37,27 +38,23 @@ function formatDate(dateStr) {
   return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 }
 
-export default function InstructorsList({ instructors }) {
+export default function InstructorsList({ instructors, districts = [] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [needsProfileFilter, setNeedsProfileFilter] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const [drawerTab, setDrawerTab] = useState("overview");
-  const [arrangeOpen, setArrangeOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const router = useRouter();
 
   // Count instructors by status
   const statusCounts = useMemo(() => {
-    const counts = { all: 0, active: 0, invited: 0, archived: 0 };
+    const counts = { all: 0, active: 0, invited: 0, archived: 0, not_invited: 0 };
     instructors.forEach((inst) => {
       counts.all++;
       counts[inst.status] = (counts[inst.status] || 0) + 1;
     });
+    // Combine not_invited + invited as "Pending" for simplicity
+    counts.pending = (counts.not_invited || 0) + (counts.invited || 0);
     return counts;
-  }, [instructors]);
-
-  // Count instructors needing profile
-  const needsProfileCount = useMemo(() => {
-    return instructors.filter((inst) => inst.needsProfile).length;
   }, [instructors]);
 
   const filteredInstructors = useMemo(() => {
@@ -70,15 +67,15 @@ export default function InstructorsList({ instructors }) {
         inst.districts.toLowerCase().includes(q);
 
       // Status filter
-      const matchesStatus =
-        statusFilter === "all" || inst.status === statusFilter;
+      let matchesStatus = statusFilter === "all" || inst.status === statusFilter;
+      // "pending" matches both "invited" and "not_invited"
+      if (statusFilter === "pending") {
+        matchesStatus = inst.status === "invited" || inst.status === "not_invited";
+      }
 
-      // Needs profile filter
-      const matchesNeedsProfile = !needsProfileFilter || inst.needsProfile;
-
-      return matchesSearch && matchesStatus && matchesNeedsProfile;
+      return matchesSearch && matchesStatus;
     });
-  }, [instructors, searchQuery, statusFilter, needsProfileFilter]);
+  }, [instructors, searchQuery, statusFilter]);
 
   const selectedInstructor = useMemo(() => {
     return instructors.find((i) => i.id === selectedId) || null;
@@ -86,31 +83,29 @@ export default function InstructorsList({ instructors }) {
 
   const handleRowClick = (id) => {
     setSelectedId(id);
-    setDrawerTab("overview");
   };
 
   const handleCloseDrawer = () => {
     setSelectedId(null);
   };
 
-  const handleOpenArrange = () => {
+  const handleOpenAddModal = () => {
     setSelectedId(null);
-    setArrangeOpen(true);
+    setAddModalOpen(true);
   };
 
-  const handleCloseArrange = () => {
-    setArrangeOpen(false);
+  const handleCloseAddModal = () => {
+    setAddModalOpen(false);
   };
 
-  // Get live instructors for arrange panel
-  const liveInstructors = useMemo(() => {
-    return instructors
-      .filter((i) => i.staffPageStatus === "live" || i.staffPageStatus === "live-incomplete")
-      .sort((a, b) => a.staff_sort_order - b.staff_sort_order);
-  }, [instructors]);
-
-  const leadership = liveInstructors.filter((i) => i.staff_section === "leadership");
-  const instructorSection = liveInstructors.filter((i) => i.staff_section === "instructor");
+  const handleInstructorAdded = (profileId) => {
+    setAddModalOpen(false);
+    router.refresh();
+    // Optionally open the drawer for the new instructor
+    if (profileId) {
+      setSelectedId(profileId);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -139,7 +134,7 @@ export default function InstructorsList({ instructors }) {
             {[
               ["all", "All"],
               ["active", "Active"],
-              ["invited", "Invited"],
+              ["pending", "Pending"],
               ["archived", "Archived"],
             ].map(([status, label]) => (
               <button
@@ -153,27 +148,17 @@ export default function InstructorsList({ instructors }) {
               </button>
             ))}
           </div>
-          {needsProfileCount > 0 && (
-            <button
-              type="button"
-              className={`${styles.needsChip} ${needsProfileFilter ? styles.needsChipActive : ""}`}
-              onClick={() => setNeedsProfileFilter(!needsProfileFilter)}
-            >
-              Needs profile
-              <span className={styles.pillCount}>{needsProfileCount}</span>
-            </button>
-          )}
         </div>
         <div className={styles.headerActions}>
           <button
             type="button"
-            className={styles.arrangeBtn}
-            onClick={handleOpenArrange}
+            className={styles.addBtn}
+            onClick={handleOpenAddModal}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+              <path d="M12 5v14M5 12h14" />
             </svg>
-            Arrange staff page
+            Add instructor
           </button>
           <a
             href="/our-team"
@@ -196,7 +181,6 @@ export default function InstructorsList({ instructors }) {
           <span>District(s)</span>
           <span>Sessions</span>
           <span>Joined</span>
-          <span>Staff page</span>
         </div>
         <div className={styles.listBody}>
           {filteredInstructors.length === 0 ? (
@@ -225,20 +209,23 @@ export default function InstructorsList({ instructors }) {
                       {getInitials(instructor.full_name)}
                     </div>
                   )}
-                  <span className={styles.nameText}>{instructor.full_name}</span>
+                  <span className={styles.nameText}>
+                    {instructor.full_name}
+                    {instructor.role === "admin" && (
+                      <span className={styles.adminBadge}>Admin</span>
+                    )}
+                  </span>
                 </div>
                 <span>
-                  <span className={`${styles.statusBadge} ${styles[instructor.status]}`}>
-                    {instructor.status.charAt(0).toUpperCase() + instructor.status.slice(1)}
+                  <span className={`${styles.statusBadge} ${styles[instructor.status === "not_invited" ? "invited" : instructor.status]}`}>
+                    {instructor.status === "not_invited" ? "Not invited" :
+                     instructor.status.charAt(0).toUpperCase() + instructor.status.slice(1)}
                   </span>
                 </span>
                 <span className={styles.districtCell}>{instructor.districts}</span>
                 <span className={styles.sessionsCell}>{instructor.sessionCount}</span>
                 <span className={styles.joinedCell}>
                   {formatDate(instructor.created_at)}
-                </span>
-                <span className={styles.staffPageCell}>
-                  <StaffPageStatus instructor={instructor} />
                 </span>
               </div>
             ))
@@ -250,60 +237,28 @@ export default function InstructorsList({ instructors }) {
       {selectedInstructor && (
         <InstructorDrawer
           instructor={selectedInstructor}
-          tab={drawerTab}
-          onTabChange={setDrawerTab}
+          districts={districts}
           onClose={handleCloseDrawer}
         />
       )}
 
-      {/* Arrange Panel */}
-      {arrangeOpen && (
-        <ArrangePanel
-          leadership={leadership}
-          instructors={instructorSection}
-          onClose={handleCloseArrange}
+      {/* Add Instructor Modal */}
+      {addModalOpen && (
+        <AddInstructorModal
+          onClose={handleCloseAddModal}
+          onSuccess={handleInstructorAdded}
         />
       )}
 
       {/* Scrim */}
-      {(selectedInstructor || arrangeOpen) && (
+      {(selectedInstructor || addModalOpen) && (
         <div
           className={styles.scrim}
           onClick={() => {
             handleCloseDrawer();
-            handleCloseArrange();
+            handleCloseAddModal();
           }}
         />
-      )}
-    </div>
-  );
-}
-
-function StaffPageStatus({ instructor }) {
-  const { staffPageStatus, staffPageLabel, hasHeadshot, hasBio, status } = instructor;
-
-  if (status === "archived") {
-    return <span className={styles.spOff}>Off the site</span>;
-  }
-
-  if (status === "invited") {
-    return <span className={styles.spPending}>After sign-up</span>;
-  }
-
-  if (staffPageStatus === "hidden") {
-    return <span className={styles.spHidden}>Hidden</span>;
-  }
-
-  // Live status
-  const warnings = [];
-  if (!hasHeadshot) warnings.push("No photo");
-  if (!hasBio) warnings.push("No bio");
-
-  return (
-    <div className={styles.spLiveWrap}>
-      <span className={styles.spLive}>Live</span>
-      {warnings.length > 0 && (
-        <span className={styles.spWarning}>{warnings.join(", ")}</span>
       )}
     </div>
   );
