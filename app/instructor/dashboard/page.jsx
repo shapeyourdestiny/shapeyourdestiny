@@ -16,16 +16,45 @@ export default async function InstructorDashboardPage() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Look up the profile by user_id (not by id)
-  // This handles the case where profile.id ≠ profile.user_id for pre-created profiles
-  const { data: profile, error: profileError } = await supabase
+  if (!user) {
+    return (
+      <div className={styles.page}>
+        <h1 className={styles.pageTitle}>My Schedule</h1>
+        <div className={styles.error}>
+          Please log in to view your schedule.
+        </div>
+      </div>
+    );
+  }
+
+  // Try to look up profile by user_id first (for pre-created profiles)
+  // Fall back to id lookup (for profiles created before the migration)
+  let profile = null;
+  let profileError = null;
+
+  // First try user_id lookup
+  const { data: profileByUserId, error: userIdError } = await supabase
     .from("profiles")
     .select("id, full_name")
     .eq("user_id", user.id)
     .single();
 
-  if (profileError || !profile) {
-    console.error("Error fetching profile:", profileError);
+  if (profileByUserId) {
+    profile = profileByUserId;
+  } else {
+    // Fall back to id lookup (legacy: id = auth.uid())
+    const { data: profileById, error: idError } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .eq("id", user.id)
+      .single();
+
+    profile = profileById;
+    profileError = idError;
+  }
+
+  if (!profile) {
+    console.error("Error fetching profile:", profileError || userIdError);
     return (
       <div className={styles.page}>
         <h1 className={styles.pageTitle}>My Schedule</h1>
