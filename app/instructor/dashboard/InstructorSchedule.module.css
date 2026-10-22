@@ -1,14 +1,151 @@
 .schedule {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+}
+
+/* ===== NEXT CLASS CARD (Navy) ===== */
+.nextCard {
+  background: var(--navy-deep, #0F1F4D);
+  border-radius: 16px;
+  padding: 20px;
+  color: #fff;
+}
+
+.nextHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.nextLabel {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nextProgram {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 9px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.nextProgram[data-program="wellness"] {
+  background: rgba(62, 143, 160, 0.25);
+  color: #7FCFE0;
+}
+
+.nextProgram[data-program="soccer"] {
+  background: rgba(242, 166, 94, 0.25);
+  color: #F5C99D;
+}
+
+.nextDateTime {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.nextSchool {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--gold, #D8AE4B);
+  margin-bottom: 4px;
+}
+
+.nextAddress {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 4px;
+}
+
+.nextCoTeacher {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 16px;
+}
+
+.nextActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.directionsBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  background: var(--orange, #F2A65E);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 20px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  min-height: 48px;
+}
+
+.directionsBtn:hover {
+  background: var(--orange-dark, #D8944A);
+}
+
+.directionsBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Empty "no upcoming" card */
+.emptyNextCard {
+  background: var(--paper, #fff);
+  border-radius: 16px;
+  padding: 32px 20px;
+  text-align: center;
+  box-shadow: var(--shadow, 0 2px 12px rgba(20, 44, 107, 0.06));
+}
+
+.emptyNextCard svg {
+  width: 32px;
+  height: 32px;
+  color: var(--tint-deep, #D6DDED);
+  margin-bottom: 12px;
+}
+
+.emptyNextCard p {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink-soft, #8594B8);
+  margin: 0 0 4px;
+}
+
+.emptyNextCard span {
+  font-size: 13px;
+  color: var(--ink-soft, #8594B8);
+  opacity: 0.7;
 }
 
 /* ===== MY CLASSES SECTION ===== */
-.myClassesSection {
+.classesSection {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .sectionHeader {
@@ -20,1090 +157,223 @@
 .sectionTitle {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
-  font-size: 14px;
-  color: var(--navy);
+  font-size: 15px;
+  color: var(--navy, #1F3F91);
 }
 
 .sectionCount {
-  background: var(--tint-deep);
-  color: var(--ink-soft);
+  background: var(--tint-deep, #D6DDED);
+  color: var(--ink-soft, #8594B8);
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
-  font-size: 10.5px;
-  padding: 2px 8px;
+  font-size: 11px;
+  padding: 2px 9px;
   border-radius: 999px;
 }
 
-.myClassesList {
+.classesList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.myClassCard {
-  background: var(--paper);
+/* ===== CLASS CARD ===== */
+.classCard {
+  background: var(--paper, #fff);
   border-radius: 14px;
-  padding: 14px 15px;
-  box-shadow: var(--shadow);
-  border-top: 3px solid var(--teal);
+  padding: 16px;
+  box-shadow: var(--shadow, 0 2px 12px rgba(20, 44, 107, 0.06));
 }
 
-.myClassCard.coveringSoon {
-  border-top-color: var(--orange);
-}
-
-.mcBadgeRow {
+.classHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 }
 
-.mcProgram {
+.classProgram {
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 9px;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
 
-.mcProgram[data-program="wellness"] {
+.classProgram[data-program="wellness"] {
   background: rgba(62, 143, 160, 0.14);
   color: #2C6E7D;
 }
 
-.mcProgram[data-program="soccer"] {
-  background: rgba(31, 63, 145, 0.09);
-  color: var(--navy);
+.classProgram[data-program="soccer"] {
+  background: rgba(242, 166, 94, 0.18);
+  color: #B8783A;
 }
 
-.mcCoveringTag {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.classDirections {
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
-  font-size: 8.5px;
-  color: var(--orange-dark);
-}
-
-.mcCoveringTag svg {
-  width: 9px;
-  height: 9px;
-}
-
-.mcSchool {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 7px;
-}
-
-.mcRow {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-  font-size: 11.5px;
-  color: var(--ink-soft);
-  margin-bottom: 5px;
-  line-height: 1.4;
-}
-
-.mcRow svg {
-  width: 12px;
-  height: 12px;
-  flex: none;
-  color: var(--teal);
-  margin-top: 1px;
-}
-
-.mcDirectionsLink {
-  color: var(--navy);
-  font-weight: 700;
+  font-size: 11px;
+  color: var(--navy, #1F3F91);
   text-decoration: none;
 }
 
-.mcDirectionsLink:hover {
+.classDirections:hover {
   text-decoration: underline;
 }
 
+.classSchool {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink, #2D3748);
+  margin-bottom: 4px;
+}
+
+.classSchedule {
+  font-size: 13px;
+  color: var(--ink-soft, #8594B8);
+  margin-bottom: 2px;
+}
+
+.classDates {
+  font-size: 13px;
+  color: var(--ink-soft, #8594B8);
+  margin-bottom: 4px;
+}
+
+.classCoTeacher {
+  font-size: 12px;
+  color: var(--ink-soft, #8594B8);
+  margin-bottom: 8px;
+}
+
+/* Progress bar */
+.progressSection {
+  margin-top: 12px;
+}
+
+.progressBar {
+  height: 6px;
+  background: var(--tint, #EEF1F8);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--teal, #3E8FA0);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  font-size: 11px;
+  color: var(--ink-soft, #8594B8);
+}
+
+/* Day off note */
+.dayOffNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(242, 166, 94, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid var(--orange, #F2A65E);
+}
+
+.dayOffNote svg {
+  width: 14px;
+  height: 14px;
+  color: var(--orange, #F2A65E);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.dayOffNote {
+  font-size: 12px;
+  color: var(--orange-dark, #D8944A);
+  line-height: 1.4;
+}
+
+/* Empty state */
 .emptyClassesCard {
-  background: var(--paper);
+  background: var(--paper, #fff);
   border-radius: 16px;
-  padding: 26px 20px;
+  padding: 40px 20px;
   text-align: center;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow, 0 2px 12px rgba(20, 44, 107, 0.06));
 }
 
 .emptyClassesCard svg {
-  width: 28px;
-  height: 28px;
-  color: var(--tint-deep);
-  margin-bottom: 10px;
+  width: 36px;
+  height: 36px;
+  color: var(--tint-deep, #D6DDED);
+  margin-bottom: 12px;
 }
 
 .emptyClassesCard p {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
-  font-size: 14px;
-  color: var(--ink-soft);
-  margin: 0 0 4px;
+  font-size: 16px;
+  color: var(--ink-soft, #8594B8);
+  margin: 0 0 6px;
 }
 
 .emptyClassesCard span {
-  font-size: 12px;
-  color: #B7C1D8;
-}
-
-/* ===== COMPACT VIEW TOGGLE ===== */
-.toggleNavWrap {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  margin-bottom: 4px;
-}
-
-.viewToggleSm {
-  display: flex;
-  gap: 3px;
-  background: var(--paper);
-  border-radius: 10px;
-  padding: 3px;
-  box-shadow: var(--shadow);
-}
-
-.toggleBtnSm {
-  border: none;
-  background: none;
-  padding: 7px 14px;
-  border-radius: 7px;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 11.5px;
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.toggleBtnSm:hover {
-  color: var(--navy);
-}
-
-.toggleBtnSm.active {
-  background: var(--navy);
-  color: #fff;
-}
-
-/* Legacy view toggle - keep for desktop if needed */
-.viewToggle {
-  display: none;
-}
-
-.loading {
-  text-align: center;
-  color: var(--ink-soft);
-  padding: 20px;
-  font-size: 14px;
-}
-
-/* ===== WEEK VIEW ===== */
-.weekView {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.weekNav,
-.monthNav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
-
-.navBtn {
-  background: var(--paper);
-  border: none;
-  padding: 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  color: var(--ink-soft);
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
-}
-.navBtn:hover {
-  background: var(--tint);
-  color: var(--navy);
-}
-.navBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.navBtn svg {
-  width: 20px;
-  height: 20px;
-  display: block;
-}
-
-.navLabel {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--ink);
-  min-width: 200px;
-  text-align: center;
-}
-
-.weekList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.weekDay {
-  display: flex;
-  background: var(--paper);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 2px 12px rgba(20, 44, 107, 0.06);
-}
-.weekDay.today {
-  box-shadow: 0 4px 20px rgba(31, 63, 145, 0.15);
-}
-.weekDay.today .dayBadge {
-  background: var(--navy);
-  color: #fff;
-}
-.weekDay.isHoliday {
-  border: 2px solid var(--gold);
-}
-
-.dayBadge {
-  width: 80px;
-  flex-shrink: 0;
-  padding: 16px 12px;
-  background: var(--tint);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-}
-
-.dayName {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.dayDate {
-  font-size: 12px;
+  font-size: 13px;
+  color: var(--ink-soft, #8594B8);
   opacity: 0.7;
 }
 
-.dayContent {
-  flex: 1;
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.holidayNotice {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: rgba(216, 174, 75, 0.1);
-  border-radius: 10px;
-  border-left: 4px solid var(--gold);
-}
-.holidayNotice svg {
-  width: 24px;
-  height: 24px;
-  color: var(--gold);
-  flex-shrink: 0;
-}
-
-.holidayInfo {
-  display: flex;
-  flex-direction: column;
-}
-
-.holidayName {
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--ink);
-}
-
-.holidaySubtext {
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-
-.sessionCard {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: var(--tint);
-  border-radius: 10px;
-}
-
-.sessionColor {
-  width: 4px;
-  height: 40px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.sessionInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sessionSchool {
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--ink);
-}
-
-.sessionTime {
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-
-.sessionCoTeacher {
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
-.sessionCoveringFor {
-  font-size: 12px;
-  color: var(--orange-dark);
-  font-weight: 700;
-}
-
-/* Orange treatment for picked-up coverage sessions */
-.sessionCardCovering {
-  border: 1.5px solid var(--orange);
-  background: rgba(242, 166, 94, 0.06);
-}
-
-.reviewBadge {
-  padding: 4px 10px;
-  background: rgba(216, 174, 75, 0.2);
-  color: #9a7a2a;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  border-radius: 4px;
-}
-
-.sessionDirections {
-  padding: 8px;
-  background: var(--paper);
-  border-radius: 8px;
-  color: var(--teal);
-  transition: all 0.15s ease;
-}
-.sessionDirections:hover {
-  background: var(--teal);
-  color: #fff;
-}
-.sessionDirections svg {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-.emptyDay {
-  padding: 12px;
-  color: var(--ink-soft);
-  font-size: 14px;
-  font-style: italic;
-}
-
-/* Empty Week Card */
-.emptyWeekCard {
-  background: var(--paper);
-  border-radius: 16px;
-  padding: 26px 20px;
-  text-align: center;
-  box-shadow: var(--shadow);
-}
-.emptyWeekCard svg {
-  width: 28px;
-  height: 28px;
-  color: var(--tint-deep);
-  margin-bottom: 10px;
-}
-.emptyWeekCard p {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--ink-soft);
-  margin: 0 0 4px;
-}
-.emptyWeekCard span {
-  font-size: 12px;
-  color: #B7C1D8;
-}
-
-/* Day Row - shared by desktop and mobile, styled differently via media queries */
-.dayRow {
-  display: flex;
-  background: var(--paper);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 2px 12px rgba(20, 44, 107, 0.06);
-}
-.dayRow.today {
-  box-shadow: 0 4px 20px rgba(31, 63, 145, 0.15);
-}
-.dayRow.today .dayBadge {
-  background: var(--navy);
-  color: #fff;
-}
-.dayRow.isHoliday {
-  border: 2px solid var(--gold);
-}
-.dayRow.isCovering {
-  border-left: 3px solid var(--orange);
-}
-
-.daySessionsWrap {
-  flex: 1;
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.emptyDayText {
-  font-size: 14px;
-  color: var(--ink-soft);
-  font-style: italic;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-}
-
-/* Can't Make It Button */
-.cantMakeItBtn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: none;
-  border: 1.5px solid var(--tint-deep);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-family: "Nunito", sans-serif;
-  font-weight: 700;
-  font-size: 11px;
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-.cantMakeItBtn:hover:not(:disabled) {
-  border-color: var(--orange);
-  color: var(--orange);
-}
-.cantMakeItBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.cantMakeItBtn svg {
-  width: 12px;
-  height: 12px;
-}
-
-/* Coverage Status Badge */
-.coverageStatus {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border-radius: 6px;
-  font-family: "Nunito", sans-serif;
-  font-weight: 800;
-  font-size: 10px;
-  flex-shrink: 0;
-}
-.coverageStatus.open {
-  background: rgba(242, 166, 94, 0.14);
-  color: var(--orange-dark);
-}
-.coverageStatus.covered {
-  background: rgba(79, 163, 71, 0.12);
-  color: #4fa347;
-}
-.coverageStatus.covering {
-  background: var(--orange);
-  color: #fff;
-}
-
-/* Coverage Request Modal */
-.coverageModal {
-  max-width: 360px;
-}
-.coverageModal h3 {
-  font-size: 17px;
-  margin-bottom: 16px;
-}
-.coverageSessionInfo {
-  background: var(--tint);
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
-}
-.coverageSchool {
-  font-family: "Baloo 2", sans-serif;
-  font-weight: 700;
-  font-size: 15px;
-  margin-bottom: 4px;
-}
-.coverageMeta {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-}
-.coverageNote {
-  margin-bottom: 16px;
-}
-.coverageNote label {
-  display: block;
-  font-family: "Baloo 2", sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--ink);
-  margin-bottom: 6px;
-}
-.coverageNote textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 12px 14px;
-  border: 2px solid var(--tint-deep);
-  border-radius: 10px;
-  font-size: 14px;
-  font-family: inherit;
-  resize: vertical;
-  background: var(--paper);
-  transition: border-color 0.15s ease;
-}
-.coverageNote textarea:focus {
-  outline: none;
-  border-color: var(--navy);
-}
-.coverageNote textarea::placeholder {
-  color: var(--ink-soft);
-  opacity: 0.6;
-}
-.coverageWarning {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-  line-height: 1.55;
-  margin-bottom: 20px;
-}
-.coverageWarning strong {
-  color: var(--ink);
-}
-.coverageActions {
-  display: flex;
-  gap: 10px;
-}
-.coverageCancelBtn {
-  flex: 1;
-  background: none;
-  border: 1.5px solid var(--tint-deep);
-  border-radius: 999px;
-  padding: 11px;
-  font-family: "Baloo 2", sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  cursor: pointer;
-  color: var(--ink-soft);
-  transition: all 0.15s ease;
-}
-.coverageCancelBtn:hover:not(:disabled) {
-  border-color: var(--navy);
-  color: var(--navy);
-}
-.coverageCancelBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.coverageSubmitBtn {
-  flex: 1;
-  background: var(--orange);
-  color: #fff;
-  border: none;
-  border-radius: 999px;
-  padding: 11px;
-  font-family: "Baloo 2", sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.coverageSubmitBtn:hover:not(:disabled) {
-  background: var(--orange-dark);
-}
-.coverageSubmitBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* ===== MONTH VIEW ===== */
-.monthView {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.monthContent {
-  display: flex;
-  gap: 24px;
-}
-
-.calendarWrapper {
-  flex: 1;
-  background: var(--paper);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.06);
-}
-
-.calendarHeader {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 8px;
-}
-
-.calendarHeaderCell {
-  text-align: center;
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ink-soft);
-  padding: 8px 0;
-}
-.calendarHeaderCell .dayShort {
-  display: none;
-}
-
-.calendarGrid {
-  display: flex;
-  flex-direction: column;
-}
-
-.calendarWeek {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-}
-
-.calendarCell {
-  aspect-ratio: 1;
-  padding: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.15s ease;
-}
-.calendarCell:hover:not(.empty) {
-  background: var(--tint);
-}
-.calendarCell.empty {
-  cursor: default;
-}
-.calendarCell.today .calendarDay {
-  background: var(--navy);
-  color: #fff;
-}
-.calendarCell.selected {
-  background: var(--tint-deep);
-}
-
-.calendarDay {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--ink);
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.calendarDots {
-  display: flex;
-  gap: 3px;
-  margin-top: 2px;
-}
-
-.calendarDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-.calendarDot.holidayDot {
-  background: var(--gold);
-}
-
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--tint-deep);
-}
-
-.legendItem {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
-.legendDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-.legendDot.holidayDot {
-  background: var(--gold);
-}
-
-/* Detail Panel */
-.detailPanel {
-  width: 280px;
-  flex-shrink: 0;
-  background: var(--paper);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.06);
-  align-self: flex-start;
-}
-
-.detailDate {
-  font-size: 18px;
-  margin: 0 0 16px;
-  color: var(--ink);
-}
-
-.detailHoliday {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  background: rgba(216, 174, 75, 0.1);
-  border-radius: 10px;
-  color: var(--ink);
-  font-weight: 600;
-}
-.detailHoliday svg {
-  width: 20px;
-  height: 20px;
-  color: var(--gold);
-}
-
-.detailSessions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.detailSession {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  background: var(--tint);
-  border-radius: 10px;
-}
-
-.detailColor {
-  width: 100%;
-  height: 4px;
-  border-radius: 2px;
-}
-
-.detailInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.detailSchool {
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--ink);
-}
-
-.detailTime {
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-
-.detailCoTeacher {
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
-.detailDirections {
-  display: block;
-  padding: 10px;
-  background: var(--navy);
-  color: #fff;
-  text-align: center;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 13px;
-  text-decoration: none;
-  transition: background 0.15s ease;
-}
-.detailDirections:hover {
-  background: var(--navy-mid);
-}
-
-.detailEmpty {
-  color: var(--ink-soft);
-  font-size: 14px;
-  font-style: italic;
-  margin: 0;
-}
-
-.detailPrompt {
-  color: var(--ink-soft);
-  font-size: 14px;
-  text-align: center;
-  margin: 0;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 900px) {
-  .monthContent {
-    flex-direction: column;
-  }
-
-  .detailPanel {
-    width: 100%;
-  }
-}
-
-/* Mobile month view - compact calendar */
-@media (max-width: 759px) {
-  .calendarWrapper {
-    padding: 16px;
-  }
-
-  .calendarHeader {
-    gap: 2px;
-    margin-bottom: 4px;
-  }
-
-  .calendarHeaderCell {
-    padding: 6px 0;
-    font-size: 10px;
-  }
-  .calendarHeaderCell .dayFull {
-    display: none;
-  }
-  .calendarHeaderCell .dayShort {
-    display: inline;
-  }
-
-  .calendarGrid {
-    gap: 2px;
-  }
-
-  .calendarWeek {
-    gap: 2px;
-  }
-
-  .calendarCell {
-    aspect-ratio: 1 / 1;
-    padding: 2px;
-    border-radius: 6px;
-  }
-
-  .calendarDay {
-    font-size: 13px;
-    width: 26px;
-    height: 26px;
-  }
-
-  .calendarDots {
-    gap: 2px;
-    margin-top: 1px;
-  }
-
-  .calendarDot {
-    width: 5px;
-    height: 5px;
-  }
-
-  .legend {
-    gap: 8px;
-    margin-top: 12px;
-    padding-top: 12px;
-  }
-
-  .legendItem {
-    font-size: 11px;
-  }
-
-  .legendDot {
-    width: 8px;
-    height: 8px;
-  }
-
-  .detailPanel {
-    padding: 16px;
-  }
-}
-
-@media (max-width: 759px) {
-  /* Compact day rows for mobile */
-  .dayRow {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-radius: 12px;
-    padding: 10px 14px;
-    margin-bottom: 6px;
-  }
-  .dayRow.hasSession {
-    border-left: 3px solid var(--teal);
-  }
-  .dayRow.isCovering {
-    border-left: 3px solid var(--orange);
-  }
-
-  .dayRow .dayBadge {
-    width: 42px;
-    flex: none;
-    padding: 0;
-    background: transparent;
-    flex-direction: column;
-    gap: 0;
-  }
-  .dayRow .dayName {
-    font-size: 11.5px;
-    color: var(--navy);
-  }
-  .dayRow .dayDate {
-    font-size: 10px;
-  }
-  .dayRow.today .dayBadge {
-    background: transparent;
-  }
-  .dayRow.today .dayName {
-    color: var(--navy);
-    font-weight: 800;
-  }
-
-  .daySessionsWrap {
-    flex: 1;
-    padding: 0;
-    min-width: 0;
-  }
-
-  .dayRow .sessionCard {
-    padding: 0;
-    background: transparent;
-    gap: 8px;
-  }
-
-  .dayRow .sessionInfo {
-    min-width: 0;
-  }
-
-  .dayRow .sessionSchool {
-    font-size: 12.5px;
-  }
-
-  .dayRow .sessionTime {
-    font-size: 10.5px;
-  }
-
-  .dayRow .sessionColor {
-    display: none;
-  }
-
-  .dayRow .holidayNotice {
-    flex: 1;
-    padding: 0;
-    background: transparent;
-    border-left: none;
-    gap: 8px;
-  }
-  .dayRow .holidayNotice svg {
-    width: 18px;
-    height: 18px;
-  }
-  .dayRow .holidayName {
-    font-size: 12px;
-  }
-  .dayRow .holidaySubtext {
-    display: none;
-  }
-
-  .emptyDayText {
-    flex: 1;
-    padding: 0;
-  }
-
-  /* Hide desktop week day layout */
-  .weekDay {
-    display: none;
-  }
-}
-
-@media (max-width: 640px) {
-  .heroCard {
-    padding: 24px;
-  }
-
-  .heroCountdown {
-    font-size: 24px;
-  }
-
-  .heroSchool {
-    font-size: 18px;
-  }
-
-  .heroActions {
-    flex-direction: column;
-  }
-
-  .directionsBtn,
-  .viewWeekBtn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .navLabel {
-    font-size: 16px;
-    min-width: 160px;
-  }
-}
-
-@media (max-width: 480px) {
+/* ===== DESKTOP LAYOUT (2 columns) ===== */
+@media (min-width: 900px) {
   .schedule {
-    gap: 16px;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .nextCard,
+  .emptyNextCard {
+    position: sticky;
+    top: 24px;
+  }
+
+  .classesSection {
+    /* Takes second column */
+  }
+
+  .classesList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+}
+
+/* ===== MOBILE TWEAKS ===== */
+@media (max-width: 480px) {
+  .nextCard {
+    padding: 18px;
+  }
+
+  .nextDateTime {
+    font-size: 22px;
+  }
+
+  .nextSchool {
+    font-size: 15px;
+  }
+
+  .directionsBtn {
+    padding: 12px 16px;
+    font-size: 13px;
+    min-height: 44px;
   }
 }
