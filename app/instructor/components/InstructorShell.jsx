@@ -20,19 +20,6 @@ const NAV_MENU = [
       </svg>
     ),
   },
-  {
-    href: "/instructor/coverage",
-    label: "Coverage",
-    badgeKey: "coverageCount",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 00-3-3.87" />
-        <path d="M16 3.13a4 4 0 010 7.75" />
-      </svg>
-    ),
-  },
 ];
 
 const NAV_RESOURCES = [
@@ -64,7 +51,7 @@ const NAV_PROFILE = [
 // Mobile bottom tabs - without Profile (moved to topbar)
 const NAV_ITEMS = [...NAV_MENU, ...NAV_RESOURCES];
 
-export default function InstructorShell({ profile, coverageCount = 0 }) {
+export default function InstructorShell({ profile }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -76,13 +63,6 @@ export default function InstructorShell({ profile, coverageCount = 0 }) {
 
   const initial = profile?.full_name?.charAt(0)?.toUpperCase() || "I";
   const avatarUrl = profile?.avatar_url;
-
-  const getBadgeCount = (item) => {
-    if (item.badgeKey === "coverageCount") {
-      return coverageCount;
-    }
-    return 0;
-  };
 
   const renderAvatar = (size = 40, className = styles.avatar) => {
     if (avatarUrl) {
@@ -118,7 +98,6 @@ export default function InstructorShell({ profile, coverageCount = 0 }) {
           <span className={styles.navLabel}>Menu</span>
           {NAV_MENU.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-            const badgeCount = getBadgeCount(item);
             return (
               <a
                 key={item.href}
@@ -127,16 +106,12 @@ export default function InstructorShell({ profile, coverageCount = 0 }) {
               >
                 <span className={styles.navIcon}>{item.icon}</span>
                 {item.label}
-                {badgeCount > 0 && (
-                  <span className={styles.badge}>{badgeCount}</span>
-                )}
               </a>
             );
           })}
           <span className={styles.navLabel} style={{ marginTop: 16 }}>Resources</span>
           {NAV_RESOURCES.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-            const badgeCount = getBadgeCount(item);
             return (
               <a
                 key={item.href}
@@ -145,16 +120,12 @@ export default function InstructorShell({ profile, coverageCount = 0 }) {
               >
                 <span className={styles.navIcon}>{item.icon}</span>
                 {item.label}
-                {badgeCount > 0 && (
-                  <span className={styles.badge}>{badgeCount}</span>
-                )}
               </a>
             );
           })}
           <span className={styles.navLabel} style={{ marginTop: 16 }}>Account</span>
           {NAV_PROFILE.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-            const badgeCount = getBadgeCount(item);
             return (
               <a
                 key={item.href}
@@ -163,9 +134,6 @@ export default function InstructorShell({ profile, coverageCount = 0 }) {
               >
                 <span className={styles.navIcon}>{item.icon}</span>
                 {item.label}
-                {badgeCount > 0 && (
-                  <span className={styles.badge}>{badgeCount}</span>
-                )}
               </a>
             );
           })}
@@ -224,19 +192,13 @@ export default function InstructorShell({ profile, coverageCount = 0 }) {
       <nav className={styles.bottomTabs}>
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          const badgeCount = getBadgeCount(item);
           return (
             <a
               key={item.href}
               href={item.href}
               className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
             >
-              <span className={styles.tabIcon}>
-                {item.icon}
-                {badgeCount > 0 && (
-                  <span className={styles.tabBadge}>{badgeCount}</span>
-                )}
-              </span>
+              <span className={styles.tabIcon}>{item.icon}</span>
               <span className={styles.tabLabel}>{item.label}</span>
             </a>
           );

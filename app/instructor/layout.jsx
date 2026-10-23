@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getOpenCoverageCount } from "@/lib/coverage/queries";
 import InstructorShell from "./components/InstructorShell";
 import styles from "./layout.module.css";
 
@@ -58,18 +57,9 @@ export default async function InstructorLayout({ children }) {
     redirect("/instructor-login?error=archived");
   }
 
-  // Get coverage count for badge
-  let coverageCount = 0;
-  try {
-    coverageCount = await getOpenCoverageCount(user.id);
-  } catch (e) {
-    // coverage_requests table might not exist yet
-    console.error("Error fetching coverage count:", e);
-  }
-
   return (
     <div className={styles.layout}>
-      <InstructorShell profile={profile} coverageCount={coverageCount} />
+      <InstructorShell profile={profile} />
       <main className={styles.main}>
         {children}
       </main>
