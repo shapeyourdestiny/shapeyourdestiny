@@ -320,6 +320,45 @@
   margin: 0;
 }
 
+/* District checkboxes */
+.districtGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.districtCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.districtCheckbox:hover {
+  background: #f9fafb;
+}
+
+.districtCheckbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--navy);
+  cursor: pointer;
+}
+
+.districtDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 /* Staff summary card */
 .staffSummary {
   display: flex;
@@ -396,8 +435,13 @@
   border-top: 1px solid var(--tint);
 }
 
+.actionButtons {
+  display: flex;
+  gap: 10px;
+}
+
 .archiveBtn {
-  width: 100%;
+  flex: 1;
   padding: 12px;
   border: 1.5px solid #E08A3C;
   background: transparent;
@@ -428,11 +472,41 @@
   cursor: not-allowed;
 }
 
+.deleteBtn {
+  padding: 12px 20px;
+  border: 1.5px solid #E0594C;
+  background: transparent;
+  color: #E0594C;
+  border-radius: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.deleteBtn:hover:not(:disabled) {
+  background: rgba(224, 89, 76, 0.08);
+}
+
+.deleteBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .archiveNote {
   font-size: 12px;
   color: var(--ink-soft);
   margin: 10px 0 0;
   text-align: center;
+}
+
+.deleteNote {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin: 6px 0 0;
+  text-align: center;
+  font-style: italic;
 }
 
 /* Profile Tab */
@@ -767,6 +841,116 @@
 }
 
 .primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Invite section */
+.inviteBox {
+  background: var(--tint);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.inviteText {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+.inviteForm {
+  display: flex;
+  gap: 10px;
+}
+
+.inviteInput {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--tint-deep);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  transition: border-color 0.15s ease;
+}
+
+.inviteInput:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+.inviteBtn {
+  padding: 10px 18px;
+  background: var(--navy);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.inviteBtn:hover:not(:disabled) {
+  background: var(--navy-deep);
+}
+
+.inviteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.inviteSent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4FA347;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.inviteSent svg {
+  width: 18px;
+  height: 18px;
+}
+
+.invitedStatus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
+.invitedStatus svg {
+  width: 18px;
+  height: 18px;
+  color: #F2A65E;
+}
+
+.resendBtn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1.5px solid var(--tint-deep);
+  border-radius: 8px;
+  color: var(--ink-soft);
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.resendBtn:hover:not(:disabled) {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+
+.resendBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

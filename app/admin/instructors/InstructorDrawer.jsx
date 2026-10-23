@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import styles from "./InstructorDrawer.module.css";
 import {
   archiveInstructorAction,
+  deleteInstructorAction,
   updateInstructorAction,
   updateInstructorDistrictsAction,
   sendInviteEmailAction,
@@ -45,6 +46,7 @@ export default function InstructorDrawer({ instructor, districts = [], onClose }
   const [loading, setLoading] = useState(false);
 
   const isArchived = instructor.status === "archived";
+  const canDelete = instructor.sessionCount === 0;
 
   const handleArchive = async () => {
     if (!confirm(`${isArchived ? "Restore" : "Archive"} ${instructor.full_name}?`)) {
@@ -58,6 +60,29 @@ export default function InstructorDrawer({ instructor, districts = [], onClose }
     if (result.error) {
       alert(result.error);
     } else {
+      router.refresh();
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!canDelete) return;
+
+    if (
+      !confirm(
+        `Delete ${instructor.full_name}? This will permanently remove them and cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    setLoading(true);
+    const result = await deleteInstructorAction(instructor.id);
+    setLoading(false);
+
+    if (result.error) {
+      alert(result.error);
+    } else {
+      onClose();
       router.refresh();
     }
   };
@@ -106,15 +131,17 @@ export default function InstructorDrawer({ instructor, districts = [], onClose }
           instructor={instructor}
           districts={districts}
           onArchive={handleArchive}
+          onDelete={handleDelete}
           loading={loading}
           isArchived={isArchived}
+          canDelete={canDelete}
         />
       </div>
     </aside>
   );
 }
 
-function OverviewTab({ instructor, districts, onArchive, loading, isArchived }) {
+function OverviewTab({ instructor, districts, onArchive, onDelete, loading, isArchived, canDelete }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [fullName, setFullName] = useState(instructor.full_name || "");
@@ -423,21 +450,36 @@ function OverviewTab({ instructor, districts, onArchive, loading, isArchived }) 
         </div>
       )}
 
-      {/* Archive/Restore */}
+      {/* Archive/Delete Actions */}
       <div className={styles.archiveSection}>
-        <button
-          type="button"
-          className={`${styles.archiveBtn} ${isArchived ? styles.restore : ""}`}
-          onClick={() => onArchive()}
-          disabled={loading}
-        >
-          {isArchived ? "Restore Instructor" : "Archive Instructor"}
-        </button>
+        <div className={styles.actionButtons}>
+          <button
+            type="button"
+            className={`${styles.archiveBtn} ${isArchived ? styles.restore : ""}`}
+            onClick={onArchive}
+            disabled={loading}
+          >
+            {isArchived ? "Restore Instructor" : "Archive Instructor"}
+          </button>
+          <button
+            type="button"
+            className={styles.deleteBtn}
+            onClick={onDelete}
+            disabled={loading || !canDelete}
+          >
+            Delete
+          </button>
+        </div>
         <p className={styles.archiveNote}>
           {isArchived
             ? "Restoring will make them available for scheduling again."
             : "Archiving removes them from scheduling immediately."}
         </p>
+        {!canDelete && (
+          <p className={styles.deleteNote}>
+            Delete is disabled because this instructor has session history. Use Archive instead.
+          </p>
+        )}
       </div>
     </div>
   );
