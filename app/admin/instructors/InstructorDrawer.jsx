@@ -46,7 +46,6 @@ export default function InstructorDrawer({ instructor, districts = [], onClose }
   const [loading, setLoading] = useState(false);
 
   const isArchived = instructor.status === "archived";
-  const canDelete = instructor.sessionCount === 0;
 
   const handleArchive = async () => {
     if (!confirm(`${isArchived ? "Restore" : "Archive"} ${instructor.full_name}?`)) {
@@ -65,11 +64,9 @@ export default function InstructorDrawer({ instructor, districts = [], onClose }
   };
 
   const handleDelete = async () => {
-    if (!canDelete) return;
-
     if (
       !confirm(
-        `Delete ${instructor.full_name}? This will permanently remove them and cannot be undone.`
+        `Delete ${instructor.full_name}? This will permanently remove them and all their session history. This cannot be undone.`
       )
     ) {
       return;
@@ -134,14 +131,13 @@ export default function InstructorDrawer({ instructor, districts = [], onClose }
           onDelete={handleDelete}
           loading={loading}
           isArchived={isArchived}
-          canDelete={canDelete}
         />
       </div>
     </aside>
   );
 }
 
-function OverviewTab({ instructor, districts, onArchive, onDelete, loading, isArchived, canDelete }) {
+function OverviewTab({ instructor, districts, onArchive, onDelete, loading, isArchived }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [fullName, setFullName] = useState(instructor.full_name || "");
@@ -465,7 +461,7 @@ function OverviewTab({ instructor, districts, onArchive, onDelete, loading, isAr
             type="button"
             className={styles.deleteBtn}
             onClick={onDelete}
-            disabled={loading || !canDelete}
+            disabled={loading}
           >
             Delete
           </button>
@@ -475,11 +471,6 @@ function OverviewTab({ instructor, districts, onArchive, onDelete, loading, isAr
             ? "Restoring will make them available for scheduling again."
             : "Archiving removes them from scheduling immediately."}
         </p>
-        {!canDelete && (
-          <p className={styles.deleteNote}>
-            Delete is disabled because this instructor has session history. Use Archive instead.
-          </p>
-        )}
       </div>
     </div>
   );
