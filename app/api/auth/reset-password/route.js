@@ -20,7 +20,7 @@ export async function POST(request) {
     type: "recovery",
     email: trimmedEmail,
     options: {
-      redirectTo: `${siteUrl}/auth/callback?next=/reset-password`,
+      redirectTo: `${siteUrl}/reset-password`,
     },
   });
 
@@ -30,11 +30,24 @@ export async function POST(request) {
     return Response.json({ success: true });
   }
 
+  // The action_link goes to Supabase's verify endpoint
+  // We need to extract the token and create a direct link
+  const actionLink = data.properties.action_link;
+
+  // Parse the token from the Supabase link and create our own link
+  // The link format is: https://xxx.supabase.co/auth/v1/verify?token=TOKEN&type=recovery&redirect_to=URL
+  const url = new URL(actionLink);
+  const token = url.searchParams.get("token");
+  const type = url.searchParams.get("type");
+
+  // Create a link that goes directly to our reset page with the token
+  const resetLink = `${siteUrl}/auth/confirm?token_hash=${token}&type=${type}&next=/reset-password`;
+
   // Send the email directly through Resend
   try {
     await sendPasswordResetEmail({
       to: trimmedEmail,
-      resetLink: data.properties.action_link,
+      resetLink: resetLink,
     });
   } catch (emailError) {
     console.error("Failed to send password reset email:", emailError);
