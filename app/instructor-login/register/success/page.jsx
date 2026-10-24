@@ -43,8 +43,9 @@ export default function RegisterSuccessPage() {
         </Link>
 
         <p className={styles.secondary}>
-          Didn&apos;t receive the email?{" "}
-          <Link href="/instructor-login/register">Try registering again</Link>
+          Didn&apos;t receive the email? Contact{" "}
+          <a href="mailto:heather@shapeyourdestiny.co">heather@shapeyourdestiny.co</a>{" "}
+          or message her on WhatsApp.
         </p>
       </div>
     </section>
