@@ -1,4 +1,5 @@
 import { getInstructorsList } from "@/lib/instructors/queries";
+import { createClient } from "@/lib/supabase/server";
 import styles from "./page.module.css";
 import InstructorsList from "./InstructorsList";
 
@@ -9,7 +10,14 @@ export const metadata = {
 };
 
 export default async function AdminInstructorsPage() {
-  const instructors = await getInstructorsList();
+  const supabase = await createClient();
+
+  const [instructors, districtsResult] = await Promise.all([
+    getInstructorsList(),
+    supabase.from("districts").select("id, name, color").order("name"),
+  ]);
+
+  const districts = districtsResult?.data || [];
 
   return (
     <div className={styles.page}>
@@ -19,7 +27,7 @@ export default async function AdminInstructorsPage() {
       </div>
 
       {instructors.length > 0 ? (
-        <InstructorsList instructors={instructors} />
+        <InstructorsList instructors={instructors} districts={districts} />
       ) : (
         <div className={styles.emptyCard}>
           <p>No instructors yet. Send an invite to get started.</p>

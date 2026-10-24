@@ -26,21 +26,6 @@ function formatDate(dateStr) {
   return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 }
 
-function formatCertDate(dateStr) {
-  if (!dateStr) return "Not on file";
-  const date = new Date(dateStr + "T00:00:00");
-  const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
-  return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
-}
-
-function isExpired(dateStr) {
-  if (!dateStr) return false;
-  return new Date(dateStr) < new Date();
-}
-
 export default function InstructorDrawer({ instructor, districts = [], onClose }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -142,8 +127,6 @@ function OverviewTab({ instructor, districts, onArchive, onDelete, loading, isAr
   const [editing, setEditing] = useState(false);
   const [fullName, setFullName] = useState(instructor.full_name || "");
   const [phone, setPhone] = useState(instructor.phone || "");
-  const [cprExpires, setCprExpires] = useState(instructor.cpr_expiration || "");
-  const [foodHandlerExpires, setFoodHandlerExpires] = useState(instructor.food_handler_expiration || "");
   const [selectedDistrictIds, setSelectedDistrictIds] = useState(
     instructor.districtList?.map((d) => d.id) || []
   );
@@ -173,8 +156,6 @@ function OverviewTab({ instructor, districts, onArchive, onDelete, loading, isAr
     const profileResult = await updateInstructorAction(instructor.id, {
       full_name: fullName.trim(),
       phone: phone.trim(),
-      cpr_expires: cprExpires || null,
-      food_handler_expires: foodHandlerExpires || null,
     });
 
     if (profileResult.error) {
@@ -203,8 +184,6 @@ function OverviewTab({ instructor, districts, onArchive, onDelete, loading, isAr
     setEditing(false);
     setFullName(instructor.full_name || "");
     setPhone(instructor.phone || "");
-    setCprExpires(instructor.cpr_expiration || "");
-    setFoodHandlerExpires(instructor.food_handler_expiration || "");
     setSelectedDistrictIds(instructor.districtList?.map((d) => d.id) || []);
   };
 
@@ -308,41 +287,6 @@ function OverviewTab({ instructor, districts, onArchive, onDelete, loading, isAr
         ) : (
           <p className={styles.empty}>No programs assigned</p>
         )}
-      </div>
-
-      {/* Certifications */}
-      <div className={styles.section}>
-        <h3>Certifications</h3>
-        <div className={styles.detailRow}>
-          <span>CPR Expires</span>
-          {editing ? (
-            <input
-              type="date"
-              value={cprExpires}
-              onChange={(e) => setCprExpires(e.target.value)}
-              className={styles.inlineInput}
-            />
-          ) : (
-            <span className={isExpired(instructor.cpr_expiration) ? styles.expired : ""}>
-              {formatCertDate(instructor.cpr_expiration)}
-            </span>
-          )}
-        </div>
-        <div className={styles.detailRow}>
-          <span>Food Handler Expires</span>
-          {editing ? (
-            <input
-              type="date"
-              value={foodHandlerExpires}
-              onChange={(e) => setFoodHandlerExpires(e.target.value)}
-              className={styles.inlineInput}
-            />
-          ) : (
-            <span className={isExpired(instructor.food_handler_expiration) ? styles.expired : ""}>
-              {formatCertDate(instructor.food_handler_expiration)}
-            </span>
-          )}
-        </div>
       </div>
 
       {/* Save/Cancel Actions */}

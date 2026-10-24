@@ -19,7 +19,7 @@ export async function POST(request) {
   // 1. Look up the invite code
   const { data: inviteData, error: inviteError } = await adminClient
     .from("invite_codes")
-    .select("id, role, used_by")
+    .select("id, role, used_by, profile_id, expires_at")
     .eq("code", inviteCode.trim())
     .single();
 
@@ -29,6 +29,11 @@ export async function POST(request) {
 
   if (inviteData.used_by) {
     return Response.json({ error: "This invite code has already been used" }, { status: 400 });
+  }
+
+  // Check expiry if set
+  if (inviteData.expires_at && new Date(inviteData.expires_at) < new Date()) {
+    return Response.json({ error: "This invite code has expired" }, { status: 400 });
   }
 
   // 2. Create the account using the regular server client for auth
@@ -47,32 +52,71 @@ export async function POST(request) {
     return Response.json({ error: "Account creation failed" }, { status: 500 });
   }
 
-  // 3. Insert profile using admin client (bypasses RLS)
-  const profileData = {
-    id: userId,
-    full_name: fullName.trim(),
-    phone: phone.trim(),
-    role: inviteData.role,
-  };
+  // 3. Handle profile creation or linking
+  let profileLinked = false;
 
-  // Add certification dates if the columns exist (may need migration)
-  if (cprExpires) {
-    profileData.cpr_expiration = cprExpires;
-  }
-  if (foodHandlerExpires) {
-    profileData.food_handler_expiration = foodHandlerExpires;
-  }
-  if (avatarUrl) {
-    profileData.avatar_url = avatarUrl;
-  }
+  if (inviteData.profile_id) {
+    // This invite is linked to a pre-created profile - update it instead of creating new
+    const updateData = {
+      user_id: userId,
+      status: "active",
+      phone: phone.trim(),
+    };
 
-  const { error: profileError } = await adminClient
-    .from("profiles")
-    .insert(profileData);
+    // Update name if provided (may differ from pre-created name)
+    if (fullName.trim()) {
+      updateData.full_name = fullName.trim();
+    }
 
-  if (profileError) {
-    console.error("Profile insert error:", profileError);
-    return Response.json({ error: "Failed to create profile: " + profileError.message }, { status: 500 });
+    // Add certification dates if provided
+    if (cprExpires) {
+      updateData.cpr_expiration = cprExpires;
+    }
+    if (foodHandlerExpires) {
+      updateData.food_handler_expiration = foodHandlerExpires;
+    }
+
+    const { error: updateError } = await adminClient
+      .from("profiles")
+      .update(updateData)
+      .eq("id", inviteData.profile_id);
+
+    if (updateError) {
+      console.error("Profile link error:", updateError);
+      return Response.json({ error: "Failed to link profile: " + updateError.message }, { status: 500 });
+    }
+
+    profileLinked = true;
+  } else {
+    // Regular flow - create new profile
+    const profileData = {
+      id: userId,
+      user_id: userId,
+      full_name: fullName.trim(),
+      phone: phone.trim(),
+      role: inviteData.role,
+      status: "active",
+    };
+
+    // Add certification dates if the columns exist (may need migration)
+    if (cprExpires) {
+      profileData.cpr_expiration = cprExpires;
+    }
+    if (foodHandlerExpires) {
+      profileData.food_handler_expiration = foodHandlerExpires;
+    }
+    if (avatarUrl) {
+      profileData.avatar_url = avatarUrl;
+    }
+
+    const { error: profileError } = await adminClient
+      .from("profiles")
+      .insert(profileData);
+
+    if (profileError) {
+      console.error("Profile insert error:", profileError);
+      return Response.json({ error: "Failed to create profile: " + profileError.message }, { status: 500 });
+    }
   }
 
   // 4. Mark invite code as used
@@ -84,5 +128,9 @@ export async function POST(request) {
   // 5. Revalidate staff page cache
   revalidateTag("staff");
 
-  return Response.json({ success: true });
+  return Response.json({
+    success: true,
+    profileLinked,
+    profileId: profileLinked ? inviteData.profile_id : userId,
+  });
 }

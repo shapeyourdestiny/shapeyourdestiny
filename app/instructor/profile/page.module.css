@@ -251,6 +251,333 @@
   flex: none;
 }
 
+/* Staff Page Profile Card */
+.staffCard {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.staffCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.staffCard h3 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.editStaffBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--tint);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.editStaffBtn:hover {
+  background: var(--tint-deep);
+  color: var(--navy);
+}
+
+.editStaffBtn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.staffIntro {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+.staffError {
+  background: rgba(224, 89, 76, 0.1);
+  color: var(--red);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+/* Staff Preview Card */
+.staffPreview {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  background: var(--tint);
+  border-radius: 14px;
+  margin-bottom: 14px;
+}
+
+.previewPhoto {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: none;
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewPhoto span {
+  color: #fff;
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.previewInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.previewName {
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.previewTitle {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.previewBio {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 6px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Photo Upload Section */
+.photoSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--tint);
+  margin-bottom: 14px;
+}
+
+.photoLabel {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 800;
+}
+
+.photoActions {
+  display: flex;
+  gap: 8px;
+}
+
+.uploadPhotoBtn {
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.uploadPhotoBtn:hover:not(:disabled) {
+  background: var(--navy-deep);
+}
+
+.uploadPhotoBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.removePhotoBtn {
+  background: none;
+  border: 1.5px solid var(--tint-deep);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.removePhotoBtn:hover:not(:disabled) {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.removePhotoBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Staff Form */
+.staffForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.staffField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.staffLabel {
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.staffInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--tint-deep);
+  border-radius: 10px;
+  font-family: "Nunito", sans-serif;
+  font-size: 13px;
+  background: var(--tint);
+  transition: all 0.15s ease;
+}
+
+.staffInput:focus {
+  outline: none;
+  border-color: var(--navy);
+  background: #fff;
+}
+
+.staffTextarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--tint-deep);
+  border-radius: 10px;
+  font-family: "Nunito", sans-serif;
+  font-size: 13px;
+  background: var(--tint);
+  resize: vertical;
+  min-height: 80px;
+  transition: all 0.15s ease;
+}
+
+.staffTextarea:focus {
+  outline: none;
+  border-color: var(--navy);
+  background: #fff;
+}
+
+.fieldHint {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.charWarn {
+  color: var(--orange-dark);
+}
+
+.staffFormActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* Read-only Staff Profile */
+.staffReadOnly {
+  display: flex;
+  flex-direction: column;
+}
+
+.readOnlyRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--tint);
+}
+
+.readOnlyRow:last-child {
+  border-bottom: none;
+}
+
+.readOnlyLabel {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 800;
+  flex: none;
+}
+
+.readOnlyValue {
+  font-family: "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+.notSet {
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+.staffNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--tint);
+  line-height: 1.4;
+}
+
+.staffNote svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  margin-top: 1px;
+}
+
 /* Logout Button */
 .logoutBtn {
   width: 100%;

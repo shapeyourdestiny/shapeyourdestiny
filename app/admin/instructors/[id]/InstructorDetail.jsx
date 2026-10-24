@@ -58,22 +58,11 @@ function formatSessionDate(dateStr) {
   return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
 }
 
-function formatCertDate(dateStr) {
-  const date = new Date(dateStr + "T00:00:00");
-  const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
-  return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
-}
-
 export default function InstructorDetail({ instructor }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editPhone, setEditPhone] = useState(instructor.phone || "");
-  const [editCprExpires, setEditCprExpires] = useState(instructor.cpr_expires || "");
-  const [editFoodHandlerExpires, setEditFoodHandlerExpires] = useState(instructor.food_handler_expires || "");
 
   const canDelete = instructor.totalSessions === 0;
   const isArchived = instructor.status === "archived";
@@ -138,8 +127,6 @@ export default function InstructorDetail({ instructor }) {
 
   const handleOpenEdit = () => {
     setEditPhone(instructor.phone || "");
-    setEditCprExpires(instructor.cpr_expires || "");
-    setEditFoodHandlerExpires(instructor.food_handler_expires || "");
     setEditModalOpen(true);
   };
 
@@ -147,8 +134,6 @@ export default function InstructorDetail({ instructor }) {
     setLoading(true);
     const result = await updateInstructorAction(instructor.id, {
       phone: editPhone.trim(),
-      cpr_expires: editCprExpires || null,
-      food_handler_expires: editFoodHandlerExpires || null,
     });
     setLoading(false);
 
@@ -251,21 +236,6 @@ export default function InstructorDetail({ instructor }) {
           <div className={styles.infoRow}>
             <span>Phone</span>
             <span>{instructor.phone || "Not on file"}</span>
-          </div>
-        </div>
-        <div className={styles.infoCard}>
-          <h3>Certifications</h3>
-          <div className={styles.infoRow}>
-            <span>CPR Expires</span>
-            <span className={instructor.cpr_expires && new Date(instructor.cpr_expires) < new Date() ? styles.expired : ""}>
-              {instructor.cpr_expires ? formatCertDate(instructor.cpr_expires) : "Not on file"}
-            </span>
-          </div>
-          <div className={styles.infoRow}>
-            <span>Food Handler Expires</span>
-            <span className={instructor.food_handler_expires && new Date(instructor.food_handler_expires) < new Date() ? styles.expired : ""}>
-              {instructor.food_handler_expires ? formatCertDate(instructor.food_handler_expires) : "Not on file"}
-            </span>
           </div>
         </div>
       </div>
@@ -373,26 +343,6 @@ export default function InstructorDetail({ instructor }) {
               value={editPhone}
               onChange={(e) => setEditPhone(e.target.value)}
               placeholder="(555) 123-4567"
-            />
-          </div>
-
-          <div className={styles.editField}>
-            <label htmlFor="editCprExpires">CPR Certification Expires</label>
-            <input
-              type="date"
-              id="editCprExpires"
-              value={editCprExpires}
-              onChange={(e) => setEditCprExpires(e.target.value)}
-            />
-          </div>
-
-          <div className={styles.editField}>
-            <label htmlFor="editFoodHandlerExpires">Food Handler Expires</label>
-            <input
-              type="date"
-              id="editFoodHandlerExpires"
-              value={editFoodHandlerExpires}
-              onChange={(e) => setEditFoodHandlerExpires(e.target.value)}
             />
           </div>
 

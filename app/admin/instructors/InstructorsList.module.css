@@ -124,7 +124,8 @@
 }
 
 .arrangeBtn,
-.viewBtn {
+.viewBtn,
+.addBtn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -136,6 +137,21 @@
   cursor: pointer;
   transition: all 0.15s ease;
   text-decoration: none;
+}
+
+.addBtn {
+  background: #4FA347;
+  border: none;
+  color: #fff;
+}
+
+.addBtn:hover {
+  background: #3d8338;
+}
+
+.addBtn svg {
+  width: 14px;
+  height: 14px;
 }
 
 .arrangeBtn {
@@ -251,6 +267,22 @@
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adminBadge {
+  display: inline-flex;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--navy-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 /* Status badge */
