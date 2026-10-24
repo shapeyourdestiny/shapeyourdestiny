@@ -19,19 +19,6 @@ const RESOURCES = [
     href: null,
   },
   {
-    title: "More forms",
-    subtitle: "Reimbursements, time off and more",
-    tile: "#FDEBD9",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M7 3h7l5 5v13H7z" />
-        <path d="M14 3v5h5" />
-        <path d="M10 13h6M10 17h6" />
-      </svg>
-    ),
-    href: null,
-  },
-  {
     title: "Instructor handbook",
     subtitle: "Policies and what to do in an emergency",
     tile: "#DCE8FB",
