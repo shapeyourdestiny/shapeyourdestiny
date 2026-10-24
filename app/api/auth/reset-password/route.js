@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 export async function POST(request) {
   const { email } = await request.json();
@@ -9,18 +10,36 @@ export async function POST(request) {
 
   const trimmedEmail = email.trim().toLowerCase();
 
-  const supabase = await createClient();
+  const adminClient = createAdminClient();
 
-  // Get the origin from the request headers
-  const origin = request.headers.get("origin") || "https://shapeyourdestiny.co";
+  // Use the fixed site URL
+  const siteUrl = "https://shapeyourdestiny.co";
 
-  const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
-    redirectTo: `${origin}/auth/callback?next=/reset-password`,
+  // Generate the recovery link using admin API
+  const { data, error } = await adminClient.auth.admin.generateLink({
+    type: "recovery",
+    email: trimmedEmail,
+    options: {
+      redirectTo: `${siteUrl}/auth/callback?next=/reset-password`,
+    },
   });
 
   if (error) {
-    console.error("Password reset error:", error);
-    return Response.json({ error: error.message }, { status: 400 });
+    console.error("Password reset link generation error:", error);
+    // Don't reveal if email exists or not - return success either way
+    return Response.json({ success: true });
+  }
+
+  // Send the email directly through Resend
+  try {
+    await sendPasswordResetEmail({
+      to: trimmedEmail,
+      resetLink: data.properties.action_link,
+    });
+  } catch (emailError) {
+    console.error("Failed to send password reset email:", emailError);
+    // Still return success to not reveal email existence
+    return Response.json({ success: true });
   }
 
   return Response.json({ success: true });
