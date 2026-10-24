@@ -7,31 +7,43 @@ import styles from "./InstructorShell.module.css";
 
 const WHATSAPP_LINK = "https://chat.whatsapp.com/YOUR_COMMUNITY_LINK"; // TODO: Replace with actual link
 
+const CalendarIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
+const DocumentIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7 3h7l5 5v13H7z" />
+    <path d="M14 3v5h5" />
+    <path d="M10 13h6M10 17h6" />
+  </svg>
+);
+
+const ProfileIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
 const NAV_MENU = [
   {
     href: "/instructor/dashboard",
     label: "Schedule",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-      </svg>
-    ),
+    icon: <CalendarIcon />,
   },
 ];
 
 const NAV_RESOURCES = [
   {
-    href: "/instructor/incident-report",
-    label: "Incident Report",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-        <path d="M12 9v4M12 17h.01" />
-      </svg>
-    ),
+    href: "/instructor/forms",
+    label: "Forms",
+    icon: <DocumentIcon />,
   },
 ];
 
@@ -39,17 +51,25 @@ const NAV_PROFILE = [
   {
     href: "/instructor/profile",
     label: "Profile",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    ),
+    icon: <ProfileIcon />,
   },
 ];
 
-// Mobile bottom tabs - without Profile (moved to topbar)
-const NAV_ITEMS = [...NAV_MENU, ...NAV_RESOURCES];
+// Mobile bottom tabs - Schedule and Forms only (Profile is in topbar)
+const MOBILE_TABS = [
+  {
+    href: "/instructor/dashboard",
+    label: "Schedule",
+    icon: <CalendarIcon />,
+    activeFor: ["/instructor/dashboard"],
+  },
+  {
+    href: "/instructor/forms",
+    label: "Forms",
+    icon: <DocumentIcon />,
+    activeFor: ["/instructor/forms", "/instructor/incident-report"],
+  },
+];
 
 export default function InstructorShell({ profile }) {
   const pathname = usePathname();
@@ -78,6 +98,15 @@ export default function InstructorShell({ profile }) {
       );
     }
     return <div className={className}>{initial}</div>;
+  };
+
+  const isTabActive = (item) => {
+    if (item.activeFor) {
+      return item.activeFor.some(
+        (path) => pathname === path || pathname.startsWith(path + "/")
+      );
+    }
+    return pathname === item.href || pathname.startsWith(item.href + "/");
   };
 
   return (
@@ -111,7 +140,7 @@ export default function InstructorShell({ profile }) {
           })}
           <span className={styles.navLabel} style={{ marginTop: 16 }}>Resources</span>
           {NAV_RESOURCES.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/") || pathname.startsWith("/instructor/incident-report");
             return (
               <a
                 key={item.href}
@@ -189,20 +218,23 @@ export default function InstructorShell({ profile }) {
       </header>
 
       {/* Mobile Bottom Tab Bar */}
-      <nav className={styles.bottomTabs}>
-        {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          return (
-            <a
-              key={item.href}
-              href={item.href}
-              className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
-            >
-              <span className={styles.tabIcon}>{item.icon}</span>
-              <span className={styles.tabLabel}>{item.label}</span>
-            </a>
-          );
-        })}
+      <nav className={styles.bottomTabs} aria-label="Main">
+        <div className={styles.bottomTabsInner}>
+          {MOBILE_TABS.map((item) => {
+            const isActive = isTabActive(item);
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <span className={styles.tabIcon}>{item.icon}</span>
+                <span className={styles.tabLabel}>{item.label}</span>
+              </a>
+            );
+          })}
+        </div>
       </nav>
     </>
   );

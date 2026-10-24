@@ -19,10 +19,11 @@
 
   .main {
     margin-left: 0;
-    /* Account for mobile header and bottom tabs */
+    /* Account for mobile header (with safe area) and floating bottom tabs */
     padding: 24px 20px;
-    padding-top: calc(56px + 24px);
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 24px);
+    padding-top: calc(56px + env(safe-area-inset-top, 0px) + 24px);
+    /* Floating bar: 70px height + 12px bottom gap + safe area + 32px content gap */
+    padding-bottom: calc(70px + 12px + env(safe-area-inset-bottom, 0px) + 32px);
     min-height: 100vh;
   }
 }

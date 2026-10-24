@@ -183,12 +183,14 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 56px;
+    height: calc(56px + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
     background: var(--navy);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    padding-left: 16px;
+    padding-right: 16px;
     z-index: 100;
   }
 
@@ -235,69 +237,72 @@
     color: var(--navy-deep);
   }
 
+  /* Floating Bottom Tab Bar */
   .bottomTabs {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: calc(56px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    background: #fff;
-    border-top: 1px solid var(--tint-deep);
-    display: flex;
-    align-items: stretch;
+    left: 16px;
+    right: 16px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    display: block;
     z-index: 100;
+  }
+
+  .bottomTabsInner {
+    height: 70px;
+    background: var(--navy-deep);
+    border-radius: 24px;
+    padding: 0 8px;
+    box-shadow: 0 10px 30px rgba(20, 44, 107, 0.35);
+    display: flex;
+    align-items: center;
   }
 
   .tab {
     flex: 1;
+    height: 56px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 4px;
     text-decoration: none;
-    color: var(--ink-soft);
-    transition: color 0.15s ease;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color: #DCE6FA;
+    background: transparent;
+    border-radius: 18px;
+    transition: background 0.15s ease, color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tab:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+
+  .tab:active {
+    opacity: 0.85;
   }
 
   .tabIcon {
-    width: 22px;
-    height: 22px;
-    position: relative;
+    width: 24px;
+    height: 24px;
   }
   .tabIcon svg {
     width: 100%;
     height: 100%;
   }
 
-  .tabBadge {
-    position: absolute;
-    top: -6px;
-    right: -10px;
-    background: var(--orange);
-    color: #fff;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 10px;
-    padding: 1px 5px;
-    border-radius: 999px;
-    min-width: 16px;
-    text-align: center;
-  }
-
   .tabLabel {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
   }
 
   .tabActive {
-    color: var(--navy);
+    background: var(--orange);
+    color: var(--ink);
   }
+
   .tabActive .tabIcon {
-    color: var(--orange);
+    color: var(--ink);
   }
 }
