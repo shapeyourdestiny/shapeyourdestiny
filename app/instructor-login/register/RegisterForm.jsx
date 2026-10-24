@@ -57,35 +57,34 @@ export default function RegisterForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
-    // Validate photo is required
-    if (!photoFile) {
-      setError("Please upload a profile photo.");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      // First, upload the photo
-      const formData = new FormData();
-      formData.append("file", photoFile);
-      formData.append("inviteCode", inviteCode.trim());
+      let avatarUrl = null;
 
-      const uploadRes = await fetch("/api/auth/upload-avatar", {
-        method: "POST",
-        body: formData,
-      });
+      // Upload photo if provided
+      if (photoFile) {
+        const formData = new FormData();
+        formData.append("file", photoFile);
+        formData.append("inviteCode", inviteCode.trim());
 
-      const uploadData = await uploadRes.json();
+        const uploadRes = await fetch("/api/auth/upload-avatar", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (!uploadRes.ok) {
-        setError(uploadData.error || "Failed to upload photo.");
-        setLoading(false);
-        return;
+        const uploadData = await uploadRes.json();
+
+        if (!uploadRes.ok) {
+          setError(uploadData.error || "Failed to upload photo.");
+          setLoading(false);
+          return;
+        }
+
+        avatarUrl = uploadData.url;
       }
 
-      // Now call the registration API with the avatar URL
+      // Call the registration API
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -95,7 +94,7 @@ export default function RegisterForm() {
           phone: phone.trim(),
           email,
           password,
-          avatarUrl: uploadData.url,
+          avatarUrl,
         }),
       });
 
@@ -146,9 +145,9 @@ export default function RegisterForm() {
 
       {/* Profile Photo Upload */}
       <div className={styles.field}>
-        <label>Profile Photo <span className={styles.required}>*</span></label>
+        <label>Profile Photo <span className={styles.optional}>(optional)</span></label>
         <p className={styles.photoHint}>
-          This photo will be visible to other instructors and admin.
+          You can add a photo now or later from your profile.
         </p>
         {photoPreview ? (
           <div className={styles.photoPreview}>
