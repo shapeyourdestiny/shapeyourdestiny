@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import styles from "../page.module.css";
 
 export default function RegisterForm() {
@@ -105,8 +106,20 @@ export default function RegisterForm() {
         return;
       }
 
-      // Redirect to success page - user needs to confirm email
-      router.push("/instructor-login/register/success");
+      // Sign in and redirect to dashboard
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        // Registration succeeded but sign-in failed - redirect to login
+        router.push("/instructor-login?registered=true");
+        return;
+      }
+
+      router.push("/instructor/dashboard");
     } catch (err) {
       console.error("Registration error:", err);
       setError("Something went wrong. Please try again.");
