@@ -2,7 +2,6 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -21,19 +20,28 @@ function ForgotPasswordForm() {
     setError("");
     setLoading(true);
 
-    const supabase = createClient();
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
-    });
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
 
-    if (resetError) {
-      setError(resetError.message);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Failed to send reset email");
+        setLoading(false);
+        return;
+      }
+
+      setSuccess(true);
       setLoading(false);
-      return;
+    } catch (err) {
+      console.error("Reset error:", err);
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
     }
-
-    setSuccess(true);
-    setLoading(false);
   };
 
   return (
