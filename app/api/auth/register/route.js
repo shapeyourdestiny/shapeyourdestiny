@@ -85,7 +85,6 @@ export async function POST(request) {
   if (profileId) {
     // This invite is linked to a pre-created profile - update it instead of creating new
     const updateData = {
-      user_id: userId,
       status: "active",
       phone: phone.trim(),
     };
@@ -107,10 +106,9 @@ export async function POST(request) {
 
     profileLinked = true;
   } else {
-    // Regular flow - create new profile
+    // Regular flow - create new profile (id = auth user id in legacy schema)
     const profileData = {
       id: userId,
-      user_id: userId,
       full_name: fullName.trim(),
       phone: phone.trim(),
       role: inviteData.role,
