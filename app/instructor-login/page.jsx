@@ -13,10 +13,15 @@ export default function InstructorLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setShowResend(false);
+    setResendSuccess(false);
     setLoading(true);
 
     const supabase = createClient();
@@ -26,15 +31,42 @@ export default function InstructorLoginPage() {
     });
 
     if (signInError) {
-      setError(signInError.message === "Invalid login credentials"
-        ? "Invalid email or password. Please try again."
-        : signInError.message
-      );
+      // Check if email not confirmed
+      if (signInError.message.toLowerCase().includes("email not confirmed")) {
+        setError("Your email hasn't been confirmed yet.");
+        setShowResend(true);
+      } else {
+        setError(signInError.message === "Invalid login credentials"
+          ? "Invalid email or password. Please try again."
+          : signInError.message
+        );
+      }
       setLoading(false);
       return;
     }
 
     router.push("/instructor/dashboard");
+  };
+
+  const handleResendConfirmation = async () => {
+    setResendLoading(true);
+    setError("");
+
+    const supabase = createClient();
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+
+    setResendLoading(false);
+
+    if (resendError) {
+      setError(resendError.message);
+      return;
+    }
+
+    setResendSuccess(true);
+    setShowResend(false);
   };
 
   return (
@@ -85,6 +117,23 @@ export default function InstructorLoginPage() {
             </div>
 
             {error && <p className={styles.errorText}>{error}</p>}
+
+            {showResend && (
+              <button
+                type="button"
+                className={styles.resendBtn}
+                onClick={handleResendConfirmation}
+                disabled={resendLoading}
+              >
+                {resendLoading ? "Sending..." : "Resend confirmation email"}
+              </button>
+            )}
+
+            {resendSuccess && (
+              <p className={styles.successText}>
+                Confirmation email sent! Check your inbox.
+              </p>
+            )}
 
             <button
               type="submit"
