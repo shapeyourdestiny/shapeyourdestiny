@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidateTag } from "next/cache";
 
 export async function POST(request) {
-  const { inviteCode, fullName, phone, email, password, cprExpires, foodHandlerExpires, avatarUrl } = await request.json();
+  const { inviteCode, fullName, phone, email, password, avatarUrl } = await request.json();
 
   if (!inviteCode || !fullName || !phone || !email || !password) {
     return Response.json({ error: "All fields are required" }, { status: 400 });
@@ -68,14 +68,6 @@ export async function POST(request) {
       updateData.full_name = fullName.trim();
     }
 
-    // Add certification dates if provided
-    if (cprExpires) {
-      updateData.cpr_expiration = cprExpires;
-    }
-    if (foodHandlerExpires) {
-      updateData.food_handler_expiration = foodHandlerExpires;
-    }
-
     const { error: updateError } = await adminClient
       .from("profiles")
       .update(updateData)
@@ -98,13 +90,6 @@ export async function POST(request) {
       status: "active",
     };
 
-    // Add certification dates if the columns exist (may need migration)
-    if (cprExpires) {
-      profileData.cpr_expiration = cprExpires;
-    }
-    if (foodHandlerExpires) {
-      profileData.food_handler_expiration = foodHandlerExpires;
-    }
     if (avatarUrl) {
       profileData.avatar_url = avatarUrl;
     }

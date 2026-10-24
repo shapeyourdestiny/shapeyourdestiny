@@ -16,8 +16,6 @@ export default function RegisterForm() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [cprExpires, setCprExpires] = useState("");
-  const [foodHandlerExpires, setFoodHandlerExpires] = useState("");
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [error, setError] = useState("");
@@ -97,8 +95,6 @@ export default function RegisterForm() {
           phone: phone.trim(),
           email,
           password,
-          cprExpires: cprExpires || null,
-          foodHandlerExpires: foodHandlerExpires || null,
           avatarUrl: uploadData.url,
         }),
       });
@@ -237,29 +233,6 @@ export default function RegisterForm() {
           placeholder="At least 6 characters"
           autoComplete="new-password"
         />
-      </div>
-
-      <div className={styles.fieldRow}>
-        <div className={styles.field}>
-          <label htmlFor="cprExpires">CPR Certification Expires</label>
-          <input
-            type="date"
-            id="cprExpires"
-            value={cprExpires}
-            onChange={(e) => setCprExpires(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="foodHandlerExpires">Food Handler Expires <span className={styles.optional}>(optional)</span></label>
-          <input
-            type="date"
-            id="foodHandlerExpires"
-            value={foodHandlerExpires}
-            onChange={(e) => setFoodHandlerExpires(e.target.value)}
-          />
-        </div>
       </div>
 
       {error && <p className={styles.errorText}>{error}</p>}
