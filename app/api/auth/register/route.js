@@ -17,13 +17,37 @@ export async function POST(request) {
   const adminClient = createAdminClient();
 
   // 1. Look up the invite code
-  const { data: inviteData, error: inviteError } = await adminClient
+  // Try with new columns first, fall back to basic query
+  let inviteData = null;
+  let inviteError = null;
+
+  const { data: fullData, error: fullError } = await adminClient
     .from("invite_codes")
     .select("id, role, used_by, profile_id, expires_at")
     .eq("code", inviteCode.trim())
-    .single();
+    .maybeSingle();
 
-  if (inviteError || !inviteData) {
+  if (fullError && fullError.message?.includes("column")) {
+    // New columns don't exist, try basic query
+    const { data: basicData, error: basicError } = await adminClient
+      .from("invite_codes")
+      .select("id, role, used_by")
+      .eq("code", inviteCode.trim())
+      .maybeSingle();
+
+    inviteData = basicData;
+    inviteError = basicError;
+  } else {
+    inviteData = fullData;
+    inviteError = fullError;
+  }
+
+  if (inviteError) {
+    console.error("Invite code lookup error:", inviteError);
+    return Response.json({ error: "Failed to verify invite code" }, { status: 500 });
+  }
+
+  if (!inviteData) {
     return Response.json({ error: "Invalid invite code" }, { status: 400 });
   }
 
@@ -31,10 +55,13 @@ export async function POST(request) {
     return Response.json({ error: "This invite code has already been used" }, { status: 400 });
   }
 
-  // Check expiry if set
+  // Check expiry if set (column may not exist in older schema)
   if (inviteData.expires_at && new Date(inviteData.expires_at) < new Date()) {
     return Response.json({ error: "This invite code has expired" }, { status: 400 });
   }
+
+  // profile_id may not exist in older schema
+  const profileId = inviteData.profile_id || null;
 
   // 2. Create the account using the regular server client for auth
   const supabase = await createClient();
@@ -55,7 +82,7 @@ export async function POST(request) {
   // 3. Handle profile creation or linking
   let profileLinked = false;
 
-  if (inviteData.profile_id) {
+  if (profileId) {
     // This invite is linked to a pre-created profile - update it instead of creating new
     const updateData = {
       user_id: userId,
@@ -71,7 +98,7 @@ export async function POST(request) {
     const { error: updateError } = await adminClient
       .from("profiles")
       .update(updateData)
-      .eq("id", inviteData.profile_id);
+      .eq("id", profileId);
 
     if (updateError) {
       console.error("Profile link error:", updateError);
@@ -116,6 +143,6 @@ export async function POST(request) {
   return Response.json({
     success: true,
     profileLinked,
-    profileId: profileLinked ? inviteData.profile_id : userId,
+    profileId: profileLinked ? profileId : userId,
   });
 }
