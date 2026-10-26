@@ -1,0 +1,679 @@
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 28, 60, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Sheet - Desktop */
+.sheet {
+  background: #fff;
+  width: 100%;
+  max-width: 560px;
+  max-height: 85vh;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(20, 44, 107, 0.25);
+  outline: none;
+}
+
+.handle {
+  display: none;
+}
+
+/* Sheet - Mobile (bottom sheet) */
+@media (max-width: 759px) {
+  .overlay {
+    align-items: flex-end;
+  }
+
+  .sheet {
+    max-width: 100%;
+    max-height: calc(100vh - 56px);
+    border-radius: 26px 26px 0 0;
+    padding-bottom: calc(70px + 12px + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+
+  .handle {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0 8px;
+    cursor: grab;
+  }
+
+  .handleBar {
+    width: 36px;
+    height: 4px;
+    background: var(--tint-deep);
+    border-radius: 2px;
+  }
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--tint);
+  flex-shrink: 0;
+}
+
+@media (max-width: 759px) {
+  .header {
+    padding: 8px 20px 16px;
+  }
+}
+
+.headerLeft {
+  flex: 1;
+  min-width: 0;
+}
+
+.programPill {
+  display: inline-block;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 9px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+
+.programPill[data-program="wellness"] {
+  background: rgba(62, 143, 160, 0.14);
+  color: #2C6E7D;
+}
+
+.programPill[data-program="soccer"] {
+  background: rgba(242, 166, 94, 0.18);
+  color: #B8783A;
+}
+
+.schoolName {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--ink);
+  margin: 0 0 4px;
+  line-height: 1.1;
+}
+
+.scheduleText {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.closeBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--tint);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 12px;
+  transition: background 0.15s ease;
+}
+
+.closeBtn:hover {
+  background: var(--tint-deep);
+}
+
+.closeBtn svg {
+  width: 20px;
+  height: 20px;
+  color: var(--ink-soft);
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Progress Card */
+.progressCard {
+  background: var(--navy-deep);
+  border-radius: 16px;
+  padding: 20px;
+  color: #fff;
+}
+
+.progressNotStarted {
+  text-align: center;
+}
+
+.startsLabel {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.progressOngoing {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ongoingLabel {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.ongoingCount {
+  font-size: 15px;
+  opacity: 0.8;
+}
+
+.startedDate {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.progressFixed {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.progressRing {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+}
+
+.progressRing svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ringTrack {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+
+.ringFill {
+  stroke: var(--gold);
+}
+
+.ringPercent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.progressText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sessionsDone {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.sessionsLeft {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Section */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionLabel {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* Location */
+.locationBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.locationName {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink);
+  margin: 0;
+}
+
+.locationAddress {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.locationActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.directionsBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 20px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.directionsBtn:hover {
+  background: var(--orange-dark);
+}
+
+.directionsBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.copyBtn {
+  padding: 14px 20px;
+  background: var(--tint);
+  border: none;
+  border-radius: 999px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.copyBtn:hover {
+  background: var(--tint-deep);
+}
+
+/* Instructions Box */
+.instructionsBox {
+  background: #FFF6EA;
+  border: 1px solid #F6D7B5;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.instructionsHeader {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--orange-dark);
+  padding: 12px 16px 8px;
+}
+
+.instructionsSteps {
+  padding: 0 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.instructionStep {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.stepNumber {
+  width: 22px;
+  height: 22px;
+  background: var(--orange);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.stepText {
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.5;
+  padding-top: 1px;
+}
+
+.frontOffice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 14px 16px;
+  border-top: 1px solid #F6D7B5;
+}
+
+.frontOfficeLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.frontOfficeLabel {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
+.frontOfficeContact {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.frontOfficeCall {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--navy);
+  background: var(--tint);
+  padding: 8px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.frontOfficeCall:hover {
+  background: var(--tint-deep);
+}
+
+/* Co-teacher */
+.coTeacherCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--tint);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.coTeacherInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.coTeacherAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.coTeacherInitial {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--navy-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.coTeacherText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.coTeacherName {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.coTeacherRole {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.coTeacherActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.contactBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #fff;
+  border-radius: 999px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--navy);
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.contactBtn:hover {
+  background: var(--tint-deep);
+}
+
+.contactBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Coming Up */
+.comingUpHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.classesLeft {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.upcomingList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upcomingRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--tint-deep);
+}
+
+.upcomingNext {
+  background: #E8F3E8;
+  border-color: #A8D5A8;
+}
+
+.upcomingOff {
+  background: #FFF6EA;
+  border-color: #F6D7B5;
+}
+
+.upcomingDate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+}
+
+.upcomingDay {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.upcomingDayNum {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.upcomingInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.upcomingDateText {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.upcomingSession {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.upcomingNoClass {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--orange-dark);
+}
+
+.upcomingReason {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.upcomingPills {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.pillNext {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #4FA347;
+  color: #fff;
+}
+
+.pillLast {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+}
+
+.pillOff {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--orange);
+  color: #fff;
+}
+
+.showAllBtn {
+  align-self: center;
+  padding: 10px 20px;
+  background: var(--tint);
+  border: none;
+  border-radius: 999px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--navy);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  margin-top: 4px;
+}
+
+.showAllBtn:hover {
+  background: var(--tint-deep);
+}

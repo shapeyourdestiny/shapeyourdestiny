@@ -1,0 +1,175 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--tint-deep);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--paper);
+  transition: border-color 0.15s ease;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.5;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 520px) {
+  .row {
+    flex-direction: column;
+  }
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* Preview section */
+.previewSection {
+  margin-top: 8px;
+}
+
+.previewLabel {
+  display: block;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.previewBox {
+  background: #FFF6EA;
+  border: 1px solid #F6D7B5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.previewHeader {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--orange-dark);
+  padding: 10px 14px 8px;
+}
+
+.previewSteps {
+  padding: 0 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.previewStep {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.stepNumber {
+  width: 20px;
+  height: 20px;
+  background: var(--orange);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.stepText {
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.4;
+  padding-top: 1px;
+}
+
+.previewContact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 12px 14px;
+  border-top: 1px solid #F6D7B5;
+}
+
+.contactLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contactLabel {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
+.contactName {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.contactCall {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--navy);
+  background: var(--tint);
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+
+.previewEmpty {
+  padding: 16px;
+  background: var(--tint);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-style: italic;
+  text-align: center;
+}

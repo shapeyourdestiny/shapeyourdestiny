@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import styles from "./InstructorSchedule.module.css";
+import ClassDetailsSheet from "./ClassDetailsSheet";
 import { getDirectionsUrl } from "@/lib/maps";
 
 const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -108,6 +110,7 @@ function formatDayOffNote(nextDayOff) {
 }
 
 export default function InstructorSchedule({ nextSession, classes }) {
+  const [selectedClass, setSelectedClass] = useState(null);
   const hasClasses = classes && classes.length > 0;
 
   // Find the most recent end date among all classes (for empty state)
@@ -117,6 +120,14 @@ export default function InstructorSchedule({ nextSession, classes }) {
     }
     return latest;
   }, null);
+
+  const handleClassClick = (cls) => {
+    setSelectedClass(cls);
+  };
+
+  const handleDirectionsClick = (e) => {
+    e.stopPropagation();
+  };
 
   return (
     <div className={styles.schedule}>
@@ -194,7 +205,13 @@ export default function InstructorSchedule({ nextSession, classes }) {
         {hasClasses ? (
           <div className={styles.classesList}>
             {classes.map((cls) => (
-              <div key={cls.id} className={styles.classCard}>
+              <button
+                key={cls.id}
+                type="button"
+                className={styles.classCard}
+                onClick={() => handleClassClick(cls)}
+                aria-label={`${cls.school.name}, ${cls.program === "soccer" ? "Soccer" : "Youth Wellness"}, details`}
+              >
                 <div className={styles.classHeader}>
                   <span
                     className={styles.classProgram}
@@ -209,6 +226,7 @@ export default function InstructorSchedule({ nextSession, classes }) {
                       rel="noopener noreferrer"
                       className={styles.classDirections}
                       aria-label={`Directions to ${cls.school.name}`}
+                      onClick={handleDirectionsClick}
                     >
                       Directions
                     </a>
@@ -258,7 +276,7 @@ export default function InstructorSchedule({ nextSession, classes }) {
                     {formatDayOffNote(cls.nextDayOff)}
                   </div>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         ) : (
@@ -272,6 +290,14 @@ export default function InstructorSchedule({ nextSession, classes }) {
           </div>
         )}
       </div>
+
+      {/* Class Details Sheet */}
+      {selectedClass && (
+        <ClassDetailsSheet
+          classData={selectedClass}
+          onClose={() => setSelectedClass(null)}
+        />
+      )}
     </div>
   );
 }

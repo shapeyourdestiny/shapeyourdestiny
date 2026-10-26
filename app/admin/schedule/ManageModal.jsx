@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "./ManageModal.module.css";
+import SchoolDetailsFields from "@/app/admin/components/SchoolDetailsFields";
 import {
   createDistrictAction,
   createSchoolAction,
@@ -75,6 +76,9 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
   const [editingSchoolId, setEditingSchoolId] = useState(null);
   const [editSchoolName, setEditSchoolName] = useState("");
   const [editSchoolAddress, setEditSchoolAddress] = useState("");
+  const [editSchoolInstructions, setEditSchoolInstructions] = useState("");
+  const [editSchoolOfficeContact, setEditSchoolOfficeContact] = useState("");
+  const [editSchoolOfficePhone, setEditSchoolOfficePhone] = useState("");
 
   if (!open) return null;
 
@@ -261,6 +265,9 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
     setEditingSchoolId(school.id);
     setEditSchoolName(school.name || "");
     setEditSchoolAddress(school.address || "");
+    setEditSchoolInstructions(school.instructions || "");
+    setEditSchoolOfficeContact(school.office_contact || "");
+    setEditSchoolOfficePhone(school.office_phone || "");
   };
 
   const cancelEditingSchool = () => {
@@ -279,6 +286,9 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
       await updateSchoolAction(schoolId, {
         name: editSchoolName.trim(),
         address: editSchoolAddress.trim() || null,
+        instructions: editSchoolInstructions.trim() || null,
+        office_contact: editSchoolOfficeContact.trim() || null,
+        office_phone: editSchoolOfficePhone.trim() || null,
       });
       setEditingSchoolId(null);
       await onDataChange();
@@ -535,17 +545,16 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
                                     />
                                   </div>
                                 </div>
-                                <div className={styles.editRow}>
-                                  <div className={styles.field}>
-                                    <label>Address</label>
-                                    <input
-                                      type="text"
-                                      value={editSchoolAddress}
-                                      onChange={(e) => setEditSchoolAddress(e.target.value)}
-                                      placeholder="e.g., 123 Main St, City, CA 90210"
-                                    />
-                                  </div>
-                                </div>
+                                <SchoolDetailsFields
+                                  address={editSchoolAddress}
+                                  onAddressChange={setEditSchoolAddress}
+                                  instructions={editSchoolInstructions}
+                                  onInstructionsChange={setEditSchoolInstructions}
+                                  officeContact={editSchoolOfficeContact}
+                                  onOfficeContactChange={setEditSchoolOfficeContact}
+                                  officePhone={editSchoolOfficePhone}
+                                  onOfficePhoneChange={setEditSchoolOfficePhone}
+                                />
                                 <div className={styles.editActions}>
                                   <button
                                     type="button"
@@ -568,7 +577,12 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
                             ) : (
                               <>
                                 <div className={styles.schoolInfo}>
-                                  <span className={styles.listName}>{school.name}</span>
+                                  <div className={styles.schoolNameRow}>
+                                    <span className={styles.listName}>{school.name}</span>
+                                    {!school.instructions && (
+                                      <span className={styles.noInstructionsPill}>No instructions yet</span>
+                                    )}
+                                  </div>
                                   {school.address && (
                                     <span className={styles.schoolAddress}>{school.address}</span>
                                   )}

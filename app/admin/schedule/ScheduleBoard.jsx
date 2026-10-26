@@ -3,7 +3,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import styles from "./ScheduleBoard.module.css";
 import BottomSheet from "./BottomSheet";
-import ManageModal from "./ManageModal";
 import AddClassModal from "./AddClassModal";
 import {
   assignInstructorAction,
@@ -105,7 +104,6 @@ export default function ScheduleBoard({ initialData }) {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
-  const [manageOpen, setManageOpen] = useState(false);
   const [addClassOpen, setAddClassOpen] = useState(false);
 
   // Month view selected day state
@@ -885,13 +883,14 @@ export default function ScheduleBoard({ initialData }) {
             </svg>
             Add Class
           </button>
-          <button className={styles.manageBtn} onClick={() => setManageOpen(true)}>
+          <a href="/admin/programs" className={styles.manageBtn}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+              <path d="M3 21h18" />
+              <path d="M5 21V8l7-5 7 5v13" />
+              <path d="M9 21v-6h6v6" />
             </svg>
-            Manage
-          </button>
+            Programs
+          </a>
         </div>
       </div>
 
@@ -953,14 +952,6 @@ export default function ScheduleBoard({ initialData }) {
           </div>
         </div>
       </BottomSheet>
-
-      {/* Manage modal */}
-      <ManageModal
-        open={manageOpen}
-        onClose={() => setManageOpen(false)}
-        data={data}
-        onDataChange={refreshData}
-      />
 
       {/* Add Class modal */}
       <AddClassModal

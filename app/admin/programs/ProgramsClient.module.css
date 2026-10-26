@@ -1,0 +1,1047 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px 40px;
+  min-height: 100%;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.headerText h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.headerText p {
+  font-size: 14px;
+  color: #666;
+  margin: 6px 0 0 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.addDistrictBtn,
+.addClassBtn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.addDistrictBtn {
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #333;
+}
+
+.addDistrictBtn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.addClassBtn {
+  background: #b08d57;
+  border: none;
+  color: #fff;
+}
+
+.addClassBtn:hover {
+  background: #9a7a4a;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 8px;
+}
+
+.tab {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s;
+}
+
+.tab:hover {
+  color: #333;
+}
+
+.tabActive {
+  color: #b08d57;
+}
+
+.tabActive::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #b08d57;
+}
+
+/* Save message */
+.saveMessage {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  background: #10b981;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1000;
+  animation: slideIn 0.2s ease-out;
+}
+
+.saveError {
+  background: #ef4444;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Classes tab */
+.classesTab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Stat cards */
+.statCards {
+  display: flex;
+  gap: 16px;
+}
+
+.statCard {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.statCard:hover {
+  border-color: #ccc;
+}
+
+.statCardActive {
+  border-color: #b08d57;
+  box-shadow: 0 0 0 3px rgba(176, 141, 87, 0.15);
+}
+
+.statNumber {
+  display: block;
+  font-size: 32px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.1;
+}
+
+.statLabel {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.statOrange {
+  color: #f59e0b;
+}
+
+.statGreen {
+  color: #10b981;
+}
+
+/* Filter bar */
+.filterBar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  flex: 1;
+  max-width: 320px;
+}
+
+.searchBox svg {
+  width: 18px;
+  height: 18px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.searchBox input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: none;
+}
+
+.searchBox input::placeholder {
+  color: #999;
+}
+
+.programPills {
+  display: flex;
+  gap: 8px;
+}
+
+.programPill {
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #f5f5f5;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.programPill:hover {
+  background: #eee;
+}
+
+.programPillActive {
+  background: #b08d57;
+  color: #fff;
+}
+
+/* Add district card */
+.addDistrictCard {
+  background: #fefefe;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.addDistrictForm {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+}
+
+.field input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 240px;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: #b08d57;
+}
+
+.colorPicker {
+  display: flex;
+  gap: 6px;
+}
+
+.colorSwatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.1);
+}
+
+.colorSelected {
+  border-color: #1a1a1a;
+}
+
+.addDistrictActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+.cancelBtn {
+  padding: 10px 16px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cancelBtn:hover {
+  background: #f5f5f5;
+}
+
+.primaryBtn {
+  padding: 10px 20px;
+  background: #b08d57;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  background: #9a7a4a;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Districts list */
+.districtsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.emptyState {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 48px;
+  text-align: center;
+}
+
+.emptyState p {
+  color: #666;
+  margin: 0;
+}
+
+/* District card */
+.districtCard {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  overflow: hidden;
+  border-left: 4px solid var(--district-color, #3E8FA0);
+}
+
+.districtHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.districtHeader:hover {
+  background: #fafafa;
+}
+
+.collapseBtn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.collapseBtn svg {
+  width: 18px;
+  height: 18px;
+  color: #666;
+}
+
+.collapsed {
+  transform: rotate(-90deg);
+}
+
+.districtName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.districtMeta {
+  font-size: 13px;
+  color: #888;
+  margin-left: auto;
+}
+
+.addSchoolPill {
+  padding: 6px 12px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.addSchoolPill:hover {
+  background: #eee;
+  color: #333;
+}
+
+.menuWrapper {
+  position: relative;
+}
+
+.menuBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.menuBtn:hover {
+  background: #f0f0f0;
+}
+
+.menuBtn svg {
+  width: 18px;
+  height: 18px;
+  color: #666;
+}
+
+.menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.menu button:hover {
+  background: #f5f5f5;
+}
+
+.menuDanger {
+  color: #ef4444 !important;
+}
+
+.menuDanger:hover {
+  background: #fef2f2 !important;
+}
+
+/* District content */
+.districtContent {
+  padding: 0 20px 20px 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Add school inline */
+.addSchoolInline {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.addSchoolInline input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  flex: 1;
+}
+
+.addSchoolInline input:focus {
+  outline: none;
+  border-color: #b08d57;
+}
+
+.noSchools {
+  padding: 24px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* School section */
+.schoolSection {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.schoolSection:last-child {
+  border-bottom: none;
+}
+
+.schoolHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.schoolInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.schoolName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.schoolAddress {
+  font-size: 12px;
+  color: #888;
+}
+
+.noInstructionsPill {
+  padding: 4px 10px;
+  background: #fef3c7;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.editSchoolLink {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #b08d57;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.editSchoolLink:hover {
+  color: #9a7a4a;
+}
+
+.addClassPill {
+  padding: 6px 12px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.addClassPill:hover {
+  background: #eee;
+  color: #333;
+}
+
+.noClasses {
+  padding: 16px;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+/* Classes list */
+.classesList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Class row */
+.classRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #fafafa;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: 100%;
+  text-align: left;
+}
+
+.classRow:hover {
+  background: #f0f0f0;
+}
+
+.classRowEnded {
+  opacity: 0.6;
+}
+
+.programPillSmall {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.program_wellness {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.program_soccer {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.classDaysTime {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  min-width: 140px;
+}
+
+.classDateProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.classDateText {
+  font-size: 13px;
+  color: #666;
+}
+
+.progressBarWrapper {
+  width: 100%;
+  height: 4px;
+  background: #e5e5e5;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: #b08d57;
+  border-radius: 2px;
+  transition: width 0.3s ease-out;
+}
+
+.sessionCount {
+  font-size: 11px;
+  color: #888;
+}
+
+.instructorChips {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.instructorChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #f0f0f0;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #333;
+}
+
+.instructorInitial {
+  width: 18px;
+  height: 18px;
+  background: #b08d57;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.noInstructor {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.statusPill {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.statusRunning {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.statusStartsSoon {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.statusEnded {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.chevron {
+  width: 16px;
+  height: 16px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.footerNote {
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+  padding: 16px 0;
+}
+
+/* Holidays tab */
+.holidaysTab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.holidaysIntro {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.holidaysGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.holidayCard {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.holidayCard h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.holidayCardDesc {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 20px 0;
+}
+
+.addHolidayForm {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.addHolidayForm input,
+.addHolidayForm select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.addHolidayForm input:focus,
+.addHolidayForm select:focus {
+  outline: none;
+  border-color: #b08d57;
+}
+
+.addHolidayForm input[type="date"] {
+  width: 140px;
+}
+
+.addHolidayForm input[type="text"] {
+  flex: 1;
+  min-width: 150px;
+}
+
+.addHolidayForm select {
+  min-width: 140px;
+}
+
+.addBtn {
+  padding: 8px 16px;
+  background: #b08d57;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: #9a7a4a;
+}
+
+.addBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Holidays list */
+.holidaysList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.holidayRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #fafafa;
+  border-radius: 6px;
+}
+
+.holidayDate {
+  font-size: 13px;
+  color: #666;
+  min-width: 110px;
+}
+
+.holidayName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+}
+
+.holidayScope {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #888;
+}
+
+.scopeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.deleteBtn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.5;
+  transition: all 0.15s;
+}
+
+.deleteBtn:hover {
+  opacity: 1;
+  background: #fef2f2;
+}
+
+.deleteBtn svg {
+  width: 14px;
+  height: 14px;
+  color: #ef4444;
+}
+
+.deleteBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pastHolidays {
+  opacity: 0.5;
+}
+
+.showPastBtn {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #b08d57;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.showPastBtn:hover {
+  color: #9a7a4a;
+}
+
+.typicalHolidaysLink {
+  margin-top: 16px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #b08d57;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.typicalHolidaysLink:hover {
+  color: #9a7a4a;
+}
+
+.typicalHolidaysLink:disabled {
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* Program off days */
+.offDayGroup {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.offDayProgramPill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.noOffDays {
+  font-size: 13px;
+  color: #888;
+  margin: 8px 0 0 0;
+}
+
+.offDaysList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.offDayRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #fafafa;
+  border-radius: 6px;
+}
+
+.offDayDate {
+  font-size: 13px;
+  color: #666;
+  min-width: 110px;
+}
+
+.offDayReason {
+  font-size: 14px;
+  color: #333;
+  flex: 1;
+}
