@@ -113,6 +113,7 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
       targetSessions: recurrenceType === "sessions" ? targetSessions : null,
       holidays: applicableHolidays,
       programOffDays: offDays,
+      classTime: time,
       rangeEnd: recurrenceType === "ongoing"
         ? (() => {
             // For ongoing preview, show next 3 months
@@ -122,7 +123,7 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
           })()
         : null,
     });
-  }, [startDate, selectedDays, recurrenceType, targetSessions, applicableHolidays, offDays]);
+  }, [startDate, selectedDays, recurrenceType, targetSessions, applicableHolidays, offDays, time]);
 
   // Track previous open state for reset logic
   const [lastOpen, setLastOpen] = useState(open);

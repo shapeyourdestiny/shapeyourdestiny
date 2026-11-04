@@ -8,7 +8,7 @@ import {
   assignInstructorAction,
   unassignInstructorAction,
 } from "@/lib/schedule/actions";
-import { computeClassOccurrences } from "@/lib/schedule/occurrences";
+import { computeClassOccurrences, getTimePeriod } from "@/lib/schedule/occurrences";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const MONTHS = [
@@ -240,7 +240,15 @@ export default function ScheduleBoard({ initialData }) {
 
     // Only apply holidays that are global, for this district, or for this school
     const applicableHolidays = getHolidaysForSchool(districtId, schoolId);
-    const isHolidayDate = applicableHolidays.some(h => h.date === dateStr);
+
+    // Check if any holiday affects this specific class (time-period-aware)
+    const classPeriod = getTimePeriod(cls.time);
+    const isHolidayDate = applicableHolidays.some(h => {
+      if (h.date !== dateStr) return false;
+      const holidayPeriod = h.time_period || 'all_day';
+      return holidayPeriod === 'all_day' || holidayPeriod === classPeriod;
+    });
+
     const isOffDay = offDaysForProgram.some(od => od.date === dateStr);
     if (isHolidayDate || isOffDay) return false;
 
@@ -252,6 +260,7 @@ export default function ScheduleBoard({ initialData }) {
       targetSessions: cls.target_sessions,
       holidays: applicableHolidays,
       programOffDays: offDaysForProgram,
+      classTime: cls.time,
     });
 
     return result.occurrences.some(o => o.date === dateStr);

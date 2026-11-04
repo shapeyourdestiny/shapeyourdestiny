@@ -59,6 +59,7 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
   const [holidayName, setHolidayName] = useState("");
   const [holidayDistrictId, setHolidayDistrictId] = useState("");
   const [holidaySchoolId, setHolidaySchoolId] = useState("");
+  const [holidayTimePeriod, setHolidayTimePeriod] = useState("all_day");
 
   // Expanded sections
   const [expandedDistrict, setExpandedDistrict] = useState(null);
@@ -211,12 +212,14 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
         holidayDate,
         holidayName.trim(),
         districtId,
-        schoolId
+        schoolId,
+        holidayTimePeriod
       );
       setHolidayDate("");
       setHolidayName("");
       setHolidayDistrictId("");
       setHolidaySchoolId("");
+      setHolidayTimePeriod("all_day");
       await onDataChange();
     } catch (err) {
       setError(err.message);
@@ -855,9 +858,20 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
                       type="text"
                       value={holidayName}
                       onChange={(e) => setHolidayName(e.target.value)}
-                      placeholder="e.g., Teacher Workday"
+                      placeholder="e.g., Parent Conferences"
                       required
                     />
+                  </div>
+                  <div className={styles.field}>
+                    <label>Classes Affected</label>
+                    <select
+                      value={holidayTimePeriod}
+                      onChange={(e) => setHolidayTimePeriod(e.target.value)}
+                    >
+                      <option value="all_day">All Day</option>
+                      <option value="am">AM Only (before 12pm)</option>
+                      <option value="pm">PM Only (12pm and later)</option>
+                    </select>
                   </div>
                 </div>
                 <div className={styles.formRow}>
@@ -926,6 +940,11 @@ export default function ManageModal({ open, onClose, data, onDataChange }) {
                             <div key={h.id} className={styles.holidayItem}>
                               <span className={styles.holidayDate}>
                                 {formatDate(h.date)}
+                                {h.time_period && h.time_period !== 'all_day' && (
+                                  <span className={styles.holidayTimePeriod}>
+                                    {h.time_period === 'am' ? 'AM' : 'PM'}
+                                  </span>
+                                )}
                               </span>
                               <span className={styles.holidayName}>{h.name}</span>
                               {school ? (

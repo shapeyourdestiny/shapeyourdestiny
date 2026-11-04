@@ -642,9 +642,21 @@
 }
 
 .holidayDate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 600;
   color: var(--ink);
-  min-width: 120px;
+  min-width: 140px;
+}
+
+.holidayTimePeriod {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(62, 143, 160, 0.15);
+  color: var(--teal-dark);
 }
 
 .holidayName {
