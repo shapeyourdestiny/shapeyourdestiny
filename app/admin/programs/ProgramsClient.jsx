@@ -79,6 +79,7 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
   const [holidayDate, setHolidayDate] = useState("");
   const [holidayName, setHolidayName] = useState("");
   const [holidayScope, setHolidayScope] = useState("all");
+  const [holidayTimePeriod, setHolidayTimePeriod] = useState("all_day");
   const [offDayProgram, setOffDayProgram] = useState("wellness");
   const [offDayDate, setOffDayDate] = useState("");
   const [offDayReason, setOffDayReason] = useState("");
@@ -309,11 +310,12 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
     }
 
     try {
-      await createHolidayAction(holidayDate, holidayName.trim(), districtId, schoolId);
+      await createHolidayAction(holidayDate, holidayName.trim(), districtId, schoolId, holidayTimePeriod);
       await refreshData();
       setHolidayDate("");
       setHolidayName("");
       setHolidayScope("all");
+      setHolidayTimePeriod("all_day");
       showSaved();
     } catch (err) {
       showError(err.message);
@@ -684,6 +686,15 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
                     </optgroup>
                   ))}
                 </select>
+                <select
+                  value={holidayTimePeriod}
+                  onChange={(e) => setHolidayTimePeriod(e.target.value)}
+                  className={styles.timePeriodSelect}
+                >
+                  <option value="all_day">All day</option>
+                  <option value="am">AM only</option>
+                  <option value="pm">PM only</option>
+                </select>
                 <button
                   className={styles.addBtn}
                   onClick={handleAddHoliday}
@@ -699,7 +710,14 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
                   const scope = getHolidayScope(h);
                   return (
                     <div key={h.id} className={styles.holidayRow}>
-                      <span className={styles.holidayDate}>{formatDateFull(h.date)}</span>
+                      <span className={styles.holidayDate}>
+                        {formatDateFull(h.date)}
+                        {h.time_period && h.time_period !== "all_day" && (
+                          <span className={styles.timePeriodBadge}>
+                            {h.time_period === "am" ? "AM" : "PM"}
+                          </span>
+                        )}
+                      </span>
                       <span className={styles.holidayName}>{h.name}</span>
                       <span className={styles.holidayScope}>
                         {scope.color && <span className={styles.scopeDot} style={{ background: scope.color }} />}
@@ -735,7 +753,14 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
                     const scope = getHolidayScope(h);
                     return (
                       <div key={h.id} className={styles.holidayRow}>
-                        <span className={styles.holidayDate}>{formatDateFull(h.date)}</span>
+                        <span className={styles.holidayDate}>
+                          {formatDateFull(h.date)}
+                          {h.time_period && h.time_period !== "all_day" && (
+                            <span className={styles.timePeriodBadge}>
+                              {h.time_period === "am" ? "AM" : "PM"}
+                            </span>
+                          )}
+                        </span>
                         <span className={styles.holidayName}>{h.name}</span>
                         <span className={styles.holidayScope}>
                           {scope.color && <span className={styles.scopeDot} style={{ background: scope.color }} />}
