@@ -3,16 +3,16 @@
   inset: 0;
   background: rgba(20, 44, 107, 0.4);
   z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
 }
 
 .panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: #fff;
   border-radius: 16px;
-  width: 100%;
+  width: calc(100% - 40px);
   max-width: 520px;
   max-height: 90vh;
   z-index: 201;
@@ -25,11 +25,11 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translate(-50%, -50%) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 

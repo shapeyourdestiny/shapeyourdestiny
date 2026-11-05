@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import styles from "./ProgramsClient.module.css";
 import ClassPanel from "./ClassPanel";
 import SchoolPanel from "./SchoolPanel";
 import ConfirmModal from "./ConfirmModal";
 import {
-  createDistrictAction,
   deleteDistrictAction,
-  createSchoolAction,
+  renameDistrictAction,
+  updateDistrictColorAction,
   createHolidayAction,
   deleteHolidayAction,
   addTypicalHolidaysAction,
@@ -26,6 +26,15 @@ const DISTRICT_COLORS = [
   "#3498DB", // blue
   "#1ABC9C", // turquoise
   "#E91E63", // pink
+];
+
+const AVATAR_COLORS = [
+  "#3E8FA0",
+  "#2B4FA3",
+  "#6FCB55",
+  "#2C6E7D",
+  "#1F3F91",
+  "#3498DB",
 ];
 
 function parseDate(dateStr) {
@@ -46,6 +55,19 @@ function formatDateFull(dateStr) {
   return `${dayName}, ${SHORT_MONTHS[date.getMonth()]} ${date.getDate()}`;
 }
 
+function getAvatarColor(name) {
+  if (!name) return AVATAR_COLORS[0];
+  const hash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
+function getShortName(fullName) {
+  if (!fullName) return "";
+  const parts = fullName.trim().split(" ");
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+}
+
 export default function ProgramsClient({ initialData, progressMap, today }) {
   const [data, setData] = useState(initialData);
   const [activeTab, setActiveTab] = useState("classes");
@@ -54,26 +76,8 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
   const [statusFilter, setStatusFilter] = useState("current");
 
   // Panel state
-  const [classPanel, setClassPanel] = useState(null); // { mode: 'create'|'edit', classId?, schoolId?, districtId? }
-  const [schoolPanel, setSchoolPanel] = useState(null); // { schoolId, districtId }
-
-  // Inline forms
-  const [addingDistrict, setAddingDistrict] = useState(false);
-  const [newDistrictName, setNewDistrictName] = useState("");
-  const [newDistrictColor, setNewDistrictColor] = useState(DISTRICT_COLORS[0]);
-  const [addingSchoolTo, setAddingSchoolTo] = useState(null); // districtId
-  const [newSchoolName, setNewSchoolName] = useState("");
-  const [newSchoolAddress, setNewSchoolAddress] = useState("");
-
-  // Collapsed districts (localStorage)
-  const [collapsedDistricts, setCollapsedDistricts] = useState(() => {
-    try {
-      const saved = localStorage.getItem("programs_collapsed_districts");
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
+  const [classPanel, setClassPanel] = useState(null);
+  const [schoolPanel, setSchoolPanel] = useState(null);
 
   // Holidays tab state
   const [holidayDate, setHolidayDate] = useState("");
@@ -122,22 +126,6 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
     fetchOffDays();
   }, []);
 
-  // Save collapsed state
-  useEffect(() => {
-    try {
-      localStorage.setItem("programs_collapsed_districts", JSON.stringify(collapsedDistricts));
-    } catch {
-      // ignore
-    }
-  }, [collapsedDistricts]);
-
-  const toggleDistrictCollapse = (districtId) => {
-    setCollapsedDistricts((prev) => ({
-      ...prev,
-      [districtId]: !prev[districtId],
-    }));
-  };
-
   // Show save message briefly
   const showSaved = (message = "Saved") => {
     setSaveMessage(message);
@@ -149,22 +137,27 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
     setTimeout(() => setSaveMessage(null), 3000);
   };
 
-  // Compute stats
+  // Compute stats for filters
   const stats = useMemo(() => {
     let currentClasses = 0;
-    let endedClasses = 0;
     let needInstructor = 0;
-    let totalSchools = 0;
+    let startingSoon = 0;
+    let endedClasses = 0;
+    const schoolsWithCurrent = new Set();
 
     for (const district of data.districts) {
-      totalSchools += district.schools?.length || 0;
       for (const school of district.schools || []) {
         for (const cls of school.classes || []) {
           const progress = progressMap[cls.id] || {};
           if (progress.status === "ended") {
             endedClasses++;
+          } else if (progress.status === "starts_soon") {
+            startingSoon++;
+            currentClasses++;
+            schoolsWithCurrent.add(school.id);
           } else {
             currentClasses++;
+            schoolsWithCurrent.add(school.id);
             const hasInstructor = cls.assignments?.some(
               (a) => a.slotType === "instructor_1" || a.slotType === "instructor_2"
             );
@@ -178,14 +171,14 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
 
     return {
       currentClasses,
-      endedClasses,
       needInstructor,
-      totalSchools,
-      totalDistricts: data.districts.length,
+      startingSoon,
+      endedClasses,
+      schoolsWithCurrent: schoolsWithCurrent.size,
     };
   }, [data, progressMap]);
 
-  // Filter classes
+  // Filter classes - only show schools with matching classes
   const filteredData = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
 
@@ -197,14 +190,18 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
               const progress = progressMap[cls.id] || {};
 
               // Status filter
-              if (statusFilter === "current" && progress.status === "ended") return false;
-              if (statusFilter === "ended" && progress.status !== "ended") return false;
-              if (statusFilter === "needInstructor") {
+              if (statusFilter === "current") {
+                if (progress.status === "ended") return false;
+              } else if (statusFilter === "ended") {
+                if (progress.status !== "ended") return false;
+              } else if (statusFilter === "needInstructor") {
                 if (progress.status === "ended") return false;
                 const hasInstructor = cls.assignments?.some(
                   (a) => a.slotType === "instructor_1" || a.slotType === "instructor_2"
                 );
                 if (hasInstructor) return false;
+              } else if (statusFilter === "startingSoon") {
+                if (progress.status !== "starts_soon") return false;
               }
 
               // Program filter
@@ -226,30 +223,12 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
 
             return { ...school, classes: filteredClasses };
           })
-          .filter((school) => school.classes.length > 0 || (!query && statusFilter !== "ended"));
+          .filter((school) => school.classes.length > 0);
 
         return { ...district, schools: filteredSchools };
       })
       .filter((district) => district.schools.length > 0);
   }, [data, progressMap, searchQuery, programFilter, statusFilter]);
-
-  // Add district
-  const handleAddDistrict = async () => {
-    if (!newDistrictName.trim()) return;
-    setLoading(true);
-    try {
-      await createDistrictAction(newDistrictName.trim(), newDistrictColor);
-      await refreshData();
-      setAddingDistrict(false);
-      setNewDistrictName("");
-      setNewDistrictColor(DISTRICT_COLORS[0]);
-      showSaved();
-    } catch (err) {
-      showError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Delete district
   const handleDeleteDistrict = async (district) => {
@@ -275,16 +254,28 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
     });
   };
 
-  // Add school
-  const handleAddSchool = async (districtId) => {
-    if (!newSchoolName.trim()) return;
+  // Rename district
+  const handleRenameDistrict = async (district, newName) => {
+    if (!newName.trim() || newName.trim() === district.name) return;
     setLoading(true);
     try {
-      await createSchoolAction(districtId, newSchoolName.trim(), newSchoolAddress.trim() || null);
+      await renameDistrictAction(district.id, newName.trim());
       await refreshData();
-      setAddingSchoolTo(null);
-      setNewSchoolName("");
-      setNewSchoolAddress("");
+      showSaved();
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Change district color
+  const handleChangeDistrictColor = async (district, newColor) => {
+    if (newColor === district.color) return;
+    setLoading(true);
+    try {
+      await updateDistrictColorAction(district.id, newColor);
+      await refreshData();
       showSaved();
     } catch (err) {
       showError(err.message);
@@ -443,44 +434,6 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
 
   return (
     <div className={styles.page}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerText}>
-          <h1>Programs</h1>
-          <p>Every district, school and class in one place. Set things up here, then assign on the Schedule Board.</p>
-        </div>
-        <div className={styles.headerActions}>
-          <button
-            className={styles.addDistrictBtn}
-            onClick={() => setAddingDistrict(true)}
-          >
-            + Add district
-          </button>
-          <button
-            className={styles.addClassBtn}
-            onClick={() => setClassPanel({ mode: "create" })}
-          >
-            + Add class
-          </button>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${activeTab === "classes" ? styles.tabActive : ""}`}
-          onClick={() => setActiveTab("classes")}
-        >
-          Districts, schools & classes
-        </button>
-        <button
-          className={`${styles.tab} ${activeTab === "holidays" ? styles.tabActive : ""}`}
-          onClick={() => setActiveTab("holidays")}
-        >
-          Holidays & days off
-        </button>
-      </div>
-
       {/* Save message */}
       {saveMessage && (
         <div className={`${styles.saveMessage} ${saveMessage.error ? styles.saveError : ""}`}>
@@ -488,45 +441,90 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
         </div>
       )}
 
-      {/* Tab 1: Classes */}
+      {/* Classes view */}
       {activeTab === "classes" && (
-        <div className={styles.classesTab}>
-          {/* Stat cards */}
-          <div className={styles.statCards}>
-            <button
-              className={`${styles.statCard} ${statusFilter === "current" ? styles.statCardActive : ""}`}
-              onClick={() => setStatusFilter(statusFilter === "current" ? "current" : "current")}
-            >
-              <span className={styles.statNumber}>{stats.currentClasses}</span>
-              <span className={styles.statLabel}>Current classes</span>
-            </button>
-            <button
-              className={`${styles.statCard} ${statusFilter === "all" ? styles.statCardActive : ""}`}
-              onClick={() => setStatusFilter(statusFilter === "all" ? "current" : "all")}
-            >
-              <span className={styles.statNumber}>{stats.totalSchools}</span>
-              <span className={styles.statLabel}>Schools in {stats.totalDistricts} districts</span>
-            </button>
-            <button
-              className={`${styles.statCard} ${statusFilter === "needInstructor" ? styles.statCardActive : ""}`}
-              onClick={() => setStatusFilter(statusFilter === "needInstructor" ? "current" : "needInstructor")}
-            >
-              <span className={`${styles.statNumber} ${stats.needInstructor > 0 ? styles.statOrange : styles.statGreen}`}>
-                {stats.needInstructor}
-              </span>
-              <span className={styles.statLabel}>Need an instructor</span>
-            </button>
-            <button
-              className={`${styles.statCard} ${statusFilter === "ended" ? styles.statCardActive : ""}`}
-              onClick={() => setStatusFilter(statusFilter === "ended" ? "current" : "ended")}
-            >
-              <span className={styles.statNumber}>{stats.endedClasses}</span>
-              <span className={styles.statLabel}>Ended</span>
-            </button>
+        <>
+          {/* Header */}
+          <div className={styles.header}>
+            <div className={styles.headerText}>
+              <h1>Programs</h1>
+              <p className={styles.subtitle}>
+                {stats.currentClasses} classes at {stats.schoolsWithCurrent} schools. Click any class to edit it.
+              </p>
+            </div>
+            <div className={styles.headerActions}>
+              <button
+                className={styles.ghostBtn}
+                onClick={() => setActiveTab("holidays")}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                Holidays & days off
+              </button>
+              <button
+                className={styles.ghostBtn}
+                onClick={() => setSchoolPanel({ mode: "create" })}
+              >
+                + Add school
+              </button>
+              <button
+                className={styles.addClassBtn}
+                onClick={() => setClassPanel({ mode: "create" })}
+              >
+                + Add class
+              </button>
+            </div>
           </div>
 
-          {/* Search and filter */}
+          {/* Filter bar */}
           <div className={styles.filterBar}>
+            <div className={styles.segmentedControl}>
+              {[
+                { key: "current", label: "Current", count: stats.currentClasses },
+                { key: "needInstructor", label: "Needs instructor", count: stats.needInstructor },
+                { key: "startingSoon", label: "Starting soon", count: stats.startingSoon },
+                { key: "ended", label: "Ended", count: stats.endedClasses },
+              ].map(({ key, label, count }) => (
+                <button
+                  key={key}
+                  className={`${styles.segment} ${statusFilter === key ? styles.segmentActive : ""}`}
+                  onClick={() => setStatusFilter(key)}
+                >
+                  {label}
+                  <span
+                    className={`${styles.segmentCount} ${
+                      key === "needInstructor" && count > 0 && statusFilter !== key
+                        ? styles.segmentCountAlert
+                        : ""
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.programChips}>
+              {[
+                { key: "all", label: "All", dotColor: "#9CA3AF" },
+                { key: "wellness", label: "Wellness", dotColor: "var(--teal)" },
+                { key: "soccer", label: "Soccer", dotColor: "var(--navy-mid)" },
+              ].map(({ key, label, dotColor }) => (
+                <button
+                  key={key}
+                  className={`${styles.programChip} ${programFilter === key ? styles.programChipActive : ""}`}
+                  onClick={() => setProgramFilter(key)}
+                >
+                  <span className={styles.programDot} style={{ background: dotColor }} />
+                  {label}
+                </button>
+              ))}
+            </div>
+
             <div className={styles.searchBox}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8" />
@@ -539,68 +537,7 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className={styles.programPills}>
-              {["all", "wellness", "soccer"].map((p) => (
-                <button
-                  key={p}
-                  className={`${styles.programPill} ${programFilter === p ? styles.programPillActive : ""}`}
-                  onClick={() => setProgramFilter(p)}
-                >
-                  {p === "all" ? "All programs" : p === "wellness" ? "Youth Wellness" : "Soccer"}
-                </button>
-              ))}
-            </div>
           </div>
-
-          {/* Add district inline */}
-          {addingDistrict && (
-            <div className={styles.addDistrictCard}>
-              <div className={styles.addDistrictForm}>
-                <div className={styles.field}>
-                  <label>District name</label>
-                  <input
-                    type="text"
-                    value={newDistrictName}
-                    onChange={(e) => setNewDistrictName(e.target.value)}
-                    placeholder="e.g., Fontana"
-                    autoFocus
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label>Color</label>
-                  <div className={styles.colorPicker}>
-                    {DISTRICT_COLORS.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        className={`${styles.colorSwatch} ${newDistrictColor === color ? styles.colorSelected : ""}`}
-                        style={{ background: color }}
-                        onClick={() => setNewDistrictColor(color)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className={styles.addDistrictActions}>
-                <button
-                  className={styles.cancelBtn}
-                  onClick={() => {
-                    setAddingDistrict(false);
-                    setNewDistrictName("");
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  className={styles.primaryBtn}
-                  onClick={handleAddDistrict}
-                  disabled={loading || !newDistrictName.trim()}
-                >
-                  Add district
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Districts list */}
           <div className={styles.districtsList}>
@@ -610,45 +547,38 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
               </div>
             ) : (
               filteredData.map((district) => (
-                <DistrictCard
+                <DistrictSection
                   key={district.id}
                   district={district}
                   progressMap={progressMap}
-                  collapsed={collapsedDistricts[district.id]}
-                  onToggleCollapse={() => toggleDistrictCollapse(district.id)}
-                  onAddSchool={() => {
-                    setAddingSchoolTo(district.id);
-                    setNewSchoolName("");
-                    setNewSchoolAddress("");
-                  }}
-                  onEditSchool={(school) => setSchoolPanel({ schoolId: school.id, districtId: district.id })}
+                  onEditSchool={(school) => setSchoolPanel({ mode: "edit", schoolId: school.id, districtId: district.id })}
                   onAddClass={(school) => setClassPanel({ mode: "create", schoolId: school.id, districtId: district.id })}
                   onEditClass={(cls) => setClassPanel({ mode: "edit", classId: cls.id })}
                   onDeleteDistrict={() => handleDeleteDistrict(district)}
-                  addingSchool={addingSchoolTo === district.id}
-                  newSchoolName={newSchoolName}
-                  setNewSchoolName={setNewSchoolName}
-                  newSchoolAddress={newSchoolAddress}
-                  setNewSchoolAddress={setNewSchoolAddress}
-                  onCancelAddSchool={() => setAddingSchoolTo(null)}
-                  onConfirmAddSchool={() => handleAddSchool(district.id)}
-                  loading={loading}
+                  onRenameDistrict={(newName) => handleRenameDistrict(district, newName)}
+                  onChangeColor={(newColor) => handleChangeDistrictColor(district, newColor)}
                   statusFilter={statusFilter}
                 />
               ))
             )}
           </div>
-
-          {/* Footer note */}
-          <p className={styles.footerNote}>
-            Ended classes stay here for payroll and history. Turn them off with the filter above.
-          </p>
-        </div>
+        </>
       )}
 
-      {/* Tab 2: Holidays */}
+      {/* Holidays view */}
       {activeTab === "holidays" && (
         <div className={styles.holidaysTab}>
+          <button
+            className={styles.backLink}
+            onClick={() => setActiveTab("classes")}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Back to classes
+          </button>
+
+          <h1 className={styles.holidaysTitle}>Holidays & days off</h1>
           <p className={styles.holidaysIntro}>
             Classes skip these dates automatically, so session counts, end dates, My Schedule and payroll all stay right.
           </p>
@@ -881,9 +811,9 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
           {...schoolPanel}
           data={data}
           onClose={() => setSchoolPanel(null)}
-          onSave={async () => {
+          onSave={async (message) => {
             await refreshData();
-            showSaved();
+            showSaved(message || "Saved");
           }}
           onDelete={async () => {
             await refreshData();
@@ -903,28 +833,41 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
   );
 }
 
-// District card component
-function DistrictCard({
+// District section component
+function DistrictSection({
   district,
   progressMap,
-  collapsed,
-  onToggleCollapse,
-  onAddSchool,
   onEditSchool,
   onAddClass,
   onEditClass,
   onDeleteDistrict,
-  addingSchool,
-  newSchoolName,
-  setNewSchoolName,
-  newSchoolAddress,
-  setNewSchoolAddress,
-  onCancelAddSchool,
-  onConfirmAddSchool,
-  loading,
+  onRenameDistrict,
+  onChangeColor,
   statusFilter,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [renamingValue, setRenamingValue] = useState(district.name);
+  const [changingColor, setChangingColor] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
+  const handleRename = () => {
+    onRenameDistrict(renamingValue);
+    setRenaming(false);
+  };
 
   const currentClassCount = (district.schools || []).reduce((sum, school) => {
     return sum + (school.classes || []).filter((cls) => {
@@ -933,34 +876,44 @@ function DistrictCard({
     }).length;
   }, 0);
 
+  const totalClassCount = (district.schools || []).reduce(
+    (sum, school) => sum + (school.classes || []).length,
+    0
+  );
+
   return (
-    <div className={styles.districtCard} style={{ "--district-color": district.color }}>
-      <div className={styles.districtHeader} onClick={onToggleCollapse}>
-        <button className={`${styles.collapseBtn} ${collapsed ? styles.collapsed : ""}`}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
-        <h3 className={styles.districtName}>{district.name}</h3>
-        <span className={styles.districtMeta}>
-          {district.schools?.length || 0} schools · {currentClassCount} classes
-        </span>
-        <button
-          className={styles.addSchoolPill}
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddSchool();
-          }}
-        >
-          + Add school
-        </button>
-        <div className={styles.menuWrapper}>
-          <button
-            className={styles.menuBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              setMenuOpen(!menuOpen);
+    <div className={styles.districtSection}>
+      {/* District heading */}
+      <div className={styles.districtHeading}>
+        <span className={styles.districtDot} style={{ background: district.color }} />
+        {renaming ? (
+          <input
+            type="text"
+            value={renamingValue}
+            onChange={(e) => setRenamingValue(e.target.value)}
+            onBlur={handleRename}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleRename();
+              if (e.key === "Escape") {
+                setRenamingValue(district.name);
+                setRenaming(false);
+              }
             }}
+            className={styles.renameInput}
+            autoFocus
+          />
+        ) : (
+          <h2 className={styles.districtName}>{district.name}</h2>
+        )}
+        <span className={styles.districtMeta}>
+          {district.schools?.length || 0} schools · {statusFilter === "ended" ? totalClassCount : currentClassCount} classes
+        </span>
+        <div className={styles.districtLine} />
+        <div className={styles.menuWrapper} ref={menuRef}>
+          <button
+            className={`${styles.menuBtn} ${menuOpen ? styles.menuBtnActive : ""}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="District options"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="5" r="1" />
@@ -969,7 +922,7 @@ function DistrictCard({
             </svg>
           </button>
           {menuOpen && (
-            <div className={styles.menu} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.menu}>
               <button onClick={() => { setRenaming(true); setMenuOpen(false); }}>
                 Rename
               </button>
@@ -984,107 +937,112 @@ function DistrictCard({
         </div>
       </div>
 
-      {!collapsed && (
-        <div className={styles.districtContent}>
-          {/* Add school inline */}
-          {addingSchool && (
-            <div className={styles.addSchoolInline}>
-              <input
-                type="text"
-                value={newSchoolName}
-                onChange={(e) => setNewSchoolName(e.target.value)}
-                placeholder="School name"
-                autoFocus
-              />
-              <input
-                type="text"
-                value={newSchoolAddress}
-                onChange={(e) => setNewSchoolAddress(e.target.value)}
-                placeholder="Address, for directions"
-              />
-              <button className={styles.cancelBtn} onClick={onCancelAddSchool}>
-                Cancel
-              </button>
-              <button
-                className={styles.primaryBtn}
-                onClick={onConfirmAddSchool}
-                disabled={loading || !newSchoolName.trim()}
-              >
-                Add school
-              </button>
-            </div>
-          )}
-
-          {/* Schools */}
-          {(district.schools || []).map((school) => (
-            <SchoolSection
-              key={school.id}
-              school={school}
-              progressMap={progressMap}
-              onEditSchool={() => onEditSchool(school)}
-              onAddClass={() => onAddClass(school)}
-              onEditClass={onEditClass}
-              statusFilter={statusFilter}
+      {/* Color picker */}
+      {changingColor && (
+        <div className={styles.colorPickerRow}>
+          {DISTRICT_COLORS.map((color) => (
+            <button
+              key={color}
+              type="button"
+              className={`${styles.colorSwatch} ${district.color === color ? styles.colorSelected : ""}`}
+              style={{ background: color }}
+              onClick={() => {
+                onChangeColor(color);
+                setChangingColor(false);
+              }}
             />
           ))}
-
-          {(!district.schools || district.schools.length === 0) && !addingSchool && (
-            <p className={styles.noSchools}>No schools yet</p>
-          )}
+          <button
+            className={styles.colorCancel}
+            onClick={() => setChangingColor(false)}
+          >
+            Cancel
+          </button>
         </div>
       )}
+
+      {/* Schools grid */}
+      <div className={styles.schoolsGrid}>
+        {(district.schools || []).map((school) => (
+          <SchoolCard
+            key={school.id}
+            school={school}
+            progressMap={progressMap}
+            onEditSchool={() => onEditSchool(school)}
+            onAddClass={() => onAddClass(school)}
+            onEditClass={onEditClass}
+            statusFilter={statusFilter}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-// School section within a district
-function SchoolSection({ school, progressMap, onEditSchool, onAddClass, onEditClass, statusFilter }) {
-  const visibleClasses = (school.classes || []).filter((cls) => {
-    const progress = progressMap[cls.id] || {};
-    if (statusFilter === "ended") return progress.status === "ended";
-    if (statusFilter === "current" || statusFilter === "needInstructor") return progress.status !== "ended";
-    return true;
-  });
+// School card component
+function SchoolCard({ school, progressMap, onEditSchool, onAddClass, onEditClass, statusFilter }) {
+  const hasInstructions = school.instructions?.trim();
+  const isEndedView = statusFilter === "ended";
 
   return (
-    <div className={styles.schoolSection}>
-      <div className={styles.schoolHeader}>
+    <div className={styles.schoolCard}>
+      <div className={styles.schoolCardHeader}>
         <div className={styles.schoolInfo}>
           <span className={styles.schoolName}>{school.name}</span>
           {school.address && <span className={styles.schoolAddress}>{school.address}</span>}
         </div>
-        {!school.instructions && (
-          <span className={styles.noInstructionsPill}>No instructions yet</span>
-        )}
-        <button className={styles.editSchoolLink} onClick={onEditSchool}>
-          Edit school
-        </button>
-        <button className={styles.addClassPill} onClick={onAddClass}>
-          + Add class here
-        </button>
+        <div className={styles.schoolActions}>
+          <button
+            className={styles.iconBtn}
+            onClick={onAddClass}
+            aria-label={`Add a class at ${school.name}`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+          <button
+            className={styles.iconBtn}
+            onClick={onEditSchool}
+            aria-label={`Edit ${school.name}`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="5" r="1" />
+              <circle cx="12" cy="12" r="1" />
+              <circle cx="12" cy="19" r="1" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {visibleClasses.length === 0 ? (
-        <p className={styles.noClasses}>No classes yet.</p>
-      ) : (
-        <div className={styles.classesList}>
-          {visibleClasses.map((cls) => (
-            <ClassRow
-              key={cls.id}
-              cls={cls}
-              progress={progressMap[cls.id] || {}}
-              onClick={() => onEditClass(cls)}
-            />
-          ))}
-        </div>
+      {/* Class rows */}
+      <div className={styles.classRows}>
+        {(school.classes || []).map((cls, idx) => (
+          <ClassRow
+            key={cls.id}
+            cls={cls}
+            progress={progressMap[cls.id] || {}}
+            onClick={() => onEditClass(cls)}
+            isFirst={idx === 0}
+          />
+        ))}
+      </div>
+
+      {/* Add instructions prompt */}
+      {!hasInstructions && !isEndedView && (
+        <button className={styles.addInstructionsBtn} onClick={onEditSchool}>
+          + Add arrival instructions for instructors
+        </button>
       )}
     </div>
   );
 }
 
 // Class row
-function ClassRow({ cls, progress, onClick }) {
+function ClassRow({ cls, progress, onClick, isFirst }) {
   const isEnded = progress.status === "ended";
+  const isStartingSoon = progress.status === "starts_soon";
   const program = cls.program || "wellness";
   const daysDisplay = cls.days?.join(" & ") || "";
 
@@ -1095,75 +1053,87 @@ function ClassRow({ cls, progress, onClick }) {
 
   // Date display
   let dateDisplay = "";
-  if (progress.status === "starts_soon") {
+  if (isStartingSoon) {
     dateDisplay = `Starts ${formatDateShort(cls.start_date)}`;
-    if (progress.totalSessions) {
-      dateDisplay += ` · ${progress.totalSessions} sessions`;
-    }
+  } else if (isEnded) {
+    dateDisplay = `Ended ${formatDateShort(progress.endDate || cls.start_date)}`;
   } else if (progress.totalSessions) {
-    dateDisplay = `${formatDateShort(cls.start_date)} - ${formatDateShort(progress.endDate)}`;
+    dateDisplay = `Ends ${formatDateShort(progress.endDate)}`;
   } else {
-    dateDisplay = `Since ${formatDateShort(cls.start_date)} · ongoing`;
-  }
-
-  // Status pill
-  let statusPill = null;
-  if (progress.status === "starts_soon") {
-    statusPill = <span className={`${styles.statusPill} ${styles.statusStartsSoon}`}>Starts soon</span>;
-  } else if (progress.status === "ended") {
-    statusPill = <span className={`${styles.statusPill} ${styles.statusEnded}`}>Ended</span>;
-  } else {
-    statusPill = <span className={`${styles.statusPill} ${styles.statusRunning}`}>Running</span>;
+    dateDisplay = `Ongoing since ${formatDateShort(cls.start_date)}`;
   }
 
   return (
     <button
-      className={`${styles.classRow} ${isEnded ? styles.classRowEnded : ""}`}
+      className={`${styles.classRow} ${isEnded ? styles.classRowEnded : ""} ${isFirst ? "" : styles.classRowBorder}`}
       onClick={onClick}
     >
-      <span className={`${styles.programPillSmall} ${styles[`program_${program}`]}`}>
-        {program === "wellness" ? "Wellness" : "Soccer"}
-      </span>
-      <span className={styles.classDaysTime}>
-        {daysDisplay} · {cls.time}
-      </span>
-      <div className={styles.classDateProgress}>
-        <span className={styles.classDateText}>{dateDisplay}</span>
-        {progress.totalSessions && progress.status !== "starts_soon" && (
-          <div className={styles.progressBarWrapper}>
-            <div
-              className={styles.progressBar}
-              style={{ width: `${Math.min(100, (progress.sessionsDone / progress.totalSessions) * 100)}%` }}
-            />
+      <div
+        className={styles.programStripe}
+        style={{ background: program === "wellness" ? "var(--teal)" : "var(--navy-mid)" }}
+      />
+      <div className={styles.classMain}>
+        <div className={styles.classFirstLine}>
+          <span className={styles.classDaysTime}>{daysDisplay} · {cls.time}</span>
+          <span
+            className={styles.programLabel}
+            style={{ color: program === "wellness" ? "var(--teal)" : "var(--navy-mid)" }}
+          >
+            {program === "wellness" ? "Wellness" : "Soccer"}
+          </span>
+        </div>
+        <div className={styles.classSecondLine}>
+          {hasInstructor ? (
+            <div className={styles.instructorStack}>
+              {instructor1 && (
+                <span
+                  className={styles.avatar}
+                  style={{ background: getAvatarColor(instructor1.full_name), zIndex: 2 }}
+                >
+                  {instructor1.full_name?.charAt(0)}
+                </span>
+              )}
+              {instructor2 && (
+                <span
+                  className={styles.avatar}
+                  style={{ background: getAvatarColor(instructor2.full_name), zIndex: 1 }}
+                >
+                  {instructor2.full_name?.charAt(0)}
+                </span>
+              )}
+              <span className={styles.instructorNames}>
+                {[instructor1, instructor2]
+                  .filter(Boolean)
+                  .map((i) => getShortName(i.full_name))
+                  .join(", ")}
+              </span>
+            </div>
+          ) : (
+            <div className={styles.needsInstructor}>
+              <span className={styles.alertDot} />
+              Needs an instructor
+            </div>
+          )}
+        </div>
+      </div>
+      <div className={styles.classRight}>
+        <span className={`${styles.dateDisplay} ${isStartingSoon ? styles.dateStartsSoon : ""}`}>
+          {dateDisplay}
+        </span>
+        {progress.totalSessions && !isStartingSoon && (
+          <div className={styles.progressRow}>
+            <div className={styles.progressBarSmall}>
+              <div
+                className={styles.progressFill}
+                style={{ width: `${Math.min(100, (progress.sessionsDone / progress.totalSessions) * 100)}%` }}
+              />
+            </div>
+            <span className={styles.sessionCount}>
+              {progress.sessionsDone} of {progress.totalSessions}
+            </span>
           </div>
         )}
-        {progress.totalSessions && progress.status !== "starts_soon" && (
-          <span className={styles.sessionCount}>
-            {progress.sessionsDone} of {progress.totalSessions} sessions
-          </span>
-        )}
       </div>
-      <div className={styles.instructorChips}>
-        {hasInstructor ? (
-          <>
-            {instructor1 && (
-              <span className={styles.instructorChip}>
-                <span className={styles.instructorInitial}>{instructor1.full_name?.charAt(0)}</span>
-                {instructor1.full_name}
-              </span>
-            )}
-            {instructor2 && (
-              <span className={styles.instructorChip}>
-                <span className={styles.instructorInitial}>{instructor2.full_name?.charAt(0)}</span>
-                {instructor2.full_name}
-              </span>
-            )}
-          </>
-        ) : (
-          <span className={`${styles.instructorChip} ${styles.noInstructor}`}>No instructor</span>
-        )}
-      </div>
-      {statusPill}
       <svg className={styles.chevron} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <polyline points="9 18 15 12 9 6" />
       </svg>
