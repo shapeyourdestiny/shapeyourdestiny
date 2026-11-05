@@ -25,8 +25,8 @@ const ACTIVITIES = [
       "With group fitness and interactive games led by our instructors, children build strength, coordination, and resilience while also practicing teamwork and communication. These activities give them a healthy outlet for stress and energy, teaching that physical movement is directly connected to how they feel emotionally.",
   },
   {
-    color: "#F2A65E",
-    colorDark: "#E08A3C",
+    color: "#3E8FA0",
+    colorDark: "#2C6E7D",
     icon: "team",
     stopTag: "Stop 3 · Belonging",
     rotation: -1.2,

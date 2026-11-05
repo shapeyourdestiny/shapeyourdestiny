@@ -4,7 +4,7 @@
 @media (max-width: 600px) { .heroInner { padding: 40px 24px 60px; } }
 .eyebrow {
   display: inline-flex; font-family: 'Baloo 2', sans-serif; font-weight: 700;
-  font-size: 13px; letter-spacing: .05em; text-transform: uppercase; color: var(--gold);
+  font-size: 13px; letter-spacing: .05em; text-transform: uppercase; color: var(--teal);
   margin-bottom: 14px;
 }
 .hero h1 { color: #fff; font-size: clamp(30px, 4.6vw, 46px); margin-bottom: 12px; }
@@ -99,7 +99,7 @@
   font-size: 12px;
   letter-spacing: .06em;
   text-transform: uppercase;
-  background: var(--gold);
+  background: var(--teal);
   color: var(--navy);
   padding: 8px 16px;
   border-radius: 999px;
@@ -153,12 +153,12 @@
 .selItemIcon svg {
   width: 18px;
   height: 18px;
-  color: var(--gold);
+  color: var(--teal);
 }
 .selItem strong { color: #fff; }
 .selQuote {
   background: rgba(255,255,255,0.1);
-  border-left: 4px solid var(--gold);
+  border-left: 4px solid var(--teal);
   border-radius: 0 12px 12px 0;
   padding: 20px 24px;
   margin: 0 0 32px;
@@ -190,7 +190,7 @@
   font-size: 10px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  background: var(--orange);
+  background: var(--navy);
   color: #fff;
   padding: 4px 10px;
   border-radius: 999px;

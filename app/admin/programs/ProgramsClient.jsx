@@ -21,7 +21,7 @@ const DISTRICT_COLORS = [
   "#3E8FA0", // teal
   "#6FCB55", // green
   "#9B59B6", // purple
-  "#F2A65E", // orange
+  "#2C6E7D", // dark teal
   "#E74C3C", // red
   "#3498DB", // blue
   "#1ABC9C", // turquoise

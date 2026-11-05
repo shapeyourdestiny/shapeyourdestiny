@@ -380,7 +380,7 @@ export default function ScheduleBoard({ initialData }) {
       <div
         key={cls.id}
         className={`${styles.gridCard} ${cls.is_review_day ? styles.reviewDay : ""}`}
-        style={{ "--card-accent": cls.is_review_day ? "var(--gold)" : programColor }}
+        style={{ "--card-accent": cls.is_review_day ? "var(--teal)" : programColor }}
       >
         <div className={styles.gridCardHeader}>
           <span

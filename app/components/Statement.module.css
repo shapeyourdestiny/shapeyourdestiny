@@ -12,7 +12,7 @@
   max-width: 640px;
   margin: 0 auto;
 }
-.w1 { color: var(--orange); }
+.w1 { color: var(--teal); }
 .w2 { color: var(--green); }
 .w3 { color: var(--teal-dark); background: rgba(255,255,255,0.9); padding: 0 6px; border-radius: 6px; }
 .wave { background: var(--navy); margin-top: 56px; position: relative; z-index: 1; }

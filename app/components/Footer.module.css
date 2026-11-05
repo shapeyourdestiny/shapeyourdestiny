@@ -38,7 +38,7 @@
   color: #fff; text-decoration: none;
   transition: background 0.2s ease, color 0.2s ease;
 }
-.social a:hover { background: var(--gold); color: var(--navy-deep); }
+.social a:hover { background: var(--teal); color: var(--navy-deep); }
 
 .links {
   display: grid;
@@ -53,7 +53,7 @@
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
   font-size: 15px;
-  color: var(--gold);
+  color: var(--teal);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 4px;
@@ -83,7 +83,7 @@
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
   font-size: 15px;
-  color: var(--gold);
+  color: var(--teal);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -99,7 +99,7 @@
   align-items: center;
   justify-content: center;
   padding: 12px 28px;
-  background: var(--gold);
+  background: var(--teal);
   color: var(--navy-deep);
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
@@ -108,7 +108,7 @@
   border-radius: 999px;
   transition: background 0.2s ease, transform 0.2s ease;
 }
-.donateBtn:hover { background: #e9c15a; transform: translateY(-2px); }
+.donateBtn:hover { background: var(--teal-dark); transform: translateY(-2px); }
 
 .bottom {
   margin-top: 48px;

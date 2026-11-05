@@ -3,7 +3,7 @@
 @media (max-width: 600px) { .heroInner { padding: 40px 24px 48px; } }
 .eyebrow {
   display: inline-flex; font-family: 'Baloo 2', sans-serif; font-weight: 700;
-  font-size: 13px; letter-spacing: .05em; text-transform: uppercase; color: var(--gold);
+  font-size: 13px; letter-spacing: .05em; text-transform: uppercase; color: var(--teal);
   margin-bottom: 14px;
 }
 .hero h1 { color: #fff; font-size: clamp(30px, 4.6vw, 46px); margin-bottom: 12px; }

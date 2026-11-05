@@ -84,7 +84,7 @@
 }
 
 .statCard.review .statIcon {
-  background: var(--orange);
+  background: var(--navy);
 }
 
 .statCard.review .statNum {
@@ -182,7 +182,7 @@
 }
 
 .sevDot.moderate {
-  background: var(--orange);
+  background: var(--navy);
 }
 
 .sevDot.serious {

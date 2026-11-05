@@ -3,7 +3,7 @@
   display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
   color: var(--on-navy-soft); font-family: 'Baloo 2', sans-serif; font-weight: 600; font-size: 14px;
 }
-.backbar a:hover { color: var(--gold); }
+.backbar a:hover { color: var(--teal); }
 .backbar svg { width: 16px; height: 16px; }
 
 .topicHero { background: var(--navy); padding: 20px 0 60px; position: relative; }
@@ -50,7 +50,7 @@
 
 .pullQuote {
   font-family: 'Baloo 2', sans-serif; font-weight: 600; font-size: 21px; color: var(--ink);
-  border-left: 5px solid var(--orange); padding: 6px 0 6px 22px; margin: 32px 0; line-height: 1.5;
+  border-left: 5px solid var(--teal); padding: 6px 0 6px 22px; margin: 32px 0; line-height: 1.5;
 }
 @media (max-width: 600px) { .pullQuote { font-size: 18px; padding-left: 18px; margin: 24px 0; } }
 

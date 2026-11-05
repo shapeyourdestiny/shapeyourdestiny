@@ -15,7 +15,7 @@
 .avatar {
   width: 64px;
   height: 64px;
-  background: var(--gold);
+  background: var(--teal);
   color: var(--navy-deep);
   border-radius: 50%;
   display: flex;
@@ -286,7 +286,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid var(--gold);
+  border: 3px solid var(--teal);
 }
 
 .photoPreviewLarge img {

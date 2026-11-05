@@ -96,7 +96,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1.5px solid #F2A65E;
+  border: 1.5px solid var(--teal);
   background: rgba(242, 166, 94, 0.08);
   color: #E08A3C;
   padding: 8px 14px;
@@ -113,7 +113,7 @@
 }
 
 .needsChipActive {
-  background: #F2A65E;
+  background: var(--teal);
   color: #fff;
 }
 
@@ -279,7 +279,7 @@
   font-size: 9px;
   padding: 2px 7px;
   border-radius: 999px;
-  background: var(--gold);
+  background: var(--teal);
   color: var(--navy-deep);
   text-transform: uppercase;
   letter-spacing: 0.03em;

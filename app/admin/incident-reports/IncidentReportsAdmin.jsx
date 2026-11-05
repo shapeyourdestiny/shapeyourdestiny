@@ -6,7 +6,7 @@ import { getIncidentReports, updateIncidentStatus } from "@/lib/incidents/querie
 import styles from "./page.module.css";
 
 // Avatar colors
-const AVATAR_COLORS = ["#D8AE4B", "#6FCB55", "#3FC0E8", "#2B4FA3", "#3E8FA0", "#F2A65E"];
+const AVATAR_COLORS = ["#3E8FA0", "#6FCB55", "#3FC0E8", "#2B4FA3", "#2C6E7D", "#1F3F91"];
 
 function getAvatarColor(name) {
   const hash = (name || "").split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);

@@ -60,7 +60,7 @@
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
   font-size: 17px;
-  color: var(--gold, #D8AE4B);
+  color: var(--teal);
   margin-bottom: 4px;
 }
 
@@ -88,7 +88,7 @@
   justify-content: center;
   gap: 8px;
   flex: 1;
-  background: var(--orange, #F2A65E);
+  background: var(--navy);
   color: #fff;
   border: none;
   border-radius: 999px;
@@ -305,13 +305,13 @@
   padding: 10px 12px;
   background: rgba(242, 166, 94, 0.1);
   border-radius: 8px;
-  border-left: 3px solid var(--orange, #F2A65E);
+  border-left: 3px solid var(--navy);
 }
 
 .dayOffNote svg {
   width: 14px;
   height: 14px;
-  color: var(--orange, #F2A65E);
+  color: var(--navy);
   flex-shrink: 0;
   margin-top: 1px;
 }

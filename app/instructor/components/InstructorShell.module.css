@@ -66,7 +66,7 @@
 }
 
 .navItemActive {
-  background: var(--orange);
+  background: var(--navy);
   color: #fff;
 }
 .navItemActive:hover {
@@ -85,7 +85,7 @@
 
 .badge {
   margin-left: auto;
-  background: var(--orange);
+  background: var(--navy);
   color: #fff;
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
@@ -97,7 +97,7 @@
 }
 .navItemActive .badge {
   background: #fff;
-  color: var(--orange);
+  color: var(--navy);
 }
 
 .user {
@@ -112,7 +112,7 @@
 .avatar {
   width: 40px;
   height: 40px;
-  background: var(--gold);
+  background: var(--teal);
   color: var(--navy-deep);
   border-radius: 50%;
   display: flex;
@@ -127,7 +127,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 2px solid var(--gold);
+  border: 2px solid var(--teal);
 }
 
 .userInfo {
@@ -226,7 +226,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--gold);
+    background: var(--teal);
   }
 
   .headerAvatarImg {
@@ -303,7 +303,7 @@
   }
 
   .tabActive {
-    background: var(--orange);
+    background: var(--navy);
     color: var(--ink);
   }
 

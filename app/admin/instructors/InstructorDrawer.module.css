@@ -929,7 +929,7 @@
 .invitedStatus svg {
   width: 18px;
   height: 18px;
-  color: #F2A65E;
+  color: var(--teal);
 }
 
 .resendBtn {

@@ -211,7 +211,7 @@
 }
 
 .ringFill {
-  stroke: var(--gold);
+  stroke: var(--teal);
 }
 
 .ringPercent {
@@ -293,7 +293,7 @@
   justify-content: center;
   gap: 8px;
   flex: 1;
-  background: var(--orange);
+  background: var(--navy);
   color: #fff;
   border: none;
   border-radius: 999px;
@@ -367,7 +367,7 @@
 .stepNumber {
   width: 22px;
   height: 22px;
-  background: var(--orange);
+  background: var(--navy);
   color: #fff;
   border-radius: 50%;
   display: flex;
@@ -465,7 +465,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--teal);
   color: var(--navy-deep);
   display: flex;
   align-items: center;
@@ -659,7 +659,7 @@
   letter-spacing: 0.02em;
   padding: 4px 10px;
   border-radius: 999px;
-  background: var(--orange);
+  background: var(--navy);
   color: #fff;
 }
 

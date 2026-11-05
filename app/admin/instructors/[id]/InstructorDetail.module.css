@@ -298,7 +298,7 @@
 .actionBtn.archive {
   background: var(--paper);
   color: var(--orange-dark);
-  border: 1.5px solid var(--orange);
+  border: 1.5px solid var(--teal);
 }
 
 .actionBtn.archive:hover {

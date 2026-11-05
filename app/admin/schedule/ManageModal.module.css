@@ -357,7 +357,7 @@
   width: auto;
 }
 .reviewToggle input:checked + span {
-  color: var(--gold);
+  color: var(--teal);
   font-weight: 700;
 }
 

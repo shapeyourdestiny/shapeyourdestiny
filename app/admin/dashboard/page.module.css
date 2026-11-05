@@ -233,7 +233,7 @@
   font-weight: 800;
 }
 .statusAvailable {
-  color: var(--orange);
+  color: var(--teal);
 }
 .statusUsed {
   color: var(--ink-soft);

@@ -12,12 +12,12 @@ import {
 import Modal from "@/app/admin/components/Modal";
 
 const AVATAR_COLORS = [
-  "#D8AE4B",
+  "#3E8FA0",
   "#6FCB55",
   "#3FC0E8",
   "#2B4FA3",
-  "#3E8FA0",
-  "#F2A65E",
+  "#2C6E7D",
+  "#1F3F91",
 ];
 
 function getAvatarColor(name) {

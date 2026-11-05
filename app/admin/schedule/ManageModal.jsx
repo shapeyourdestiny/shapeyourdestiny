@@ -23,8 +23,8 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const PRESET_COLORS = [
   "#3E8FA0", // teal
   "#1F3F91", // navy
-  "#D8AE4B", // gold
-  "#F2A65E", // orange
+  "#2C6E7D", // dark teal
+  "#2B4FA3", // mid navy
   "#6FCB55", // green
   "#9B59B6", // purple
   "#E74C3C", // red
