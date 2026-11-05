@@ -52,7 +52,7 @@ export async function POST(request) {
   const buffer = Buffer.from(arrayBuffer);
 
   // Upload to Supabase storage
-  const { data: uploadData, error: uploadError } = await adminClient
+  const { error: uploadError } = await adminClient
     .storage
     .from("avatar-photos")
     .upload(filename, buffer, {

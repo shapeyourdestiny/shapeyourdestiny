@@ -85,6 +85,7 @@ export async function POST(request) {
   if (profileId) {
     // This invite is linked to a pre-created profile - update it instead of creating new
     const updateData = {
+      user_id: userId,
       status: "active",
       phone: phone.trim(),
     };

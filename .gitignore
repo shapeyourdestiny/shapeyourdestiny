@@ -24,6 +24,10 @@
 .DS_Store
 *.pem
 
+# Personal documents in public folder (served to anyone with URL)
+public/Images/*.pdf
+public/**/*.pdf
+
 # debug
 npm-debug.log*
 yarn-debug.log*

@@ -422,6 +422,9 @@
   color: var(--navy);
   background: var(--tint);
   padding: 8px 18px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   border-radius: 999px;
   text-decoration: none;
   transition: background 0.15s ease;
@@ -505,6 +508,7 @@
   align-items: center;
   gap: 6px;
   padding: 10px 14px;
+  min-height: 44px;
   background: #fff;
   border-radius: 999px;
   font-family: 'Nunito', sans-serif;
