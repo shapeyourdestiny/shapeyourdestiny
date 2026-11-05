@@ -45,8 +45,8 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
   const [selectedDays, setSelectedDays] = useState([]);
   const [time, setTime] = useState("");
   const [startDate, setStartDate] = useState("");
-  const [recurrenceType, setRecurrenceType] = useState("sessions"); // "sessions" or "ongoing"
-  const [targetSessions, setTargetSessions] = useState(8);
+  const [endDate, setEndDate] = useState("");
+  const [isOngoing, setIsOngoing] = useState(false);
 
   // Off days state
   const [offDays, setOffDays] = useState([]);
@@ -101,29 +101,44 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
     });
   }, [data.holidays, districtId, schoolId]);
 
-  // Compute preview
+  // Compute preview - calculate sessions between start and end date
   const preview = useMemo(() => {
     if (!startDate || selectedDays.length === 0) {
       return null;
     }
 
+    if (isOngoing) {
+      // For ongoing, show next 3 months preview
+      const threeMonthsOut = new Date();
+      threeMonthsOut.setMonth(threeMonthsOut.getMonth() + 3);
+      const rangeEnd = `${threeMonthsOut.getFullYear()}-${String(threeMonthsOut.getMonth() + 1).padStart(2, "0")}-${String(threeMonthsOut.getDate()).padStart(2, "0")}`;
+
+      return computeClassOccurrences({
+        startDate,
+        days: selectedDays,
+        targetSessions: null,
+        holidays: applicableHolidays,
+        programOffDays: offDays,
+        classTime: time,
+        rangeEnd,
+      });
+    }
+
+    if (!endDate) {
+      return null;
+    }
+
+    // Calculate occurrences between start and end date
     return computeClassOccurrences({
       startDate,
       days: selectedDays,
-      targetSessions: recurrenceType === "sessions" ? targetSessions : null,
+      targetSessions: null,
       holidays: applicableHolidays,
       programOffDays: offDays,
       classTime: time,
-      rangeEnd: recurrenceType === "ongoing"
-        ? (() => {
-            // For ongoing preview, show next 3 months
-            const d = new Date();
-            d.setMonth(d.getMonth() + 3);
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-          })()
-        : null,
+      rangeEnd: endDate,
     });
-  }, [startDate, selectedDays, recurrenceType, targetSessions, applicableHolidays, offDays, time]);
+  }, [startDate, endDate, selectedDays, isOngoing, applicableHolidays, offDays, time]);
 
   // Track previous open state for reset logic
   const [lastOpen, setLastOpen] = useState(open);
@@ -137,8 +152,8 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
     setSelectedDays([]);
     setTime("");
     setStartDate("");
-    setRecurrenceType("sessions");
-    setTargetSessions(8);
+    setEndDate("");
+    setIsOngoing(false);
     setNewOffDayDate("");
     setNewOffDayReason("");
     setError("");
@@ -222,6 +237,24 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
       return;
     }
 
+    if (!isOngoing && !endDate) {
+      setError("Please select an end date or mark as ongoing");
+      return;
+    }
+
+    // Calculate target sessions from the preview (sessions per day)
+    // For fixed-duration classes, we pass the total session count divided by days
+    let targetSessions = null;
+    if (!isOngoing && preview && preview.occurrences.length > 0) {
+      // Group sessions by weekday and find the max count per day
+      const countsByDay = {};
+      preview.occurrences.forEach(occ => {
+        countsByDay[occ.weekday] = (countsByDay[occ.weekday] || 0) + 1;
+      });
+      // Use the max count across days as target (they should be equal or close)
+      targetSessions = Math.max(...Object.values(countsByDay));
+    }
+
     setLoading(true);
     setError("");
 
@@ -232,7 +265,7 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
         days: selectedDays,
         time: time.trim(),
         startDate,
-        targetSessions: recurrenceType === "sessions" ? targetSessions : null,
+        targetSessions,
         isReviewDay: false,
       });
 
@@ -347,7 +380,7 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
             </div>
           </div>
 
-          {/* Start Date & Recurrence */}
+          {/* Start Date & End Date */}
           <div className={styles.section}>
             <div className={styles.row}>
               <div className={styles.field}>
@@ -361,36 +394,34 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
               </div>
 
               <div className={styles.field}>
-                <label>Recurrence</label>
-                <div className={styles.recurrenceToggle}>
-                  <button
-                    type="button"
-                    className={`${styles.recurrenceBtn} ${recurrenceType === "sessions" ? styles.active : ""}`}
-                    onClick={() => setRecurrenceType("sessions")}
-                  >
-                    Fixed Sessions
-                  </button>
-                  <button
-                    type="button"
-                    className={`${styles.recurrenceBtn} ${recurrenceType === "ongoing" ? styles.active : ""}`}
-                    onClick={() => setRecurrenceType("ongoing")}
-                  >
-                    Ongoing
-                  </button>
-                </div>
+                <label>End Date</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  disabled={isOngoing}
+                  min={startDate}
+                />
               </div>
             </div>
 
-            {recurrenceType === "sessions" && (
-              <div className={styles.sessionsInput}>
-                <label>Number of sessions per day:</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="52"
-                  value={targetSessions}
-                  onChange={(e) => setTargetSessions(parseInt(e.target.value) || 8)}
-                />
+            <label className={styles.ongoingCheckbox}>
+              <input
+                type="checkbox"
+                checked={isOngoing}
+                onChange={(e) => {
+                  setIsOngoing(e.target.checked);
+                  if (e.target.checked) setEndDate("");
+                }}
+              />
+              <span>Ongoing class (no end date)</span>
+            </label>
+
+            {/* Auto-calculated session count */}
+            {preview && preview.occurrences.length > 0 && !isOngoing && (
+              <div className={styles.sessionCount}>
+                <span className={styles.sessionCountNumber}>{preview.occurrences.length}</span>
+                <span className={styles.sessionCountLabel}>sessions</span>
               </div>
             )}
           </div>
@@ -456,15 +487,20 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
           </div>
 
           {/* Live Preview */}
-          {preview && (
+          {preview && preview.occurrences.length > 0 && (
             <div className={styles.preview}>
               <h3>Preview</h3>
-              {recurrenceType === "sessions" ? (
+              {isOngoing ? (
+                <p className={styles.previewMain}>
+                  Creates an ongoing class starting <strong>{formatDateFull(startDate)}</strong>.
+                  Holidays and off days will be skipped automatically.
+                </p>
+              ) : (
                 <>
                   <p className={styles.previewMain}>
-                    This creates <strong>{preview.occurrences.length} sessions</strong>, running from{" "}
+                    <strong>{preview.occurrences.length} sessions</strong> from{" "}
                     <strong>{formatDateFull(startDate)}</strong> to{" "}
-                    <strong>{formatDateFull(preview.endDate)}</strong>.
+                    <strong>{formatDateFull(endDate)}</strong>
                   </p>
                   {preview.skipped.length > 0 && (
                     <p className={styles.previewSkipped}>
@@ -472,19 +508,12 @@ export default function AddClassModal({ open, onClose, data, onDataChange }) {
                       {preview.skipped.map((s, i) => (
                         <span key={s.date}>
                           {i > 0 && ", "}
-                          {formatDateDisplay(s.date)} ({s.reason}
-                          {s.type === "holiday" && " - Holiday"}
-                          {s.type === "off_day" && " - Off Day"})
+                          {formatDateDisplay(s.date)} ({s.reason})
                         </span>
                       ))}
                     </p>
                   )}
                 </>
-              ) : (
-                <p className={styles.previewMain}>
-                  Creates an ongoing class starting <strong>{formatDateFull(startDate)}</strong>.
-                  Holidays and off days will be skipped automatically.
-                </p>
               )}
             </div>
           )}

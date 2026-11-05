@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import styles from "./ClassPanel.module.css";
 import {
   createClassWithProgramAction,
@@ -9,6 +9,7 @@ import {
   assignInstructorAction,
   unassignInstructorAction,
 } from "@/lib/schedule/actions";
+import { computeClassOccurrences } from "@/lib/schedule/occurrences";
 
 const DAY_OPTIONS = [
   { value: "Mon", label: "Mon" },
@@ -67,10 +68,30 @@ export default function ClassPanel({
   const [days, setDays] = useState(existingClass?.days || []);
   const [time, setTime] = useState(existingClass?.time || "2:00 PM");
   const [startDate, setStartDate] = useState(existingClass?.start_date || "");
-  const [targetSessions, setTargetSessions] = useState(
-    existingClass?.target_sessions?.toString() || ""
-  );
+  const [endDate, setEndDate] = useState("");
+  const [isOngoing, setIsOngoing] = useState(!existingClass?.target_sessions);
   const [isReviewDay, setIsReviewDay] = useState(existingClass?.is_review_day || false);
+
+  // Get holidays from data (if available)
+  const holidays = data.holidays || [];
+
+  // Compute session count between start and end date
+  const sessionPreview = useMemo(() => {
+    if (!startDate || days.length === 0 || isOngoing) return null;
+    if (!endDate) return null;
+
+    const result = computeClassOccurrences({
+      startDate,
+      days,
+      targetSessions: null,
+      holidays,
+      programOffDays: [],
+      classTime: time,
+      rangeEnd: endDate,
+    });
+
+    return result;
+  }, [startDate, endDate, days, isOngoing, holidays, time]);
 
   // Instructor assignment
   const [showInstructorPicker, setShowInstructorPicker] = useState(null); // 'instructor_1' or 'instructor_2'
@@ -123,6 +144,20 @@ export default function ClassPanel({
       setError("Please enter a start date");
       return;
     }
+    if (!isOngoing && !endDate) {
+      setError("Please select an end date or mark as ongoing");
+      return;
+    }
+
+    // Calculate target sessions from the preview (sessions per day)
+    let targetSessions = null;
+    if (!isOngoing && sessionPreview && sessionPreview.occurrences.length > 0) {
+      const countsByDay = {};
+      sessionPreview.occurrences.forEach(occ => {
+        countsByDay[occ.weekday] = (countsByDay[occ.weekday] || 0) + 1;
+      });
+      targetSessions = Math.max(...Object.values(countsByDay));
+    }
 
     setLoading(true);
 
@@ -134,7 +169,7 @@ export default function ClassPanel({
           days,
           time,
           startDate,
-          targetSessions: targetSessions ? parseInt(targetSessions, 10) : null,
+          targetSessions,
           isReviewDay,
         });
       } else {
@@ -143,7 +178,7 @@ export default function ClassPanel({
           days,
           time,
           start_date: startDate,
-          target_sessions: targetSessions ? parseInt(targetSessions, 10) : null,
+          target_sessions: targetSessions,
           is_review_day: isReviewDay,
         });
       }
@@ -303,20 +338,40 @@ export default function ClassPanel({
             />
           </div>
 
-          {/* Target sessions */}
+          {/* End date */}
           <div className={styles.field}>
-            <label>Target sessions (optional)</label>
+            <label>End date</label>
             <input
-              type="number"
-              value={targetSessions}
-              onChange={(e) => setTargetSessions(e.target.value)}
-              placeholder="e.g., 16"
-              min="1"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              disabled={isOngoing}
+              min={startDate}
             />
-            <span className={styles.hint}>
-              Leave empty for ongoing classes. Set a number to automatically compute the end date.
-            </span>
           </div>
+
+          {/* Ongoing checkbox */}
+          <div className={styles.toggleField}>
+            <label>
+              <input
+                type="checkbox"
+                checked={isOngoing}
+                onChange={(e) => {
+                  setIsOngoing(e.target.checked);
+                  if (e.target.checked) setEndDate("");
+                }}
+              />
+              <span className={styles.toggleLabel}>Ongoing class (no end date)</span>
+            </label>
+          </div>
+
+          {/* Session count preview */}
+          {sessionPreview && sessionPreview.occurrences.length > 0 && !isOngoing && (
+            <div className={styles.sessionPreview}>
+              <span className={styles.sessionCount}>{sessionPreview.occurrences.length}</span>
+              <span className={styles.sessionLabel}>sessions</span>
+            </div>
+          )}
 
           {/* Review day toggle */}
           <div className={styles.toggleField}>
