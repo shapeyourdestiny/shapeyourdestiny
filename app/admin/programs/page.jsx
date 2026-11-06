@@ -62,7 +62,8 @@ export default async function AdminProgramsPage() {
 
         let sessionsDone = 0;
         let totalSessions = null;
-        let endDate = null;
+        // Use stored end_date if available, otherwise compute from target_sessions
+        let endDate = cls.end_date || null;
         let status = "running";
 
         if (cls.start_date && cls.days?.length > 0) {
@@ -70,7 +71,10 @@ export default async function AdminProgramsPage() {
             const progress = await getClassProgress(classData);
             sessionsDone = progress.sessionsDone;
             totalSessions = progress.totalSessions;
-            endDate = progress.endDate;
+            // Only use computed endDate if no stored end_date
+            if (!cls.end_date) {
+              endDate = progress.endDate;
+            }
 
             // Determine status
             if (cls.start_date > today) {

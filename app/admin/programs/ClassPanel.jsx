@@ -112,8 +112,13 @@ export default function ClassPanel({
   const holidays = data.holidays || [];
   const allProgramOffDays = data.programOffDays || [];
 
-  // Compute initial end date for existing classes with target_sessions
+  // Get initial end date - prefer stored end_date, fallback to computed from target_sessions
   const initialEndDate = useMemo(() => {
+    // Use stored end_date if available
+    if (existingClass?.end_date) {
+      return existingClass.end_date;
+    }
+    // Fallback: compute from target_sessions for legacy data
     if (!existingClass?.target_sessions || !existingClass?.start_date || !existingClass?.days?.length) {
       return "";
     }
@@ -265,6 +270,7 @@ export default function ClassPanel({
           time,
           endTime,
           startDate,
+          endDate: isOngoing ? null : endDate,
           targetSessions,
           isReviewDay,
           hoursPerDay,
@@ -276,6 +282,7 @@ export default function ClassPanel({
           time,
           end_time: endTime,
           start_date: startDate,
+          end_date: isOngoing ? null : endDate,
           target_sessions: targetSessions,
           is_review_day: isReviewDay,
           hours_per_day: hoursPerDay,
