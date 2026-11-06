@@ -87,6 +87,7 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
   const [offDayProgram, setOffDayProgram] = useState("wellness");
   const [offDayDate, setOffDayDate] = useState("");
   const [offDayReason, setOffDayReason] = useState("");
+  const [offDayTimePeriod, setOffDayTimePeriod] = useState("all_day");
   const [programOffDays, setProgramOffDays] = useState([]);
   const [showPastHolidays, setShowPastHolidays] = useState(false);
 
@@ -356,6 +357,7 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
           program: offDayProgram,
           date: offDayDate,
           reason: offDayReason.trim(),
+          time_period: offDayTimePeriod,
         }),
       });
       if (!res.ok) {
@@ -366,6 +368,32 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
       setProgramOffDays((prev) => [...prev, newOffDay].sort((a, b) => a.date.localeCompare(b.date)));
       setOffDayDate("");
       setOffDayReason("");
+      setOffDayTimePeriod("all_day");
+      showSaved();
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update program off day time period
+  const handleUpdateOffDayTimePeriod = async (id, newTimePeriod) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/program-off-days", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, time_period: newTimePeriod }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to update");
+      }
+      const updated = await res.json();
+      setProgramOffDays((prev) =>
+        prev.map((od) => (od.id === id ? updated : od))
+      );
       showSaved();
     } catch (err) {
       showError(err.message);
@@ -746,6 +774,15 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
                   onChange={(e) => setOffDayReason(e.target.value)}
                   placeholder="Reason, e.g., Field trip"
                 />
+                <select
+                  value={offDayTimePeriod}
+                  onChange={(e) => setOffDayTimePeriod(e.target.value)}
+                  className={styles.timePeriodSelect}
+                >
+                  <option value="all_day">All day</option>
+                  <option value="am">AM only</option>
+                  <option value="pm">PM only</option>
+                </select>
                 <button
                   className={styles.addBtn}
                   onClick={handleAddOffDay}
@@ -767,8 +804,25 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
                     <div className={styles.offDaysList}>
                       {offDaysByProgram[prog].map((od) => (
                         <div key={od.id} className={styles.offDayRow}>
-                          <span className={styles.offDayDate}>{formatDateFull(od.date)}</span>
+                          <span className={styles.offDayDate}>
+                            {formatDateFull(od.date)}
+                            {od.time_period && od.time_period !== "all_day" && (
+                              <span className={styles.timePeriodBadge}>
+                                {od.time_period === "am" ? "AM" : "PM"}
+                              </span>
+                            )}
+                          </span>
                           <span className={styles.offDayReason}>{od.reason}</span>
+                          <select
+                            value={od.time_period || "all_day"}
+                            onChange={(e) => handleUpdateOffDayTimePeriod(od.id, e.target.value)}
+                            className={styles.timePeriodSelectSmall}
+                            disabled={loading}
+                          >
+                            <option value="all_day">All day</option>
+                            <option value="am">AM</option>
+                            <option value="pm">PM</option>
+                          </select>
                           <button
                             className={styles.deleteBtn}
                             onClick={() => handleDeleteOffDay(od.id)}

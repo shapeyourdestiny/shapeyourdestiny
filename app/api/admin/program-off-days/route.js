@@ -27,7 +27,7 @@ export async function GET(request) {
   // Build query
   let query = supabase
     .from("program_off_days")
-    .select("id, program, date, reason, created_at")
+    .select("id, program, date, reason, time_period, created_at")
     .order("date", { ascending: true });
 
   if (program) {
@@ -64,7 +64,7 @@ export async function POST(request) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { program, date, reason } = await request.json();
+  const { program, date, reason, time_period = "all_day" } = await request.json();
 
   if (!program || !date || !reason) {
     return Response.json({ error: "Program, date, and reason are required" }, { status: 400 });
@@ -74,9 +74,13 @@ export async function POST(request) {
     return Response.json({ error: "Invalid program" }, { status: 400 });
   }
 
+  if (!["all_day", "am", "pm"].includes(time_period)) {
+    return Response.json({ error: "Invalid time period" }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from("program_off_days")
-    .insert({ program, date, reason: reason.trim() })
+    .insert({ program, date, reason: reason.trim(), time_period })
     .select()
     .single();
 
@@ -85,6 +89,54 @@ export async function POST(request) {
       return Response.json({ error: "An off day already exists for this program on this date" }, { status: 400 });
     }
     console.error("Error creating program off day:", error);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+
+  return Response.json(data);
+}
+
+// PATCH - Update a program off day (e.g., change time_period)
+export async function PATCH(request) {
+  const supabase = await createClient();
+
+  // Verify admin
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || profile.role !== "admin") {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { id, time_period } = await request.json();
+
+  if (!id) {
+    return Response.json({ error: "ID is required" }, { status: 400 });
+  }
+
+  if (time_period && !["all_day", "am", "pm"].includes(time_period)) {
+    return Response.json({ error: "Invalid time period" }, { status: 400 });
+  }
+
+  const updates = {};
+  if (time_period) updates.time_period = time_period;
+
+  const { data, error } = await supabase
+    .from("program_off_days")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating program off day:", error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 

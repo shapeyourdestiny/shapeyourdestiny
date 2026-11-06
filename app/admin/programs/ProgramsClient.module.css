@@ -997,15 +997,39 @@
 }
 
 .offDayDate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   color: var(--ink-soft);
-  min-width: 110px;
+  min-width: 130px;
 }
 
 .offDayReason {
   font-size: 14px;
   color: var(--ink);
   flex: 1;
+}
+
+.timePeriodSelectSmall {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fff;
+  color: var(--ink-soft);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.timePeriodSelectSmall:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+.timePeriodSelectSmall:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Responsive */
