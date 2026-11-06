@@ -509,14 +509,18 @@ export default function ClassPanel({
             <div className={styles.progressSection}>
               <h4>Progress</h4>
               <div className={styles.progressInfo}>
-                {progress.totalSessions ? (
+                {!isOngoing && sessionPreview ? (
                   <span>
-                    {progress.sessionsDone} of {progress.totalSessions} sessions completed
-                    {progress.endDate && ` · Ends ${progress.endDate}`}
+                    {progress.sessionsDone} of {sessionPreview.occurrences.length} sessions completed
+                    {endDate && ` · Ends ${endDate}`}
+                  </span>
+                ) : isOngoing ? (
+                  <span>
+                    {progress.sessionsDone} sessions completed · Ongoing
                   </span>
                 ) : (
                   <span>
-                    {progress.sessionsDone} sessions completed · Ongoing
+                    {progress.sessionsDone} sessions completed
                   </span>
                 )}
               </div>
