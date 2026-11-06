@@ -172,22 +172,18 @@ export default function SchoolPanel({
       }
 
       if (mode === "create") {
-        await createSchoolAction(finalDistrictId, name.trim(), address.trim() || null);
+        const schoolResult = await createSchoolAction(finalDistrictId, name.trim(), address.trim() || null);
+        if (schoolResult?.error) {
+          throw new Error(schoolResult.error);
+        }
         // After creating, also update with instructions if provided
         if (instructions.trim() || officeContact.trim() || officePhone.trim()) {
-          const res = await fetch("/api/admin/schedule");
-          if (res.ok) {
-            const newData = await res.json();
-            const newSchool = newData.districts
-              .flatMap((d) => d.schools || [])
-              .find((s) => s.name === name.trim());
-            if (newSchool) {
-              await updateSchoolAction(newSchool.id, {
-                instructions: instructions.trim() || null,
-                office_contact: officeContact.trim() || null,
-                office_phone: officePhone.trim() || null,
-              });
-            }
+          if (schoolResult?.id) {
+            await updateSchoolAction(schoolResult.id, {
+              instructions: instructions.trim() || null,
+              office_contact: officeContact.trim() || null,
+              office_phone: officePhone.trim() || null,
+            });
           }
         }
         await onSave(`${name.trim()} added. It will show here once it has a class.`);
@@ -236,7 +232,9 @@ export default function SchoolPanel({
   const subtitle = isEdit
     ? "Edit school details. Changes show for instructors right away."
     : "Only schools with classes show on Programs. Add a class here after you save.";
-  const canSave = name.trim() && (selectedDistrictId || (isNewDistrict && newDistrictName.trim()));
+  const canSave = isEdit
+    ? name.trim()
+    : name.trim() && (selectedDistrictId || (isNewDistrict && newDistrictName.trim()));
 
   return createPortal(
     <div
