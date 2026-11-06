@@ -32,8 +32,41 @@ const TIME_OPTIONS = [
   "3:00 PM", "3:15 PM", "3:30 PM", "3:45 PM",
   "4:00 PM", "4:15 PM", "4:30 PM", "4:45 PM",
   "5:00 PM", "5:15 PM", "5:30 PM", "5:45 PM",
-  "6:00 PM",
+  "6:00 PM", "6:15 PM", "6:30 PM", "6:45 PM",
+  "7:00 PM",
 ];
+
+// Parse time string to minutes from midnight
+function parseTimeToMinutes(timeStr) {
+  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return 0;
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const period = match[3].toUpperCase();
+  if (period === "PM" && hours !== 12) hours += 12;
+  if (period === "AM" && hours === 12) hours = 0;
+  return hours * 60 + minutes;
+}
+
+// Calculate hours between two time strings
+function calculateHours(startTime, endTime) {
+  const startMinutes = parseTimeToMinutes(startTime);
+  const endMinutes = parseTimeToMinutes(endTime);
+  const diff = endMinutes - startMinutes;
+  if (diff <= 0) return 1;
+  return Math.round(diff / 60);
+}
+
+// Calculate end time from start time and hours
+function calculateEndTime(startTime, hours) {
+  const startMinutes = parseTimeToMinutes(startTime);
+  const endMinutes = startMinutes + hours * 60;
+  const endHour24 = Math.floor(endMinutes / 60);
+  const endMin = endMinutes % 60;
+  const period = endHour24 >= 12 ? "PM" : "AM";
+  const endHour12 = endHour24 > 12 ? endHour24 - 12 : endHour24 === 0 ? 12 : endHour24;
+  return `${endHour12}:${endMin.toString().padStart(2, "0")} ${period}`;
+}
 
 export default function ClassPanel({
   mode,
@@ -99,11 +132,40 @@ export default function ClassPanel({
   const [program, setProgram] = useState(existingClass?.program || "wellness");
   const [days, setDays] = useState(existingClass?.days || []);
   const [time, setTime] = useState(existingClass?.time || "2:00 PM");
-  const [hoursPerDay, setHoursPerDay] = useState(existingClass?.hours_per_day || 1);
+  // Calculate initial end time from existing data or default to 1 hour after start
+  const initialEndTime = existingClass?.end_time ||
+    (existingClass?.time && existingClass?.hours_per_day
+      ? calculateEndTime(existingClass.time, existingClass.hours_per_day)
+      : "3:00 PM");
+  const [endTime, setEndTime] = useState(initialEndTime);
   const [startDate, setStartDate] = useState(existingClass?.start_date || "");
   const [endDate, setEndDate] = useState(initialEndDate);
   const [isOngoing, setIsOngoing] = useState(!existingClass?.target_sessions);
   const [isReviewDay, setIsReviewDay] = useState(existingClass?.is_review_day || false);
+
+  // Auto-calculate hours per day from time range
+  const hoursPerDay = useMemo(() => {
+    return calculateHours(time, endTime);
+  }, [time, endTime]);
+
+  // Filter end time options to only show times after start time
+  const endTimeOptions = useMemo(() => {
+    const startMinutes = parseTimeToMinutes(time);
+    return TIME_OPTIONS.filter((t) => parseTimeToMinutes(t) > startMinutes);
+  }, [time]);
+
+  // Handle start time change - adjust end time if needed
+  const handleStartTimeChange = (newTime) => {
+    setTime(newTime);
+    const newStartMinutes = parseTimeToMinutes(newTime);
+    const currentEndMinutes = parseTimeToMinutes(endTime);
+    if (currentEndMinutes <= newStartMinutes) {
+      // Set end time to 1 hour after new start time
+      const nextHourMinutes = newStartMinutes + 60;
+      const nextHour = TIME_OPTIONS.find((t) => parseTimeToMinutes(t) >= nextHourMinutes);
+      if (nextHour) setEndTime(nextHour);
+    }
+  };
 
   // Compute session count between start and end date
   const sessionPreview = useMemo(() => {
@@ -203,6 +265,7 @@ export default function ClassPanel({
           program,
           days,
           time,
+          endTime,
           startDate,
           targetSessions,
           isReviewDay,
@@ -213,6 +276,7 @@ export default function ClassPanel({
           program,
           days,
           time,
+          end_time: endTime,
           start_date: startDate,
           target_sessions: targetSessions,
           is_review_day: isReviewDay,
@@ -355,8 +419,8 @@ export default function ClassPanel({
 
           {/* Time */}
           <div className={styles.field}>
-            <label>Time</label>
-            <select value={time} onChange={(e) => setTime(e.target.value)}>
+            <label>Start time</label>
+            <select value={time} onChange={(e) => handleStartTimeChange(e.target.value)}>
               {TIME_OPTIONS.map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -365,15 +429,19 @@ export default function ClassPanel({
             </select>
           </div>
 
-          {/* Hours per day (for payroll) */}
+          {/* End Time */}
           <div className={styles.field}>
-            <label>Hours per day</label>
-            <select value={hoursPerDay} onChange={(e) => setHoursPerDay(Number(e.target.value))}>
-              <option value={1}>1 hour (1 class)</option>
-              <option value={2}>2 hours (2 classes)</option>
-              <option value={3}>3 hours (3 classes)</option>
+            <label>End time</label>
+            <select value={endTime} onChange={(e) => setEndTime(e.target.value)}>
+              {endTimeOptions.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
             </select>
-            <span className={styles.hint}>For payroll: 1 hour = 1 class paid</span>
+            <span className={styles.hint}>
+              {hoursPerDay} hour{hoursPerDay !== 1 ? "s" : ""} ({hoursPerDay} class{hoursPerDay !== 1 ? "es" : ""} for payroll)
+            </span>
           </div>
 
           {/* Start date */}
