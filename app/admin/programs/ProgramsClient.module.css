@@ -1032,6 +1032,196 @@
   cursor: not-allowed;
 }
 
+/* Manage tab */
+.manageTab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.manageTitle {
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.manageIntro {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.manageList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.manageDistrict {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(20, 44, 107, 0.06);
+}
+
+.manageDistrictHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #EEF2F9;
+  margin-bottom: 16px;
+}
+
+.manageDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.manageDistrictName {
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.manageDistrictMeta {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-left: auto;
+}
+
+.manageDeleteBtn {
+  padding: 6px 12px;
+  background: none;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--red);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.manageDeleteBtn:hover {
+  background: #fef2f2;
+}
+
+.manageDeleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.manageSchools {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.manageEmpty {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 12px 0;
+}
+
+.manageSchoolRow {
+  padding: 12px;
+  background: var(--tint);
+  border-radius: 8px;
+}
+
+.manageSchoolInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.manageSchoolName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.manageSchoolMeta {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.manageSchoolActions {
+  display: flex;
+  gap: 8px;
+}
+
+.manageEditBtn {
+  padding: 5px 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.manageEditBtn:hover {
+  background: #f5f5f5;
+}
+
+.manageDeleteSmall {
+  padding: 5px 10px;
+  background: none;
+  border: 1px solid #fecaca;
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--red);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.manageDeleteSmall:hover {
+  background: #fef2f2;
+}
+
+.manageDeleteSmall:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.manageClasses {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #E6ECF7;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.manageClassRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: #fff;
+  border-radius: 5px;
+}
+
+.manageClassInfo {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.manageClassProgram {
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--teal-dark);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .page {

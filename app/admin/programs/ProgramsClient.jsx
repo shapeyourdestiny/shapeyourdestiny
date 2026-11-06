@@ -7,6 +7,8 @@ import SchoolPanel from "./SchoolPanel";
 import ConfirmModal from "./ConfirmModal";
 import {
   deleteDistrictAction,
+  deleteSchoolAction,
+  deleteClassAction,
   renameDistrictAction,
   updateDistrictColorAction,
   createHolidayAction,
@@ -483,6 +485,16 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
             <div className={styles.headerActions}>
               <button
                 className={styles.ghostBtn}
+                onClick={() => setActiveTab("manage")}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z" />
+                </svg>
+                Manage
+              </button>
+              <button
+                className={styles.ghostBtn}
                 onClick={() => setActiveTab("holidays")}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -840,6 +852,129 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manage tab */}
+      {activeTab === "manage" && (
+        <div className={styles.manageTab}>
+          <button
+            className={styles.backLink}
+            onClick={() => setActiveTab("classes")}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Back to classes
+          </button>
+
+          <h1 className={styles.manageTitle}>Manage Districts & Schools</h1>
+          <p className={styles.manageIntro}>
+            Delete duplicate schools or clean up unused districts. Schools without classes are shown here.
+          </p>
+
+          <div className={styles.manageList}>
+            {data.districts.map((district) => (
+              <div key={district.id} className={styles.manageDistrict}>
+                <div className={styles.manageDistrictHeader}>
+                  <span className={styles.manageDot} style={{ background: district.color }} />
+                  <span className={styles.manageDistrictName}>{district.name}</span>
+                  <span className={styles.manageDistrictMeta}>
+                    {district.schools?.length || 0} schools
+                  </span>
+                  <button
+                    className={styles.manageDeleteBtn}
+                    onClick={() => handleDeleteDistrict(district)}
+                    disabled={loading}
+                  >
+                    Delete district
+                  </button>
+                </div>
+                <div className={styles.manageSchools}>
+                  {(district.schools || []).length === 0 ? (
+                    <div className={styles.manageEmpty}>No schools in this district</div>
+                  ) : (
+                    (district.schools || []).map((school) => (
+                      <div key={school.id} className={styles.manageSchoolRow}>
+                        <div className={styles.manageSchoolInfo}>
+                          <span className={styles.manageSchoolName}>{school.name}</span>
+                          <span className={styles.manageSchoolMeta}>
+                            {school.classes?.length || 0} classes
+                            {school.address && ` · ${school.address}`}
+                          </span>
+                        </div>
+                        <div className={styles.manageSchoolActions}>
+                          <button
+                            className={styles.manageEditBtn}
+                            onClick={() => setSchoolPanel({ mode: "edit", schoolId: school.id, districtId: district.id })}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className={styles.manageDeleteSmall}
+                            onClick={async () => {
+                              const classCount = school.classes?.length || 0;
+                              const message = classCount > 0
+                                ? `Delete ${school.name}? This will also delete ${classCount} class${classCount === 1 ? "" : "es"}. This cannot be undone.`
+                                : `Delete ${school.name}? This cannot be undone.`;
+                              if (!confirm(message)) return;
+                              setLoading(true);
+                              try {
+                                await deleteSchoolAction(school.id);
+                                await refreshData();
+                                showSaved("Deleted");
+                              } catch (err) {
+                                showError(err.message);
+                              } finally {
+                                setLoading(false);
+                              }
+                            }}
+                            disabled={loading}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                        {/* Classes under this school */}
+                        {(school.classes || []).length > 0 && (
+                          <div className={styles.manageClasses}>
+                            {school.classes.map((cls) => (
+                              <div key={cls.id} className={styles.manageClassRow}>
+                                <span className={styles.manageClassInfo}>
+                                  {cls.days?.join(" & ")} · {cls.time}
+                                  <span className={styles.manageClassProgram}>
+                                    {(cls.program || "wellness") === "wellness" ? "Wellness" : "Soccer"}
+                                  </span>
+                                </span>
+                                <button
+                                  className={styles.manageDeleteSmall}
+                                  onClick={async () => {
+                                    if (!confirm("Delete this class? This cannot be undone.")) return;
+                                    setLoading(true);
+                                    try {
+                                      await deleteClassAction(cls.id);
+                                      await refreshData();
+                                      showSaved("Deleted");
+                                    } catch (err) {
+                                      showError(err.message);
+                                    } finally {
+                                      setLoading(false);
+                                    }
+                                  }}
+                                  disabled={loading}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
