@@ -70,8 +70,10 @@ function getShortName(fullName) {
   return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
 }
 
-export default function ProgramsClient({ initialData, progressMap, today }) {
+export default function ProgramsClient({ initialData, progressMap: initialProgressMap, today: initialToday }) {
   const [data, setData] = useState(initialData);
+  const [progressMap, setProgressMap] = useState(initialProgressMap);
+  const [today, setToday] = useState(initialToday);
   const [activeTab, setActiveTab] = useState("classes");
   const [searchQuery, setSearchQuery] = useState("");
   const [programFilter, setProgramFilter] = useState("all");
@@ -105,8 +107,10 @@ export default function ProgramsClient({ initialData, progressMap, today }) {
     try {
       const res = await fetch("/api/admin/schedule");
       if (res.ok) {
-        const newData = await res.json();
-        setData(newData);
+        const result = await res.json();
+        setData(result.scheduleData);
+        setProgressMap(result.progressMap);
+        setToday(result.today);
       }
     } catch (err) {
       console.error("Failed to refresh data:", err);
