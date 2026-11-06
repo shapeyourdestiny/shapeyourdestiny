@@ -75,31 +75,38 @@ export default function ClassPanel({
   const [program, setProgram] = useState(existingClass?.program || "wellness");
   const [days, setDays] = useState(existingClass?.days || []);
   const [time, setTime] = useState(existingClass?.time || "2:00 PM");
+  const [hoursPerDay, setHoursPerDay] = useState(existingClass?.hours_per_day || 1);
   const [startDate, setStartDate] = useState(existingClass?.start_date || "");
   const [endDate, setEndDate] = useState("");
   const [isOngoing, setIsOngoing] = useState(!existingClass?.target_sessions);
   const [isReviewDay, setIsReviewDay] = useState(existingClass?.is_review_day || false);
 
-  // Get holidays from data (if available)
+  // Get holidays and program off days from data
   const holidays = data.holidays || [];
+  const allProgramOffDays = data.programOffDays || [];
 
   // Compute session count between start and end date
   const sessionPreview = useMemo(() => {
     if (!startDate || days.length === 0 || isOngoing) return null;
     if (!endDate) return null;
 
+    // Filter program off days to only those matching the selected program
+    const relevantOffDays = allProgramOffDays.filter(
+      (pod) => pod.program === program
+    );
+
     const result = computeClassOccurrences({
       startDate,
       days,
       targetSessions: null,
       holidays,
-      programOffDays: [],
+      programOffDays: relevantOffDays,
       classTime: time,
       rangeEnd: endDate,
     });
 
     return result;
-  }, [startDate, endDate, days, isOngoing, holidays, time]);
+  }, [startDate, endDate, days, isOngoing, holidays, allProgramOffDays, program, time]);
 
   // Instructor assignment
   const [showInstructorPicker, setShowInstructorPicker] = useState(null); // 'instructor_1' or 'instructor_2'
@@ -179,6 +186,7 @@ export default function ClassPanel({
           startDate,
           targetSessions,
           isReviewDay,
+          hoursPerDay,
         });
       } else {
         await updateClassAction(classId, {
@@ -188,6 +196,7 @@ export default function ClassPanel({
           start_date: startDate,
           target_sessions: targetSessions,
           is_review_day: isReviewDay,
+          hours_per_day: hoursPerDay,
         });
       }
       await onSave();
@@ -334,6 +343,17 @@ export default function ClassPanel({
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Hours per day (for payroll) */}
+          <div className={styles.field}>
+            <label>Hours per day</label>
+            <select value={hoursPerDay} onChange={(e) => setHoursPerDay(Number(e.target.value))}>
+              <option value={1}>1 hour (1 class)</option>
+              <option value={2}>2 hours (2 classes)</option>
+              <option value={3}>3 hours (3 classes)</option>
+            </select>
+            <span className={styles.hint}>For payroll: 1 hour = 1 class paid</span>
           </div>
 
           {/* Start date */}
