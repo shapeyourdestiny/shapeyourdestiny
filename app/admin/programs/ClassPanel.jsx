@@ -20,22 +20,6 @@ const DAY_OPTIONS = [
   { value: "Sat", label: "Sat" },
 ];
 
-const TIME_OPTIONS = [
-  "7:00 AM", "7:15 AM", "7:30 AM", "7:45 AM",
-  "8:00 AM", "8:15 AM", "8:30 AM", "8:45 AM",
-  "9:00 AM", "9:15 AM", "9:30 AM", "9:45 AM",
-  "10:00 AM", "10:15 AM", "10:30 AM", "10:45 AM",
-  "11:00 AM", "11:15 AM", "11:30 AM", "11:45 AM",
-  "12:00 PM", "12:15 PM", "12:30 PM", "12:45 PM",
-  "1:00 PM", "1:15 PM", "1:30 PM", "1:45 PM",
-  "2:00 PM", "2:15 PM", "2:30 PM", "2:45 PM",
-  "3:00 PM", "3:15 PM", "3:30 PM", "3:45 PM",
-  "4:00 PM", "4:15 PM", "4:30 PM", "4:45 PM",
-  "5:00 PM", "5:15 PM", "5:30 PM", "5:45 PM",
-  "6:00 PM", "6:15 PM", "6:30 PM", "6:45 PM",
-  "7:00 PM",
-];
-
 // Parse time string to minutes from midnight
 function parseTimeToMinutes(timeStr) {
   const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
@@ -66,6 +50,28 @@ function calculateEndTime(startTime, hours) {
   const period = endHour24 >= 12 ? "PM" : "AM";
   const endHour12 = endHour24 > 12 ? endHour24 - 12 : endHour24 === 0 ? 12 : endHour24;
   return `${endHour12}:${endMin.toString().padStart(2, "0")} ${period}`;
+}
+
+// Convert "7:20 AM" to "07:20" (HTML time input format)
+function to24HourFormat(timeStr) {
+  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return "12:00";
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2];
+  const period = match[3].toUpperCase();
+  if (period === "PM" && hours !== 12) hours += 12;
+  if (period === "AM" && hours === 12) hours = 0;
+  return `${hours.toString().padStart(2, "0")}:${minutes}`;
+}
+
+// Convert "07:20" to "7:20 AM" (display format)
+function to12HourFormat(timeStr) {
+  const [hoursStr, minutes] = timeStr.split(":");
+  let hours = parseInt(hoursStr, 10);
+  const period = hours >= 12 ? "PM" : "AM";
+  if (hours > 12) hours -= 12;
+  if (hours === 0) hours = 12;
+  return `${hours}:${minutes} ${period}`;
 }
 
 export default function ClassPanel({
@@ -148,12 +154,6 @@ export default function ClassPanel({
     return calculateHours(time, endTime);
   }, [time, endTime]);
 
-  // Filter end time options to only show times after start time
-  const endTimeOptions = useMemo(() => {
-    const startMinutes = parseTimeToMinutes(time);
-    return TIME_OPTIONS.filter((t) => parseTimeToMinutes(t) > startMinutes);
-  }, [time]);
-
   // Handle start time change - adjust end time if needed
   const handleStartTimeChange = (newTime) => {
     setTime(newTime);
@@ -161,9 +161,7 @@ export default function ClassPanel({
     const currentEndMinutes = parseTimeToMinutes(endTime);
     if (currentEndMinutes <= newStartMinutes) {
       // Set end time to 1 hour after new start time
-      const nextHourMinutes = newStartMinutes + 60;
-      const nextHour = TIME_OPTIONS.find((t) => parseTimeToMinutes(t) >= nextHourMinutes);
-      if (nextHour) setEndTime(nextHour);
+      setEndTime(calculateEndTime(newTime, 1));
     }
   };
 
@@ -420,25 +418,21 @@ export default function ClassPanel({
           {/* Time */}
           <div className={styles.field}>
             <label>Start time</label>
-            <select value={time} onChange={(e) => handleStartTimeChange(e.target.value)}>
-              {TIME_OPTIONS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+            <input
+              type="time"
+              value={to24HourFormat(time)}
+              onChange={(e) => handleStartTimeChange(to12HourFormat(e.target.value))}
+            />
           </div>
 
           {/* End Time */}
           <div className={styles.field}>
             <label>End time</label>
-            <select value={endTime} onChange={(e) => setEndTime(e.target.value)}>
-              {endTimeOptions.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+            <input
+              type="time"
+              value={to24HourFormat(endTime)}
+              onChange={(e) => setEndTime(to12HourFormat(e.target.value))}
+            />
             <span className={styles.hint}>
               {hoursPerDay} hour{hoursPerDay !== 1 ? "s" : ""} ({hoursPerDay} class{hoursPerDay !== 1 ? "es" : ""} for payroll)
             </span>
