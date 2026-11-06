@@ -5,7 +5,7 @@ import styles from "./AddClassModal.module.css";
 import { createClassWithProgramAction } from "@/lib/schedule/actions";
 import { computeClassOccurrences, formatDateDisplay, formatDateFull } from "@/lib/schedule/occurrences";
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const PROGRAMS = [
   { value: "wellness", label: "Youth Wellness Program" },
   { value: "soccer", label: "Intramural Soccer" },

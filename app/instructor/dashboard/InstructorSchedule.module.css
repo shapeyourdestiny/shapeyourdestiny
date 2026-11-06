@@ -48,6 +48,22 @@
   color: #F5C99D;
 }
 
+/* Covering card (when instructor is subbing) */
+.nextCard.coveringCard {
+  background: #1A4A55;
+}
+
+.coveringBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(62, 143, 160, 0.3);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7FCFE0;
+  margin-bottom: 8px;
+}
+
 .nextDateTime {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;

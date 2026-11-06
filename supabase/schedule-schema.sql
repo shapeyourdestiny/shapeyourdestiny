@@ -134,7 +134,7 @@ CREATE POLICY "Admins can delete schools"
 CREATE TABLE IF NOT EXISTS classes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   school_id UUID NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
-  days TEXT[] NOT NULL, -- array of 'Mon'/'Tue'/'Wed'/'Thu'/'Fri'
+  days TEXT[] NOT NULL, -- array of 'Mon'/'Tue'/'Wed'/'Thu'/'Fri'/'Sat'
   time TEXT NOT NULL, -- display format like "2:30pm"
   is_review_day BOOLEAN DEFAULT false,
   start_date DATE, -- when the program starts

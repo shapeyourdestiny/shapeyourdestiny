@@ -133,7 +133,7 @@ export default function InstructorSchedule({ nextSession, classes }) {
     <div className={styles.schedule}>
       {/* Next Class Card */}
       {nextSession ? (
-        <div className={styles.nextCard}>
+        <div className={`${styles.nextCard} ${nextSession.isCovering ? styles.coveringCard : ""}`}>
           <div className={styles.nextHeader}>
             <span className={styles.nextLabel}>Next class</span>
             <span
@@ -143,6 +143,12 @@ export default function InstructorSchedule({ nextSession, classes }) {
               {nextSession.program === "soccer" ? "Soccer" : "Youth Wellness"}
             </span>
           </div>
+
+          {nextSession.isCovering && nextSession.coveringFor && (
+            <div className={styles.coveringBadge}>
+              Covering for {nextSession.coveringFor.name?.split(" ")[0]}
+            </div>
+          )}
 
           <div className={styles.nextDateTime}>
             {formatSessionDate(nextSession.date)}, {formatTime(nextSession.time)}

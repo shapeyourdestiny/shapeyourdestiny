@@ -4,13 +4,17 @@ import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import styles from "./ScheduleBoard.module.css";
 import BottomSheet from "./BottomSheet";
 import AddClassModal from "./AddClassModal";
+import WeekSummary from "./WeekSummary";
+import SlotMenu from "./SlotMenu";
+import MarkOutModal from "./MarkOutModal";
 import {
   assignInstructorAction,
-  unassignInstructorAction,
 } from "@/lib/schedule/actions";
 import { computeClassOccurrences, getTimePeriod } from "@/lib/schedule/occurrences";
+import { getClassSessionStaff, SlotStatus, countNeedsSub, getAbsencesInRange } from "@/lib/schedule/session-staff";
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const DAYS_WITH_SAT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
@@ -31,11 +35,11 @@ function getWeekStart(date) {
   return new Date(d.setDate(diff));
 }
 
-// Format date range for week nav (e.g., "Aug 24-28")
-function formatWeekRange(weekStart) {
+// Format date range for week nav (e.g., "Aug 24-28" or "Aug 24-29" with Saturday)
+function formatWeekRange(weekStart, includeSaturday = false) {
   const start = new Date(weekStart);
   const end = new Date(weekStart);
-  end.setDate(end.getDate() + 4); // Friday
+  end.setDate(end.getDate() + (includeSaturday ? 5 : 4)); // Friday or Saturday
 
   const startMonth = SHORT_MONTHS[start.getMonth()];
   const endMonth = SHORT_MONTHS[end.getMonth()];
@@ -114,6 +118,17 @@ export default function ScheduleBoard({ initialData }) {
   const [pickerSearch, setPickerSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const popoverRef = useRef(null);
+
+  // Slot menu state
+  const [slotMenuOpen, setSlotMenuOpen] = useState(null); // { cls, slotType, slotState, date, anchorRect }
+
+  // Mark out modal state
+  const [markOutOpen, setMarkOutOpen] = useState(false);
+  const [markOutMode, setMarkOutMode] = useState("one_day"); // "one_day" or "several_days"
+  const [markOutInstructor, setMarkOutInstructor] = useState(null);
+  const [markOutClass, setMarkOutClass] = useState(null);
+  const [markOutDate, setMarkOutDate] = useState(null);
+  const [markOutSlotType, setMarkOutSlotType] = useState(null);
 
   // Close popover when clicking outside
   useEffect(() => {
@@ -199,19 +214,44 @@ export default function ScheduleBoard({ initialData }) {
     }
   };
 
-  // Unassign instructor (× button)
-  const handleUnassign = async (e, classId, slotType) => {
-    e.stopPropagation();
-    if (loading) return;
-    setLoading(true);
-    try {
-      await unassignInstructorAction(classId, slotType);
-      await refreshData();
-    } catch (err) {
-      console.error("Failed to unassign:", err);
-    } finally {
-      setLoading(false);
-    }
+  // Open slot menu
+  const openSlotMenu = (cls, slotType, slotState, date, event) => {
+    event.stopPropagation();
+    const rect = event.currentTarget.getBoundingClientRect();
+    setSlotMenuOpen({ cls, slotType, slotState, date, anchorRect: rect });
+  };
+
+  // Close slot menu
+  const closeSlotMenu = () => {
+    setSlotMenuOpen(null);
+  };
+
+  // Handle slot menu actions
+  const handleMarkOut = (cls, slotType, date, instructor) => {
+    closeSlotMenu();
+    setMarkOutMode("one_day");
+    setMarkOutInstructor(instructor);
+    setMarkOutClass(cls);
+    setMarkOutDate(date);
+    setMarkOutSlotType(slotType);
+    setMarkOutOpen(true);
+  };
+
+  const handleOpenMarkOutModal = (mode = "several_days") => {
+    setMarkOutMode(mode);
+    setMarkOutInstructor(null);
+    setMarkOutClass(null);
+    setMarkOutDate(null);
+    setMarkOutSlotType(null);
+    setMarkOutOpen(true);
+  };
+
+  const handleCloseMarkOutModal = () => {
+    setMarkOutOpen(false);
+    setMarkOutInstructor(null);
+    setMarkOutClass(null);
+    setMarkOutDate(null);
+    setMarkOutSlotType(null);
   };
 
   // Filter holidays to those applicable to a specific school
@@ -313,8 +353,67 @@ export default function ScheduleBoard({ initialData }) {
   const getClassesForDate = (year, month, day) => {
     const date = new Date(year, month, day);
     const dayName = getDayName(date.getDay());
-    if (!DAYS.includes(dayName)) return [];
+    if (!DAYS_WITH_SAT.includes(dayName)) return [];
     return getClassesForDay(dayName, date);
+  };
+
+  // Check if this week has any Saturday classes
+  const hasSaturdayThisWeek = useMemo(() => {
+    const saturdayDate = getDateForDay(weekStart, 5); // Saturday is index 5
+    const satClasses = getClassesForDay("Sat", saturdayDate);
+    return satClasses.length > 0;
+  }, [weekStart, data]);
+
+  // Get the days to show based on Saturday presence
+  const daysToShow = hasSaturdayThisWeek ? DAYS_WITH_SAT : WEEKDAYS;
+
+  // Get week date range for session changes
+  const weekDateRange = useMemo(() => {
+    const startDate = formatDateKey(weekStart);
+    const endDate = formatDateKey(getDateForDay(weekStart, hasSaturdayThisWeek ? 5 : 4));
+    return { startDate, endDate };
+  }, [weekStart, hasSaturdayThisWeek]);
+
+  // Compute week summary data
+  const weekSummary = useMemo(() => {
+    const sessionChanges = data.sessionChanges || [];
+    let classCount = 0;
+    const instructorIds = new Set();
+
+    // Count classes and instructors for each day
+    for (let i = 0; i < daysToShow.length; i++) {
+      const day = daysToShow[i];
+      const date = getDateForDay(weekStart, i);
+      const classes = getClassesForDay(day, date);
+      classCount += classes.length;
+
+      classes.forEach(cls => {
+        cls.assignments?.forEach(a => {
+          if (a.profile?.id) instructorIds.add(a.profile.id);
+        });
+      });
+    }
+
+    // Get absences and needs-sub count
+    const absences = getAbsencesInRange(sessionChanges, weekDateRange.startDate, weekDateRange.endDate);
+    const needsSubCount = countNeedsSub(sessionChanges, weekDateRange.startDate, weekDateRange.endDate);
+
+    return {
+      classCount,
+      instructorCount: instructorIds.size,
+      absences,
+      needsSubCount,
+    };
+  }, [weekStart, daysToShow, data, weekDateRange]);
+
+  // Get initials from full name
+  const getInitials = (fullName) => {
+    if (!fullName) return "?";
+    const parts = fullName.split(" ").filter(Boolean);
+    if (parts.length >= 2) {
+      return parts[0][0] + parts[parts.length - 1][0];
+    }
+    return parts[0]?.[0] || "?";
   };
 
   // Filter instructors by search
@@ -326,7 +425,110 @@ export default function ScheduleBoard({ initialData }) {
     );
   }, [availableInstructors, pickerSearch]);
 
-  // Render slot (instructor chip or empty slot)
+  // Render slot with session change awareness
+  const renderSlotWithState = (cls, slotType, date, slotState) => {
+    const isMenuOpen = slotMenuOpen?.cls?.id === cls.id &&
+                       slotMenuOpen?.slotType === slotType &&
+                       slotMenuOpen?.date === date;
+    const { status, actualInstructor, absentInstructor, reason } = slotState;
+
+    // Normal slot - regular instructor teaching
+    if (status === SlotStatus.NORMAL && actualInstructor) {
+      const color = actualInstructor.color || cls.district?.color || "#3E8FA0";
+      return (
+        <div className={styles.slotWrapper}>
+          <div
+            className={`${styles.normalSlot} ${isMenuOpen ? styles.slotActive : ""}`}
+            style={{ "--slot-color": color }}
+            onClick={(e) => openSlotMenu(cls, slotType, slotState, date, e)}
+          >
+            <span className={styles.slotInitials}>[{getInitials(actualInstructor.full_name)}]</span>
+            <span className={styles.slotName}>{actualInstructor.full_name}</span>
+            <span className={styles.slotMenuIcon}>&#x22ee;</span>
+          </div>
+        </div>
+      );
+    }
+
+    // Sub slot - substitute teaching
+    if (status === SlotStatus.SUB && actualInstructor) {
+      return (
+        <div className={styles.slotWrapper}>
+          <div
+            className={`${styles.subSlot} ${isMenuOpen ? styles.slotActive : ""}`}
+            onClick={(e) => openSlotMenu(cls, slotType, slotState, date, e)}
+          >
+            <div className={styles.subSlotMain}>
+              <span className={styles.slotInitials}>[{getInitials(actualInstructor.full_name)}]</span>
+              <span className={styles.slotName}>{actualInstructor.full_name}</span>
+              <span className={styles.slotMenuIcon}>&#x22ee;</span>
+            </div>
+            <div className={styles.subSlotInfo}>
+              Subbing for {absentInstructor?.full_name?.split(" ")[0] || "someone"}
+              {reason && ` \u00b7 ${reason}`}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Needs sub slot - someone is out, no sub yet
+    if (status === SlotStatus.NEEDS_SUB) {
+      return (
+        <div className={styles.slotWrapper}>
+          <div
+            className={`${styles.needsSubSlot} ${isMenuOpen ? styles.slotActive : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMarkOut(cls, slotType, date, absentInstructor);
+            }}
+          >
+            <div className={styles.needsSubMain}>
+              {absentInstructor?.full_name?.split(" ")[0] || "Someone"} is out
+            </div>
+            <div className={styles.needsSubInfo}>
+              {reason || "No reason"} \u00b7 no one teaching yet
+            </div>
+            <button className={styles.findSubBtn}>Find a sub</button>
+          </div>
+        </div>
+      );
+    }
+
+    // One-time slot - temp assignment just for this day
+    if (status === SlotStatus.ONE_TIME && actualInstructor) {
+      const color = actualInstructor.color || cls.district?.color || "#3E8FA0";
+      return (
+        <div className={styles.slotWrapper}>
+          <div
+            className={`${styles.oneTimeSlot} ${isMenuOpen ? styles.slotActive : ""}`}
+            style={{ "--slot-color": color }}
+            onClick={(e) => openSlotMenu(cls, slotType, slotState, date, e)}
+          >
+            <span className={styles.slotInitials}>[{getInitials(actualInstructor.full_name)}]</span>
+            <span className={styles.slotName}>{actualInstructor.full_name}</span>
+            <span className={styles.slotMenuIcon}>&#x22ee;</span>
+            <div className={styles.oneTimeLabel}>Just this day</div>
+          </div>
+        </div>
+      );
+    }
+
+    // Empty slot - no one assigned
+    return (
+      <div className={styles.slotWrapper}>
+        <div
+          className={`${styles.emptySlot} ${isMenuOpen ? styles.slotActive : ""}`}
+          onClick={(e) => openSlotMenu(cls, slotType, slotState, date, e)}
+        >
+          <span className={styles.emptyPlus}>+</span>
+          <span className={styles.emptyLabel}>Add instructor</span>
+        </div>
+      </div>
+    );
+  };
+
+  // Legacy renderSlot for month view (without session changes)
   const renderSlot = (cls, slotType, label) => {
     const assignment = cls.assignments?.find((a) => a.slotType === slotType);
     const isThisSlotOpen = pickerOpen?.classId === cls.id && pickerOpen?.slotType === slotType;
@@ -341,17 +543,6 @@ export default function ScheduleBoard({ initialData }) {
             onClick={(e) => openPicker(cls.id, slotType, e)}
           >
             <span className={styles.slotName}>{assignment.profile.full_name}</span>
-            <button
-              className={styles.unassignBtn}
-              onClick={(e) => handleUnassign(e, cls.id, slotType)}
-              disabled={loading}
-              aria-label="Unassign"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
           </div>
         </div>
       );
@@ -371,25 +562,34 @@ export default function ScheduleBoard({ initialData }) {
     );
   };
 
-  // Render grid class card (for Week view columns)
-  const renderGridClassCard = (cls) => {
+  // Render grid class card (for Week view columns) with session state awareness
+  const renderGridClassCard = (cls, date) => {
     const program = cls.program || "wellness";
     const programColor = PROGRAM_COLORS[program] || PROGRAM_COLORS.wellness;
+    const dateStr = formatDateKey(date);
+
+    // Get slot states for this class on this date
+    const sessionChanges = data.sessionChanges || [];
+    const slotStates = getClassSessionStaff(cls, sessionChanges, dateStr);
+
+    // Check if any slot needs a sub
+    const needsSub = slotStates.instructor_1.status === SlotStatus.NEEDS_SUB ||
+                     slotStates.instructor_2.status === SlotStatus.NEEDS_SUB;
 
     return (
       <div
-        key={cls.id}
-        className={`${styles.gridCard} ${cls.is_review_day ? styles.reviewDay : ""}`}
+        key={`${cls.id}-${dateStr}`}
+        className={`${styles.gridCard} ${cls.is_review_day ? styles.reviewDay : ""} ${needsSub ? styles.needsSubCard : ""}`}
         style={{ "--card-accent": cls.is_review_day ? "var(--teal)" : programColor }}
       >
         <div className={styles.gridCardHeader}>
+          <span className={styles.gridCardTime}>{cls.time}</span>
           <span
             className={styles.programBadge}
             style={{ background: programColor }}
           >
             {program}
           </span>
-          <span className={styles.gridCardTime}>{cls.time}</span>
         </div>
         <div className={styles.gridCardSchool}>{cls.school?.name}</div>
         <div className={styles.gridCardDistrict}>
@@ -400,9 +600,8 @@ export default function ScheduleBoard({ initialData }) {
           <span className={styles.reviewPill}>Review Day</span>
         )}
         <div className={styles.gridCardSlots}>
-          {renderSlot(cls, "instructor_1", "Instructor 1")}
-          {renderSlot(cls, "instructor_2", "Instructor 2")}
-          {cls.is_review_day && renderSlot(cls, "admin_review", "Admin Review")}
+          {renderSlotWithState(cls, "instructor_1", dateStr, slotStates.instructor_1)}
+          {renderSlotWithState(cls, "instructor_2", dateStr, slotStates.instructor_2)}
         </div>
       </div>
     );
@@ -417,10 +616,33 @@ export default function ScheduleBoard({ initialData }) {
     return compareDate < today;
   };
 
-  // Render Week View - horizontal 5-column grid (no sidebar)
+  // Jump to this week
+  const goToThisWeek = () => {
+    setWeekStart(getWeekStart(new Date()));
+  };
+
+  // Render Week View - horizontal day grid with dynamic Saturday
   const renderWeekView = () => {
+    // Check if any day this week needs a sub
+    const weekHasNeedsSub = weekSummary.needsSubCount > 0;
+
     return (
       <div className={styles.weekView}>
+        {/* Week Summary Strip */}
+        <WeekSummary
+          classCount={weekSummary.classCount}
+          instructorCount={weekSummary.instructorCount}
+          absences={weekSummary.absences}
+          needsSubCount={weekSummary.needsSubCount}
+          onNeedsSubClick={() => {
+            // Scroll to first needs-sub card
+            const firstNeedsSub = document.querySelector(`.${styles.needsSubCard}`);
+            if (firstNeedsSub) {
+              firstNeedsSub.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          }}
+        />
+
         {/* Week navigation */}
         <div className={styles.weekNav}>
           <button className={styles.weekNavBtn} onClick={goToPrevWeek}>
@@ -428,30 +650,46 @@ export default function ScheduleBoard({ initialData }) {
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <span className={styles.weekNavLabel}>{formatWeekRange(weekStart)}</span>
+          <span className={styles.weekNavLabel}>{formatWeekRange(weekStart, hasSaturdayThisWeek)}</span>
           <button className={styles.weekNavBtn} onClick={goToNextWeek}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
+          <button className={styles.thisWeekBtn} onClick={goToThisWeek}>
+            This week
+          </button>
         </div>
 
-        {/* 5-column grid */}
-        <div className={styles.weekGrid}>
-          {DAYS.map((day, index) => {
+        {/* Day grid (5 or 6 columns) */}
+        <div className={styles.weekGrid} style={{ "--day-count": daysToShow.length }}>
+          {daysToShow.map((day, index) => {
             const date = getDateForDay(weekStart, index);
+            const dateStr = formatDateKey(date);
             const dayClasses = getClassesForDay(day, date);
             const isTodayCol = isToday(date);
             const isPast = isPastDate(date);
             const dayHolidays = getHolidaysForDate(date);
 
+            // Count needs-sub for this day
+            const sessionChanges = data.sessionChanges || [];
+            const dayNeedsSub = countNeedsSub(sessionChanges, dateStr, dateStr);
+            const hasClasses = dayClasses.length > 0;
+
             return (
-              <div key={day} className={`${styles.weekColumn} ${dayHolidays.length > 0 ? styles.hasHoliday : ""} ${isPast ? styles.pastDay : ""}`}>
-                <div className={`${styles.weekColumnHeader} ${isTodayCol ? styles.today : ""}`}>
-                  <span className={styles.weekColumnDay}>{day}</span>
-                  <span className={styles.weekColumnDate}>
-                    {SHORT_MONTHS[date.getMonth()]} {date.getDate()}
-                  </span>
+              <div
+                key={day}
+                className={`${styles.weekColumn} ${hasClasses ? styles.hasClasses : ""} ${dayHolidays.length > 0 ? styles.hasHoliday : ""} ${isPast ? styles.pastDay : ""}`}
+              >
+                <div className={styles.weekColumnHeader}>
+                  <span className={styles.weekColumnDay}>{day.toUpperCase()}</span>
+                  <span className={styles.weekColumnDate}>{date.getDate()}</span>
+                  <div className={styles.headerPills}>
+                    {isTodayCol && <span className={styles.todayPill}>Today</span>}
+                    {dayNeedsSub > 0 && (
+                      <span className={styles.needsSubPill}>Needs a sub</span>
+                    )}
+                  </div>
                 </div>
                 <div className={styles.weekColumnContent}>
                   {/* Show holidays */}
@@ -500,10 +738,10 @@ export default function ScheduleBoard({ initialData }) {
                   )}
                   {dayClasses.length === 0 && dayHolidays.length === 0 ? (
                     <div className={styles.emptyPlaceholder}>
-                      <p>Nothing scheduled</p>
+                      <p>No classes</p>
                     </div>
                   ) : (
-                    dayClasses.map((cls) => renderGridClassCard(cls))
+                    dayClasses.map((cls) => renderGridClassCard(cls, date))
                   )}
                 </div>
               </div>
@@ -885,6 +1123,12 @@ export default function ScheduleBoard({ initialData }) {
               </button>
             ))}
           </div>
+          <button
+            className={styles.markOutBtn}
+            onClick={() => handleOpenMarkOutModal("several_days")}
+          >
+            Mark someone out
+          </button>
           <button className={styles.addClassBtn} onClick={() => setAddClassOpen(true)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -968,6 +1212,36 @@ export default function ScheduleBoard({ initialData }) {
         onClose={() => setAddClassOpen(false)}
         data={data}
         onDataChange={refreshData}
+      />
+
+      {/* Slot Menu popover */}
+      <SlotMenu
+        open={slotMenuOpen !== null}
+        anchorRect={slotMenuOpen?.anchorRect}
+        cls={slotMenuOpen?.cls}
+        slotType={slotMenuOpen?.slotType}
+        slotState={slotMenuOpen?.slotState}
+        date={slotMenuOpen?.date}
+        isMobile={isMobile}
+        onClose={closeSlotMenu}
+        onMarkOut={(cls, slotType, date, instructor) => handleMarkOut(cls, slotType, date, instructor)}
+        onRefresh={refreshData}
+      />
+
+      {/* Mark Out modal */}
+      <MarkOutModal
+        open={markOutOpen}
+        mode={markOutMode}
+        instructor={markOutInstructor}
+        cls={markOutClass}
+        date={markOutDate}
+        slotType={markOutSlotType}
+        data={data}
+        onClose={handleCloseMarkOutModal}
+        onSave={async () => {
+          await refreshData();
+          handleCloseMarkOutModal();
+        }}
       />
     </div>
   );

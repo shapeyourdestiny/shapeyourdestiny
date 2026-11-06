@@ -1,0 +1,95 @@
+.popover {
+  background: var(--paper);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(20, 44, 107, 0.2);
+  z-index: 1000;
+  overflow: hidden;
+  min-width: 270px;
+}
+
+.popoverHeader {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--tint-deep);
+}
+
+.instructorName {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.emptyTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+.popoverContent {
+  padding: 8px;
+}
+
+.menuOption {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.menuOption:hover {
+  background: var(--tint);
+}
+
+.menuOption:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.optionText {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.dangerOption .optionText {
+  color: #c62828;
+}
+
+.menuDivider {
+  height: 1px;
+  background: var(--tint-deep);
+  margin: 6px 0;
+}
+
+/* Mobile styles */
+.mobileMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobileMenu .menuOption {
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--tint);
+}
+
+.mobileMenu .menuOption:hover {
+  background: var(--tint-deep);
+}
+
+.mobileMenu .optionText {
+  font-size: 15px;
+}
+
+.mobileMenu .menuDivider {
+  margin: 8px 0;
+}

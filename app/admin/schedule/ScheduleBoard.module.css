@@ -101,6 +101,23 @@
   height: 18px;
 }
 
+.markOutBtn {
+  padding: 10px 18px;
+  background: transparent;
+  border: 2px solid var(--tint-deep);
+  border-radius: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.markOutBtn:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+
 /* ===== DISTRICT DOT ===== */
 .districtDot {
   width: 10px;
@@ -120,8 +137,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 20px;
+}
+
+.thisWeekBtn {
+  padding: 6px 14px;
+  background: var(--tint);
+  border: none;
+  border-radius: 6px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 8px;
+}
+.thisWeekBtn:hover {
+  background: var(--tint-deep);
 }
 
 .weekNavBtn {
@@ -154,8 +188,8 @@
 
 .weekGrid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(var(--day-count, 5), 1fr);
+  gap: 12px;
   flex: 1;
 }
 
@@ -163,37 +197,73 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  border-radius: 12px;
+  padding: 0 0 12px 0;
+}
+
+.weekColumn.hasClasses {
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .weekColumnHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 8px;
-  border-bottom: 2px solid var(--tint-deep);
-  margin-bottom: 12px;
-}
-.weekColumnHeader.today {
-  border-bottom-color: var(--navy);
+  padding: 14px 8px 10px;
+  margin-bottom: 8px;
+  gap: 2px;
 }
 
 .weekColumnDay {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--ink);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
 }
 
 .weekColumnDate {
-  font-size: 12px;
-  color: var(--ink-soft);
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.headerPills {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.todayPill {
+  padding: 2px 8px;
+  background: var(--navy);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.needsSubPill {
+  padding: 2px 8px;
+  background: rgba(211, 47, 47, 0.15);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #c62828;
 }
 
 .weekColumnContent {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   flex: 1;
+  padding: 0 8px;
 }
 
 /* Past day dimming */
@@ -209,46 +279,50 @@
   box-shadow: none;
 }
 
-/* ===== GRID CLASS CARD (shared by Day and Week views) ===== */
+/* ===== GRID CLASS CARD (Week view) ===== */
 .gridCard {
-  background: var(--paper);
-  border-radius: 12px;
+  background: #fff;
+  border-radius: 14px;
   padding: 14px;
-  box-shadow: 0 2px 12px rgba(20, 44, 107, 0.06);
-  border-top: 3px solid var(--card-accent, var(--teal));
+  box-shadow: 0 2px 10px rgba(20, 44, 107, 0.06);
 }
 .gridCard.reviewDay {
-  border-top-color: var(--teal);
+  border-left: 3px solid var(--teal);
+}
+.gridCard.needsSubCard {
+  box-shadow: 0 2px 10px rgba(211, 47, 47, 0.12);
 }
 
 .gridCardHeader {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .programBadge {
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 5px;
   font-size: 10px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
   color: #fff;
 }
 
 .gridCardTime {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 20px;
   color: var(--ink);
 }
 
 .gridCardSchool {
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--ink);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .gridCardDistrict {
@@ -257,7 +331,7 @@
   gap: 6px;
   font-size: 12px;
   color: var(--ink-soft);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .reviewPill {
@@ -275,7 +349,7 @@
 .gridCardSlots {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* ===== SLOTS ===== */
@@ -283,38 +357,193 @@
   position: relative;
 }
 
-.emptySlot {
+/* Normal slot - regular instructor */
+.normalSlot {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 10px 12px;
   background: var(--tint);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.normalSlot:hover {
+  background: var(--tint-deep);
+}
+.normalSlot:hover .slotMenuIcon {
+  opacity: 1;
+}
+.normalSlot.slotActive {
+  background: var(--tint-deep);
+}
+
+.slotInitials {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.slotName {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.slotMenuIcon {
+  font-size: 16px;
+  color: var(--ink-soft);
+  opacity: 0.3;
+  transition: opacity 0.15s ease;
+}
+
+/* Sub slot - substitute teaching */
+.subSlot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: rgba(62, 143, 160, 0.12);
+  border: 1px solid rgba(62, 143, 160, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.subSlot:hover {
+  background: rgba(62, 143, 160, 0.18);
+}
+.subSlot:hover .slotMenuIcon {
+  opacity: 1;
+}
+.subSlot.slotActive {
+  box-shadow: 0 0 0 2px var(--teal);
+}
+
+.subSlotMain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subSlotInfo {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+/* Needs sub slot - someone is out, no sub */
+.needsSubSlot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(211, 47, 47, 0.08);
+  border: 2px dashed rgba(211, 47, 47, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.needsSubSlot:hover {
+  background: rgba(211, 47, 47, 0.12);
+  border-style: solid;
+}
+.needsSubSlot.slotActive {
+  border-style: solid;
+  box-shadow: 0 0 0 2px #c62828;
+}
+
+.needsSubMain {
+  font-size: 13px;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.needsSubInfo {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.findSubBtn {
+  align-self: flex-start;
+  padding: 4px 10px;
+  background: #c62828;
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.findSubBtn:hover {
+  background: #b71c1c;
+}
+
+/* One-time slot - temp assignment */
+.oneTimeSlot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--tint);
+  border: 1px dotted var(--ink-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.oneTimeSlot:hover {
+  background: var(--tint-deep);
+}
+.oneTimeSlot:hover .slotMenuIcon {
+  opacity: 1;
+}
+.oneTimeSlot.slotActive {
+  background: var(--tint-deep);
+}
+
+.oneTimeLabel {
+  width: 100%;
+  font-size: 10px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* Empty slot - no one assigned */
+.emptySlot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: transparent;
   border: 2px dashed var(--tint-deep);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .emptySlot:hover {
-  border-color: var(--navy);
+  border-color: var(--ink-soft);
   border-style: solid;
 }
 .emptySlot.slotActive {
   border-color: var(--navy);
   border-style: solid;
-  background: var(--tint-deep);
+  background: var(--tint);
 }
 
-.slotLabel {
+.emptyPlus {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.emptyLabel {
   font-size: 12px;
   color: var(--ink-soft);
 }
 
-.assignHint {
-  font-size: 11px;
-  color: var(--teal);
-  font-weight: 600;
-}
-
+/* Legacy filled slot (month view) */
 .filledSlot {
   display: flex;
   align-items: center;
@@ -334,30 +563,15 @@
   box-shadow: 0 0 0 2px var(--navy);
 }
 
-.slotName {
-  flex: 1;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink);
+.slotLabel {
+  font-size: 12px;
+  color: var(--ink-soft);
 }
 
-.unassignBtn {
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  color: var(--ink-soft);
-  border-radius: 4px;
-  transition: all 0.15s ease;
-}
-.unassignBtn:hover {
-  color: #d32f2f;
-  background: rgba(211, 47, 47, 0.1);
-}
-.unassignBtn svg {
-  width: 14px;
-  height: 14px;
-  display: block;
+.assignHint {
+  font-size: 11px;
+  color: var(--teal);
+  font-weight: 600;
 }
 
 /* ===== CLICK-TO-ASSIGN POPOVER ===== */

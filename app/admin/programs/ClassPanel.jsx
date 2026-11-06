@@ -17,6 +17,7 @@ const DAY_OPTIONS = [
   { value: "Wed", label: "Wed" },
   { value: "Thu", label: "Thu" },
   { value: "Fri", label: "Fri" },
+  { value: "Sat", label: "Sat" },
 ];
 
 const TIME_OPTIONS = [
