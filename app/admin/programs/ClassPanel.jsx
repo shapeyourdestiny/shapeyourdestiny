@@ -68,6 +68,29 @@ export default function ClassPanel({
         .find((s) => s.id === schoolId)
     : null;
 
+  // Get holidays and program off days from data
+  const holidays = data.holidays || [];
+  const allProgramOffDays = data.programOffDays || [];
+
+  // Compute initial end date for existing classes with target_sessions
+  const initialEndDate = useMemo(() => {
+    if (!existingClass?.target_sessions || !existingClass?.start_date || !existingClass?.days?.length) {
+      return "";
+    }
+    const relevantOffDays = allProgramOffDays.filter(
+      (pod) => pod.program === existingClass.program
+    );
+    const result = computeClassOccurrences({
+      startDate: existingClass.start_date,
+      days: existingClass.days,
+      targetSessions: existingClass.target_sessions,
+      holidays,
+      programOffDays: relevantOffDays,
+      classTime: existingClass.time,
+    });
+    return result.endDate || "";
+  }, [existingClass, holidays, allProgramOffDays]);
+
   // Form state
   const [selectedSchoolId, setSelectedSchoolId] = useState(
     existingClass ? classSchool?.id : schoolId || ""
@@ -77,13 +100,9 @@ export default function ClassPanel({
   const [time, setTime] = useState(existingClass?.time || "2:00 PM");
   const [hoursPerDay, setHoursPerDay] = useState(existingClass?.hours_per_day || 1);
   const [startDate, setStartDate] = useState(existingClass?.start_date || "");
-  const [endDate, setEndDate] = useState("");
+  const [endDate, setEndDate] = useState(initialEndDate);
   const [isOngoing, setIsOngoing] = useState(!existingClass?.target_sessions);
   const [isReviewDay, setIsReviewDay] = useState(existingClass?.is_review_day || false);
-
-  // Get holidays and program off days from data
-  const holidays = data.holidays || [];
-  const allProgramOffDays = data.programOffDays || [];
 
   // Compute session count between start and end date
   const sessionPreview = useMemo(() => {
