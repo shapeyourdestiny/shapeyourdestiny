@@ -295,6 +295,8 @@ export default function ScheduleBoard({ initialData }) {
   const isClassActiveOnDate = (cls, dateStr, districtId, schoolId) => {
     if (!cls.start_date) return true;
     if (dateStr < cls.start_date) return false;
+    // Check stored end_date
+    if (cls.end_date && dateStr > cls.end_date) return false;
 
     const classProgram = cls.program || "wellness";
     const offDaysForProgram = (data.programOffDays || []).filter(
