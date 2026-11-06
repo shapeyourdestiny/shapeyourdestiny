@@ -27,6 +27,29 @@ const PROGRAM_COLORS = {
   soccer: "#1F3F91",     // navy
 };
 
+// Avatar colors for initials (consistent hashing from profile ID)
+const AVATAR_COLORS = [
+  "#3E8FA0", // teal
+  "#1F3F91", // navy
+  "#E07A3E", // orange
+  "#7B4FA0", // purple
+  "#4A9F6E", // green
+  "#C45F5F", // coral
+  "#5F8AC4", // blue
+  "#9F7B4F", // brown
+];
+
+function getAvatarColor(profileId) {
+  if (!profileId) return AVATAR_COLORS[0];
+  // Simple hash based on profile ID string
+  let hash = 0;
+  const str = String(profileId);
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
 // Get Monday of the week containing a date
 function getWeekStart(date) {
   const d = new Date(date);
@@ -434,15 +457,16 @@ export default function ScheduleBoard({ initialData }) {
 
     // Normal slot - regular instructor teaching
     if (status === SlotStatus.NORMAL && actualInstructor) {
-      const color = actualInstructor.color || cls.district?.color || "#3E8FA0";
+      const avatarColor = getAvatarColor(actualInstructor.id);
       return (
         <div className={styles.slotWrapper}>
           <div
             className={`${styles.normalSlot} ${isMenuOpen ? styles.slotActive : ""}`}
-            style={{ "--slot-color": color }}
             onClick={(e) => openSlotMenu(cls, slotType, slotState, date, e)}
           >
-            <span className={styles.slotInitials}>[{getInitials(actualInstructor.full_name)}]</span>
+            <span className={styles.slotInitials} style={{ "--avatar-color": avatarColor }}>
+              {getInitials(actualInstructor.full_name)}
+            </span>
             <span className={styles.slotName}>{actualInstructor.full_name}</span>
             <span className={styles.slotMenuIcon}>&#x22ee;</span>
           </div>
@@ -452,6 +476,7 @@ export default function ScheduleBoard({ initialData }) {
 
     // Sub slot - substitute teaching
     if (status === SlotStatus.SUB && actualInstructor) {
+      const avatarColor = getAvatarColor(actualInstructor.id);
       return (
         <div className={styles.slotWrapper}>
           <div
@@ -459,7 +484,9 @@ export default function ScheduleBoard({ initialData }) {
             onClick={(e) => openSlotMenu(cls, slotType, slotState, date, e)}
           >
             <div className={styles.subSlotMain}>
-              <span className={styles.slotInitials}>[{getInitials(actualInstructor.full_name)}]</span>
+              <span className={styles.slotInitials} style={{ "--avatar-color": avatarColor }}>
+                {getInitials(actualInstructor.full_name)}
+              </span>
               <span className={styles.slotName}>{actualInstructor.full_name}</span>
               <span className={styles.slotMenuIcon}>&#x22ee;</span>
             </div>
@@ -497,15 +524,16 @@ export default function ScheduleBoard({ initialData }) {
 
     // One-time slot - temp assignment just for this day
     if (status === SlotStatus.ONE_TIME && actualInstructor) {
-      const color = actualInstructor.color || cls.district?.color || "#3E8FA0";
+      const avatarColor = getAvatarColor(actualInstructor.id);
       return (
         <div className={styles.slotWrapper}>
           <div
             className={`${styles.oneTimeSlot} ${isMenuOpen ? styles.slotActive : ""}`}
-            style={{ "--slot-color": color }}
             onClick={(e) => openSlotMenu(cls, slotType, slotState, date, e)}
           >
-            <span className={styles.slotInitials}>[{getInitials(actualInstructor.full_name)}]</span>
+            <span className={styles.slotInitials} style={{ "--avatar-color": avatarColor }}>
+              {getInitials(actualInstructor.full_name)}
+            </span>
             <span className={styles.slotName}>{actualInstructor.full_name}</span>
             <span className={styles.slotMenuIcon}>&#x22ee;</span>
             <div className={styles.oneTimeLabel}>Just this day</div>
@@ -642,24 +670,6 @@ export default function ScheduleBoard({ initialData }) {
             }
           }}
         />
-
-        {/* Week navigation */}
-        <div className={styles.weekNav}>
-          <button className={styles.weekNavBtn} onClick={goToPrevWeek}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <span className={styles.weekNavLabel}>{formatWeekRange(weekStart, hasSaturdayThisWeek)}</span>
-          <button className={styles.weekNavBtn} onClick={goToNextWeek}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-          <button className={styles.thisWeekBtn} onClick={goToThisWeek}>
-            This week
-          </button>
-        </div>
 
         {/* Day grid (5 or 6 columns) */}
         <div className={styles.weekGrid} style={{ "--day-count": daysToShow.length }}>
@@ -1110,6 +1120,24 @@ export default function ScheduleBoard({ initialData }) {
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1>Schedule Board</h1>
+          {view === "week" && (
+            <div className={styles.weekNav}>
+              <button className={styles.weekNavBtn} onClick={goToPrevWeek}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <span className={styles.weekNavLabel}>{formatWeekRange(weekStart, hasSaturdayThisWeek)}</span>
+              <button className={styles.weekNavBtn} onClick={goToNextWeek}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+              <button className={styles.thisWeekBtn} onClick={goToThisWeek}>
+                This week
+              </button>
+            </div>
+          )}
         </div>
         <div className={styles.headerRight}>
           <div className={styles.viewToggle}>
@@ -1136,14 +1164,6 @@ export default function ScheduleBoard({ initialData }) {
             </svg>
             Add Class
           </button>
-          <a href="/admin/programs" className={styles.manageBtn}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 21h18" />
-              <path d="M5 21V8l7-5 7 5v13" />
-              <path d="M9 21v-6h6v6" />
-            </svg>
-            Programs
-          </a>
         </div>
       </div>
 
