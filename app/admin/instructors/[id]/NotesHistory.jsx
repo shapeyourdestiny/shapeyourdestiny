@@ -347,28 +347,35 @@ export default function NotesHistory({ instructor, notesData, onRefresh }) {
       {/* Timeline Column */}
       <div className={styles.timelineColumn}>
         <div className={styles.timelineHeader}>
-          <div className={styles.filterChips}>
-            <button
-              type="button"
-              className={`${styles.filterChip} ${typeFilter === "all" ? styles.active : ""}`}
-              onClick={() => setTypeFilter("all")}
-            >
-              All
-              <span className={styles.chipCount}>{typeCounts.all}</span>
-            </button>
-            {["review", "pay", "attendance", "training", "communication", "behavior", "disciplinary", "recognition"].map((type) => (
-              <button
-                key={type}
-                type="button"
-                className={`${styles.filterChip} ${typeFilter === type ? styles.active : ""}`}
-                onClick={() => setTypeFilter(type)}
-              >
-                <span className={styles.chipDot} style={{ background: TYPE_COLORS[type] || "#888" }} />
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-                <span className={styles.chipCount}>{typeCounts[type] || 0}</span>
-              </button>
-            ))}
-          </div>
+          {/* Only show filters when there are entries to filter */}
+          {typeCounts.all > 0 && (
+            <div className={styles.filterChips}>
+              {/* Only show "All" when there are multiple types */}
+              {Object.keys(typeCounts).filter(k => k !== "all" && typeCounts[k] > 0).length > 1 && (
+                <button
+                  type="button"
+                  className={`${styles.filterChip} ${typeFilter === "all" ? styles.active : ""}`}
+                  onClick={() => setTypeFilter("all")}
+                >
+                  All
+                </button>
+              )}
+              {["review", "pay", "attendance", "training", "communication", "behavior", "disciplinary", "recognition"]
+                .filter((type) => typeCounts[type] > 0)
+                .map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    className={`${styles.filterChip} ${typeFilter === type ? styles.active : ""}`}
+                    onClick={() => setTypeFilter(type)}
+                  >
+                    <span className={styles.chipDot} style={{ background: TYPE_COLORS[type] || "#888" }} />
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                    <span className={styles.chipCount}>{typeCounts[type]}</span>
+                  </button>
+                ))}
+            </div>
+          )}
           <button type="button" className={styles.addNoteBtn} onClick={handleAddNote}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M5 12h14" />
