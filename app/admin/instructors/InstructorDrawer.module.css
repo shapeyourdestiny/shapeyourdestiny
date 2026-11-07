@@ -18,8 +18,8 @@
   padding: 20px 24px;
   border-bottom: 1px solid var(--tint);
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .closeBtn {
@@ -49,6 +49,32 @@
   align-items: center;
   gap: 14px;
   flex: 1;
+}
+
+.viewProfileBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 14px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.viewProfileBtn:hover {
+  background: var(--navy-deep);
+}
+
+.viewProfileBtn svg {
+  width: 14px;
+  height: 14px;
 }
 
 .headerAvatar {
