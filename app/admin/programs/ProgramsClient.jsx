@@ -5,6 +5,7 @@ import styles from "./ProgramsClient.module.css";
 import ClassPanel from "./ClassPanel";
 import SchoolPanel from "./SchoolPanel";
 import ConfirmModal from "./ConfirmModal";
+import DayOffImpactModal from "./DayOffImpactModal";
 import {
   deleteDistrictAction,
   deleteSchoolAction,
@@ -97,6 +98,11 @@ export default function ProgramsClient({ initialData, progressMap: initialProgre
 
   // Confirm modal
   const [confirmModal, setConfirmModal] = useState(null);
+
+  // Day-off impact preview
+  const [dayOffPreview, setDayOffPreview] = useState(null);
+  const [dayOffImpact, setDayOffImpact] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   // Loading/saving states
   const [loading, setLoading] = useState(false);
@@ -291,29 +297,85 @@ export default function ProgramsClient({ initialData, progressMap: initialProgre
     }
   };
 
-  // Add holiday
-  const handleAddHoliday = async () => {
+  // Preview holiday impact before adding
+  const handlePreviewHoliday = async () => {
     if (!holidayDate || !holidayName.trim()) return;
-    setLoading(true);
+    setPreviewLoading(true);
 
     let districtId = null;
     let schoolId = null;
+    let scope = "global";
 
     if (holidayScope !== "all") {
       if (holidayScope.startsWith("district:")) {
         districtId = holidayScope.replace("district:", "");
+        scope = "district";
       } else if (holidayScope.startsWith("school:")) {
         schoolId = holidayScope.replace("school:", "");
+        scope = "school";
       }
     }
 
     try {
-      await createHolidayAction(holidayDate, holidayName.trim(), districtId, schoolId, holidayTimePeriod);
+      const res = await fetch("/api/admin/day-off-impact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: holidayDate,
+          scope,
+          timePeriod: holidayTimePeriod,
+          districtId,
+          schoolId,
+          name: holidayName.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to preview");
+      }
+
+      const impact = await res.json();
+      setDayOffImpact(impact);
+      setDayOffPreview({
+        type: "holiday",
+        date: holidayDate,
+        name: holidayName.trim(),
+        scope: holidayScope,
+        timePeriod: holidayTimePeriod,
+        districtId,
+        schoolId,
+      });
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  // Add holiday after confirming impact
+  const handleConfirmHoliday = async () => {
+    if (!dayOffPreview) return;
+    setLoading(true);
+
+    try {
+      await createHolidayAction(
+        dayOffPreview.date,
+        dayOffPreview.name,
+        dayOffPreview.districtId,
+        dayOffPreview.schoolId,
+        dayOffPreview.timePeriod
+      );
+
+      // TODO: Send inbox notifications to affected instructors
+
       await refreshData();
       setHolidayDate("");
       setHolidayName("");
       setHolidayScope("all");
       setHolidayTimePeriod("all_day");
+      setDayOffPreview(null);
+      setDayOffImpact(null);
       showSaved();
     } catch (err) {
       showError(err.message);
@@ -351,19 +413,60 @@ export default function ProgramsClient({ initialData, progressMap: initialProgre
     }
   };
 
-  // Add program off day
-  const handleAddOffDay = async () => {
+  // Preview program off day impact before adding
+  const handlePreviewOffDay = async () => {
     if (!offDayDate || !offDayReason.trim()) return;
+    setPreviewLoading(true);
+
+    try {
+      const res = await fetch("/api/admin/day-off-impact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: offDayDate,
+          scope: "program",
+          timePeriod: offDayTimePeriod,
+          program: offDayProgram,
+          name: offDayReason.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to preview");
+      }
+
+      const impact = await res.json();
+      setDayOffImpact(impact);
+      setDayOffPreview({
+        type: "program",
+        date: offDayDate,
+        name: offDayReason.trim(),
+        scope: "program",
+        timePeriod: offDayTimePeriod,
+        program: offDayProgram,
+      });
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  // Add program off day after confirming impact
+  const handleConfirmOffDay = async () => {
+    if (!dayOffPreview) return;
     setLoading(true);
+
     try {
       const res = await fetch("/api/admin/program-off-days", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          program: offDayProgram,
-          date: offDayDate,
-          reason: offDayReason.trim(),
-          time_period: offDayTimePeriod,
+          program: dayOffPreview.program,
+          date: dayOffPreview.date,
+          reason: dayOffPreview.name,
+          time_period: dayOffPreview.timePeriod,
         }),
       });
       if (!res.ok) {
@@ -371,10 +474,15 @@ export default function ProgramsClient({ initialData, progressMap: initialProgre
         throw new Error(data.error || "Failed to add");
       }
       const newOffDay = await res.json();
+
+      // TODO: Send inbox notifications to affected instructors
+
       setProgramOffDays((prev) => [...prev, newOffDay].sort((a, b) => a.date.localeCompare(b.date)));
       setOffDayDate("");
       setOffDayReason("");
       setOffDayTimePeriod("all_day");
+      setDayOffPreview(null);
+      setDayOffImpact(null);
       showSaved();
     } catch (err) {
       showError(err.message);
@@ -671,10 +779,10 @@ export default function ProgramsClient({ initialData, progressMap: initialProgre
                 </select>
                 <button
                   className={styles.addBtn}
-                  onClick={handleAddHoliday}
-                  disabled={loading || !holidayDate || !holidayName.trim()}
+                  onClick={handlePreviewHoliday}
+                  disabled={loading || previewLoading || !holidayDate || !holidayName.trim()}
                 >
-                  Add
+                  {previewLoading ? "..." : "Add"}
                 </button>
               </div>
 
@@ -801,10 +909,10 @@ export default function ProgramsClient({ initialData, progressMap: initialProgre
                 </select>
                 <button
                   className={styles.addBtn}
-                  onClick={handleAddOffDay}
-                  disabled={loading || !offDayDate || !offDayReason.trim()}
+                  onClick={handlePreviewOffDay}
+                  disabled={loading || previewLoading || !offDayDate || !offDayReason.trim()}
                 >
-                  Add day off
+                  {previewLoading ? "..." : "Add day off"}
                 </button>
               </div>
 
@@ -1020,6 +1128,23 @@ export default function ProgramsClient({ initialData, progressMap: initialProgre
         <ConfirmModal
           {...confirmModal}
           onCancel={() => setConfirmModal(null)}
+        />
+      )}
+
+      {/* Day-off impact preview modal */}
+      {dayOffPreview && dayOffImpact && (
+        <DayOffImpactModal
+          date={dayOffPreview.date}
+          name={dayOffPreview.name}
+          scope={dayOffPreview.scope}
+          timePeriod={dayOffPreview.timePeriod}
+          impact={dayOffImpact}
+          loading={loading}
+          onConfirm={dayOffPreview.type === "holiday" ? handleConfirmHoliday : handleConfirmOffDay}
+          onCancel={() => {
+            setDayOffPreview(null);
+            setDayOffImpact(null);
+          }}
         />
       )}
     </div>

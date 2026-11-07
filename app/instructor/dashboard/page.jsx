@@ -66,16 +66,22 @@ export default async function InstructorDashboardPage() {
   }
 
   // Fetch schedule data using the profile ID
-  let nextSession, instructorClasses;
+  let nextSession, instructorClasses, calendarFeed;
   try {
-    [nextSession, instructorClasses] = await Promise.all([
+    [nextSession, instructorClasses, { data: calendarFeed }] = await Promise.all([
       getNextSession(profile.id),
       getInstructorClasses(profile.id),
+      supabase
+        .from("calendar_feeds")
+        .select("enabled")
+        .eq("profile_id", profile.id)
+        .single(),
     ]);
   } catch (e) {
     console.error("Error fetching dashboard data:", e);
     nextSession = null;
     instructorClasses = [];
+    calendarFeed = null;
   }
 
   return (
@@ -85,6 +91,7 @@ export default async function InstructorDashboardPage() {
       <InstructorSchedule
         nextSession={nextSession}
         classes={instructorClasses}
+        calendarEnabled={calendarFeed?.enabled ?? false}
       />
     </div>
   );

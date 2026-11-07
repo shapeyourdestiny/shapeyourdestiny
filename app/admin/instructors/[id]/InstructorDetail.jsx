@@ -63,7 +63,14 @@ function formatSessionDate(dateStr) {
   return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
 }
 
-export default function InstructorDetail({ instructor, districts = [], notesData, attendanceData }) {
+const CALENDAR_APPS = {
+  apple: "Apple Calendar",
+  google: "Google Calendar",
+  outlook: "Outlook",
+  other: "other app",
+};
+
+export default function InstructorDetail({ instructor, districts = [], notesData, attendanceData, calendarSyncStatus }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -585,6 +592,13 @@ export default function InstructorDetail({ instructor, districts = [], notesData
               </p>
             )}
           </div>
+
+          {/* Calendar sync status (muted line) */}
+          <p className={styles.calendarSyncNote}>
+            Calendar sync: {calendarSyncStatus?.enabled
+              ? `on${calendarSyncStatus.calendar_app ? ` (${CALENDAR_APPS[calendarSyncStatus.calendar_app] || calendarSyncStatus.calendar_app})` : ""}`
+              : "off"}
+          </p>
         </div>
       )}
 

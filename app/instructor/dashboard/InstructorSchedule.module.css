@@ -209,6 +209,70 @@
   height: 16px;
 }
 
+/* Calendar sync promo link */
+.calendarPromo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--teal-dark, #2C6E7D);
+  text-decoration: none;
+  padding: 12px 14px;
+  background: rgba(62, 143, 160, 0.1);
+  border-radius: 12px;
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.calendarPromo:hover {
+  background: rgba(62, 143, 160, 0.16);
+}
+
+.calendarPromo > svg:first-child {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.calendarPromo > span {
+  flex: 1;
+}
+
+.calendarPromoChevron {
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.calendarPromoDismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-left: 4px;
+  margin-right: -4px;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.calendarPromoDismiss:hover {
+  background: rgba(62, 143, 160, 0.2);
+}
+
+.calendarPromoDismiss svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+}
+
 .classesList {
   display: flex;
   flex-direction: column;

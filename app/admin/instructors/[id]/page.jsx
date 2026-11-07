@@ -84,6 +84,19 @@ export default async function InstructorDetailPage({ params }) {
     };
   }
 
+  // Fetch calendar sync status (without token for privacy)
+  let calendarSyncStatus = null;
+  try {
+    const { data: calendarFeed } = await supabase
+      .from("calendar_feeds")
+      .select("enabled, calendar_app")
+      .eq("profile_id", id)
+      .single();
+    calendarSyncStatus = calendarFeed;
+  } catch {
+    // Table may not exist yet
+  }
+
   return (
     <Suspense fallback={null}>
       <InstructorDetail
@@ -91,6 +104,7 @@ export default async function InstructorDetailPage({ params }) {
         districts={districts}
         notesData={notesData}
         attendanceData={attendanceData}
+        calendarSyncStatus={calendarSyncStatus}
       />
     </Suspense>
   );

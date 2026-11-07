@@ -7,6 +7,7 @@ import {
   uploadMyHeadshot,
   removeMyHeadshot,
 } from "@/lib/instructors/self-service";
+import CalendarSyncCard from "./CalendarSyncCard";
 import styles from "./page.module.css";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -17,7 +18,7 @@ function formatJoinedDate(dateStr) {
   return `${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-export default function ProfileClient({ profile }) {
+export default function ProfileClient({ profile, calendarFeed }) {
   const router = useRouter();
   const fileInputRef = useRef(null);
 
@@ -80,6 +81,9 @@ export default function ProfileClient({ profile }) {
         <h1 className={styles.profileName}>{profile.full_name}</h1>
         <span className={styles.rolePill}>Instructor</span>
       </div>
+
+      {/* Calendar Sync */}
+      <CalendarSyncCard feed={calendarFeed} />
 
       {/* Stats */}
       <div className={styles.statRow}>

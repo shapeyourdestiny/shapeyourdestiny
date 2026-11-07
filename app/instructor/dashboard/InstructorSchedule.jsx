@@ -110,9 +110,34 @@ function formatDayOffNote(nextDayOff) {
   return `No class ${startStr} – ${endStr} (${nextDayOff.reason})`;
 }
 
-export default function InstructorSchedule({ nextSession, classes }) {
+// Check localStorage outside component to avoid effect
+function getInitialPromoVisible() {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem("calendarPromoDismissed") !== "true";
+  } catch {
+    return true;
+  }
+}
+
+export default function InstructorSchedule({ nextSession, classes, calendarEnabled }) {
   const [selectedClass, setSelectedClass] = useState(null);
+  const [promoVisible, setPromoVisible] = useState(getInitialPromoVisible);
   const hasClasses = classes && classes.length > 0;
+
+  const handleDismissPromo = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      localStorage.setItem("calendarPromoDismissed", "true");
+    } catch {
+      // localStorage not available
+    }
+    setPromoVisible(false);
+  };
+
+  // Show promo if: not enabled, has classes, visible (not dismissed)
+  const showCalendarPromo = !calendarEnabled && hasClasses && promoVisible;
 
   // Find the most recent end date among all classes (for empty state)
   const mostRecentEndDate = classes.reduce((latest, cls) => {
@@ -199,6 +224,30 @@ export default function InstructorSchedule({ nextSession, classes }) {
           )}
         </div>
       ) : null}
+
+      {/* Calendar Sync Promo - under next class card */}
+      {showCalendarPromo && (
+        <Link href="/instructor/profile" className={styles.calendarPromo}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+          <span>Put your classes in your calendar</span>
+          <svg className={styles.calendarPromoChevron} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+          <button
+            type="button"
+            className={styles.calendarPromoDismiss}
+            onClick={handleDismissPromo}
+            aria-label="Dismiss"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </Link>
+      )}
 
       {/* My Classes Section */}
       <div className={styles.classesSection}>

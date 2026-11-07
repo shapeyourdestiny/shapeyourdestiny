@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { getMyProfile } from "@/lib/instructors/self-service";
 import ProfileClient from "./ProfileClient";
 
@@ -14,5 +15,13 @@ export default async function InstructorProfilePage() {
     redirect("/instructor-login");
   }
 
-  return <ProfileClient profile={profile} />;
+  // Fetch calendar feed
+  const supabase = await createClient();
+  const { data: calendarFeed } = await supabase
+    .from("calendar_feeds")
+    .select("*")
+    .eq("profile_id", profile.id)
+    .single();
+
+  return <ProfileClient profile={profile} calendarFeed={calendarFeed} />;
 }
