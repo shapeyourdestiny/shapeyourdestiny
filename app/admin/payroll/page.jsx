@@ -12,7 +12,6 @@ import {
   getDefaultPeriod,
   getPayrollSettings,
 } from "@/lib/payroll/compute.js";
-import { getCheckDeadline } from "@/lib/payroll/checks.js";
 import PayrollClient from "./PayrollClient";
 
 export const metadata = {
