@@ -65,6 +65,17 @@ const NAV_OPERATIONS = [
     ),
   },
   {
+    href: "/admin/payroll",
+    label: "Payroll",
+    badgeKey: "payrollCount",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23" />
+        <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+      </svg>
+    ),
+  },
+  {
     href: "/admin/incident-reports",
     label: "Incident Reports",
     badgeKey: "incidentCount",
@@ -77,7 +88,7 @@ const NAV_OPERATIONS = [
   },
 ];
 
-export default function Sidebar({ profile, incidentCount = 0, inboxCount = 0 }) {
+export default function Sidebar({ profile, incidentCount = 0, inboxCount = 0, payrollCount = 0 }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -95,6 +106,9 @@ export default function Sidebar({ profile, incidentCount = 0, inboxCount = 0 }) 
     }
     if (item.badgeKey === "inboxCount") {
       return inboxCount;
+    }
+    if (item.badgeKey === "payrollCount") {
+      return payrollCount;
     }
     return 0;
   };

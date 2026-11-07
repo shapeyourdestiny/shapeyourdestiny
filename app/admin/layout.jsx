@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOpenIncidentCount } from "@/lib/incidents/queries";
 import { getAdminInbox } from "@/lib/admin/inbox";
+import { getPeriodsNeedingApprovalCount } from "@/lib/payroll/compute";
 import Sidebar from "./components/Sidebar";
 import styles from "./layout.module.css";
 
@@ -46,9 +47,17 @@ export default async function AdminLayout({ children }) {
     // tables might not exist yet
   }
 
+  // Get payroll count for badge
+  let payrollCount = 0;
+  try {
+    payrollCount = await getPeriodsNeedingApprovalCount();
+  } catch {
+    // tables might not exist yet
+  }
+
   return (
     <div className={styles.layout}>
-      <Sidebar profile={profile} incidentCount={incidentCount} inboxCount={inboxCount} />
+      <Sidebar profile={profile} incidentCount={incidentCount} inboxCount={inboxCount} payrollCount={payrollCount} />
       <main className={styles.main}>
         {children}
       </main>
