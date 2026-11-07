@@ -12,6 +12,7 @@ import {
   sendInviteEmailAction,
 } from "@/lib/instructors/actions";
 import NotesHistory from "./NotesHistory";
+import AttendanceTab from "./AttendanceTab";
 import { formatPhone } from "@/lib/format";
 
 const AVATAR_COLORS = [
@@ -62,7 +63,7 @@ function formatSessionDate(dateStr) {
   return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
 }
 
-export default function InstructorDetail({ instructor, districts = [], notesData }) {
+export default function InstructorDetail({ instructor, districts = [], notesData, attendanceData }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -326,6 +327,13 @@ export default function InstructorDetail({ instructor, districts = [], notesData
           onClick={() => handleTabChange("schedule")}
         >
           Schedule
+        </button>
+        <button
+          type="button"
+          className={`${styles.tab} ${currentTab === "attendance" ? styles.tabActive : ""}`}
+          onClick={() => handleTabChange("attendance")}
+        >
+          Attendance &amp; time off
         </button>
         <button
           type="button"
@@ -603,6 +611,15 @@ export default function InstructorDetail({ instructor, districts = [], notesData
             <div className={styles.emptyNote}>No upcoming sessions scheduled</div>
           )}
         </div>
+      )}
+
+      {/* Attendance & Time Off Tab */}
+      {currentTab === "attendance" && attendanceData && (
+        <AttendanceTab
+          instructor={instructor}
+          attendanceData={attendanceData}
+          onRefresh={handleRefreshNotes}
+        />
       )}
 
       {/* Notes & History Tab */}

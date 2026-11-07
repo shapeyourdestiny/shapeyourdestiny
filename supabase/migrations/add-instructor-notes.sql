@@ -69,7 +69,16 @@ CREATE POLICY "Admins can update instructor notes" ON instructor_notes
     )
   );
 
--- No DELETE policy - notes should be archived, not deleted
+DROP POLICY IF EXISTS "Admins can delete instructor notes" ON instructor_notes;
+CREATE POLICY "Admins can delete instructor notes" ON instructor_notes
+  FOR DELETE TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE (p.user_id = auth.uid() OR p.id = auth.uid())
+      AND p.role = 'admin'
+    )
+  );
 
 -- Indexes for efficient queries
 CREATE INDEX IF NOT EXISTS idx_instructor_notes_profile_date ON instructor_notes(profile_id, note_date DESC);

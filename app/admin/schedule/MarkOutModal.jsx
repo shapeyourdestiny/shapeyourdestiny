@@ -8,6 +8,8 @@ import { createSessionChangesBulkAction } from "@/lib/schedule/actions";
 const REASONS = [
   { value: "vacation", label: "Vacation" },
   { value: "sick", label: "Sick" },
+  { value: "appointment", label: "Appointment" },
+  { value: "personal", label: "Personal" },
   { value: "emergency", label: "Emergency" },
   { value: "other", label: "Other" },
 ];
@@ -41,6 +43,7 @@ export default function MarkOutModal({
   const [selectedInstructor, setSelectedInstructor] = useState(initialInstructor?.id || "");
   const [reason, setReason] = useState("vacation");
   const [note, setNote] = useState("");
+  const [notifiedOn, setNotifiedOn] = useState(getTodayString);
   const [startDate, setStartDate] = useState(getInitialDate);
   const [endDate, setEndDate] = useState(getInitialDate);
   const [sendEmail, setSendEmail] = useState(true);
@@ -59,6 +62,7 @@ export default function MarkOutModal({
     setSelectedInstructor(initialInstructor?.id || "");
     setReason("vacation");
     setNote("");
+    setNotifiedOn(getTodayString());
     setStartDate(initialDate || getTodayString());
     setEndDate(initialDate || getTodayString());
     setSubAssignments({});
@@ -330,6 +334,7 @@ export default function MarkOutModal({
             reason,
             note: note.trim() || null,
             absenceGroupId: mode === "several_days" ? absenceGroupId : null,
+            notifiedOn: notifiedOn || null,
           };
         });
 
@@ -429,13 +434,24 @@ export default function MarkOutModal({
                 </button>
               ))}
             </div>
-            <input
-              type="text"
-              placeholder="Note (optional)"
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              className={styles.noteInput}
-            />
+            <div className={styles.noteRow}>
+              <input
+                type="text"
+                placeholder="Note (optional)"
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                className={styles.noteInput}
+              />
+              <div className={styles.notifiedField}>
+                <label>They told us on</label>
+                <input
+                  type="date"
+                  value={notifiedOn}
+                  onChange={e => setNotifiedOn(e.target.value)}
+                  max={getTodayString()}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Date range (several days mode) */}
