@@ -328,11 +328,15 @@
   }
 
   .tabActive {
-    background: var(--navy);
-    color: var(--ink);
+    background: var(--teal);
+    color: white;
   }
 
   .tabActive .tabIcon {
-    color: var(--ink);
+    color: white;
+  }
+
+  .tabActive .tabLabel {
+    color: white;
   }
 }

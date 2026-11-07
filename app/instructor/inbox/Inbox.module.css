@@ -5,25 +5,46 @@
   margin: 0 auto;
 }
 
+/* Header */
 .header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   margin-bottom: 20px;
 }
 
-.header h1 {
+.headerLeft h1 {
+  font-family: 'Baloo 2', sans-serif;
   font-size: 32px;
+  font-weight: 700;
   margin: 0 0 4px 0;
+  color: var(--ink);
 }
 
 .headerSub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 14px;
   color: var(--ink-soft);
   margin: 0;
 }
 
+.headerSubCaughtUp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--teal-dark);
+  margin: 0;
+}
+
+.headerSubCaughtUp svg {
+  width: 16px;
+  height: 16px;
+}
+
 .markAllBtn {
-  position: absolute;
-  top: 24px;
-  right: 24px;
   background: none;
   border: none;
   font-family: 'Baloo 2', sans-serif;
@@ -31,6 +52,7 @@
   font-size: 13px;
   color: var(--teal-dark);
   cursor: pointer;
+  padding: 4px 0;
 }
 
 .markAllBtn:hover {
@@ -38,59 +60,26 @@
 }
 
 /* Tabs */
-.tabsRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
 .tabs {
-  flex: 1;
   display: flex;
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 4px;
+  margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
-}
-
-.composeBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 10px;
-  background: var(--teal);
-  color: white;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s ease;
-}
-
-.composeBtn:hover {
-  background: var(--teal-dark);
-}
-
-.composeBtn svg {
-  width: 16px;
-  height: 16px;
 }
 
 .tab {
   flex: 1;
-  padding: 12px 16px;
+  height: 44px;
   border: none;
-  background: none;
+  background: transparent;
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
   font-size: 14px;
   color: var(--ink-soft);
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -99,8 +88,8 @@
 }
 
 .tab.active {
-  background: var(--tint);
-  color: var(--ink);
+  background: var(--navy);
+  color: white;
 }
 
 .tabBadge {
@@ -120,6 +109,12 @@
   color: var(--teal-dark);
 }
 
+.tab.active .tabBadge.red,
+.tab.active .tabBadge.teal {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
 /* Content */
 .content {
   display: flex;
@@ -127,11 +122,393 @@
   gap: 20px;
 }
 
-.emptyState {
+/* Empty States */
+.emptyHero {
+  border-radius: 24px;
+  padding: 30px 24px 28px;
   text-align: center;
-  padding: 60px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.emptyHeroShoutouts {
+  background: linear-gradient(160deg, #DFF1F4 0%, #fff 70%);
+}
+
+.emptyHeroUpdates {
+  background: linear-gradient(160deg, #E4EBF9 0%, #fff 70%);
+}
+
+/* Decorative shapes */
+.heroDecorations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.heroDot1 {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #9FD4DE;
+  top: 20px;
+  left: 24px;
+  opacity: 0.6;
+}
+
+.heroDot2 {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #C9D5EE;
+  top: 40px;
+  right: 30px;
+  opacity: 0.7;
+}
+
+.heroSquare {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: #9FD4DE;
+  bottom: 30px;
+  right: 20px;
+  opacity: 0.5;
+  transform: rotate(15deg);
+}
+
+/* Shout-outs illustration */
+.heroIllustration {
+  position: relative;
+  width: 96px;
+  height: 80px;
+  margin: 0 auto 16px;
+}
+
+.heroTileBehind {
+  position: absolute;
+  width: 58px;
+  height: 58px;
+  background: white;
+  border-radius: 14px;
+  transform: rotate(-10deg);
+  left: 8px;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(20, 44, 107, 0.08);
+}
+
+.heroTileBehind svg {
+  width: 26px;
+  height: 26px;
+  color: var(--navy-mid);
+}
+
+.heroTileFront {
+  position: absolute;
+  width: 62px;
+  height: 62px;
+  background: var(--teal);
+  border-radius: 16px;
+  transform: rotate(8deg);
+  right: 8px;
+  top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(62, 143, 160, 0.35);
+}
+
+.heroTileFront svg {
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
+/* Updates empty icon */
+.heroIcon {
+  width: 72px;
+  height: 72px;
+  background: var(--navy);
+  border-radius: 22px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(31, 63, 145, 0.25);
+}
+
+.heroIcon svg {
+  width: 32px;
+  height: 32px;
+  color: white;
+}
+
+.heroHeading {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px 0;
+}
+
+.heroText {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
   color: var(--ink-soft);
+  line-height: 1.5;
+  max-width: 270px;
+  margin: 0 auto;
+}
+
+/* Recent classes card */
+.recentClassesCard {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(20, 44, 107, 0.08);
+}
+
+.recentClassesTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 4px 0;
+}
+
+.recentClassesSub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 16px 0;
+}
+
+.recentClassesList {
+  display: flex;
+  flex-direction: column;
+}
+
+.recentClassRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--tint);
+}
+
+.recentClassRow:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.dateTile {
+  width: 48px;
+  height: 48px;
+  background: var(--tint);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dateTileDay {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+}
+
+.dateTileNum {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.recentClassInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.recentClassSchool {
+  font-weight: 700;
   font-size: 14px;
+  color: var(--ink);
+}
+
+.recentClassWith {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.recentClassAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.recentClassAvatarPlaceholder {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--teal);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.thankBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--teal);
+  color: white;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.thankBtn:hover {
+  background: var(--teal-dark);
+}
+
+.thankBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.thankedLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal-dark);
+  flex-shrink: 0;
+}
+
+.showMoreBtn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  border: none;
+  background: none;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--teal-dark);
+  cursor: pointer;
+  text-align: center;
+}
+
+.showMoreBtn:hover {
+  text-decoration: underline;
+}
+
+/* Next class section */
+.nextClassSection {
+  margin-top: 24px;
+}
+
+.nextClassLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.nextClassCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(20, 44, 107, 0.08);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.nextClassCard:hover {
+  box-shadow: 0 6px 20px rgba(20, 44, 107, 0.12);
+}
+
+.nextClassDateTile {
+  width: 52px;
+  height: 52px;
+  background: var(--navy);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nextClassDateDay {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nextClassDateNum {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+}
+
+.nextClassInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.nextClassSchool {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.nextClassMeta {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.nextClassChevron {
+  width: 20px;
+  height: 20px;
+  color: var(--ink-soft);
+  flex-shrink: 0;
 }
 
 /* Item groups */

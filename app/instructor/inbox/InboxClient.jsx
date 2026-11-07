@@ -23,6 +23,8 @@ const RATING_WORDS = {
   1: "Needs work",
 };
 
+const DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 function formatDate(dateStr) {
   if (!dateStr) return "";
   const date = new Date(dateStr.includes("T") ? dateStr : dateStr + "T00:00:00");
@@ -38,6 +40,15 @@ function formatDayDate(dateStr) {
   return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
 }
 
+function getDateParts(dateStr) {
+  if (!dateStr) return { day: "", num: "" };
+  const date = new Date(dateStr + "T00:00:00");
+  return {
+    day: DAYS_SHORT[date.getDay()],
+    num: date.getDate(),
+  };
+}
+
 export default function InboxClient({ inboxData }) {
   const router = useRouter();
   const [tab, setTab] = useState("updates");
@@ -45,14 +56,19 @@ export default function InboxClient({ inboxData }) {
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [showCompose, setShowCompose] = useState(false);
+  const [composeRecipient, setComposeRecipient] = useState(null);
+  const [composeContext, setComposeContext] = useState(null);
 
-  const { updates, shoutOuts, unreadUpdates, unreadShoutOuts, sharedNotes } = inboxData;
+  const { updates, shoutOuts, unreadUpdates, unreadShoutOuts, sharedNotes, recentSessions = [], nextClass } = inboxData;
 
   // Group items
   const currentItems = tab === "updates" ? updates : shoutOuts;
   const needsYouItems = currentItems.filter((i) => i.needsYou);
   const newItems = currentItems.filter((i) => !i.needsYou && !i.isRead);
   const earlierItems = currentItems.filter((i) => !i.needsYou && i.isRead);
+
+  const totalUnread = tab === "updates" ? unreadUpdates : unreadShoutOuts;
+  const hasUnread = (tab === "updates" ? newItems.length : shoutOuts.filter((s) => !s.isRead).length) > 0;
 
   const handleItemClick = async (item) => {
     setSelectedItem(item);
@@ -93,6 +109,20 @@ export default function InboxClient({ inboxData }) {
     await markAllRead(tab);
     setLoading(false);
     router.refresh();
+  };
+
+  const handleThankClick = (session) => {
+    setComposeRecipient({
+      id: session.otherPersonId,
+      full_name: session.otherPersonName,
+      avatar_url: session.otherPersonAvatar,
+    });
+    setComposeContext({
+      classId: session.classId,
+      date: session.date,
+      schoolName: session.schoolName,
+    });
+    setShowCompose(true);
   };
 
   const handleKeyDown = useCallback((e) => {
@@ -287,14 +317,103 @@ export default function InboxClient({ inboxData }) {
     </div>
   );
 
+  // Empty state for Shout-outs tab
+  const renderShoutOutsEmpty = () => (
+    <>
+      {/* Hero card */}
+      <div className={`${styles.emptyHero} ${styles.emptyHeroShoutouts}`}>
+        <div className={styles.heroDecorations} aria-hidden="true">
+          <div className={styles.heroDot1} />
+          <div className={styles.heroDot2} />
+          <div className={styles.heroSquare} />
+        </div>
+        <div className={styles.heroIllustration} aria-hidden="true">
+          <div className={styles.heroTileBehind}>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </svg>
+          </div>
+          <div className={styles.heroTileFront}>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </div>
+        </div>
+        <h2 className={styles.heroHeading}>No shout-outs yet</h2>
+        <p className={styles.heroText}>
+          When a teammate thanks you, it lands here. Parent thank-yous too.
+        </p>
+      </div>
+
+      {/* Recent classes card - would need data from server */}
+      {recentSessions.length > 0 && (
+        <RecentClassesCard
+          sessions={recentSessions}
+          onThankClick={handleThankClick}
+        />
+      )}
+    </>
+  );
+
+  // Empty state for Updates tab
+  const renderUpdatesEmpty = () => (
+    <>
+      {/* Hero card */}
+      <div className={`${styles.emptyHero} ${styles.emptyHeroUpdates}`}>
+        <div className={styles.heroIcon}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+            <path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" />
+          </svg>
+        </div>
+        <h2 className={styles.heroHeading}>You&apos;re all caught up</h2>
+        <p className={styles.heroText}>
+          Classes you&apos;re covering, time off, reviews and notes from the office show up here.
+        </p>
+      </div>
+
+      {/* Next class section */}
+      {nextClass && (
+        <div className={styles.nextClassSection}>
+          <div className={styles.nextClassLabel}>Your next class</div>
+          <div className={styles.nextClassCard}>
+            <div className={styles.nextClassDateTile}>
+              <span className={styles.nextClassDateDay}>{getDateParts(nextClass.date).day}</span>
+              <span className={styles.nextClassDateNum}>{getDateParts(nextClass.date).num}</span>
+            </div>
+            <div className={styles.nextClassInfo}>
+              <div className={styles.nextClassSchool}>{nextClass.schoolName}</div>
+              <div className={styles.nextClassMeta}>{nextClass.program} · {nextClass.time}</div>
+            </div>
+            <svg className={styles.nextClassChevron} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className={styles.container}>
+      {/* Header */}
       <div className={styles.header}>
-        <h1>Inbox</h1>
-        <p className={styles.headerSub}>
-          {unreadUpdates > 0 ? `${unreadUpdates} new update${unreadUpdates !== 1 ? "s" : ""}` : "All caught up"}
-        </p>
-        {(tab === "updates" ? newItems.length : shoutOuts.filter((s) => !s.isRead).length) > 0 && (
+        <div className={styles.headerLeft}>
+          <h1>Inbox</h1>
+          {totalUnread > 0 ? (
+            <p className={styles.headerSub}>
+              {totalUnread} new update{totalUnread !== 1 ? "s" : ""}
+            </p>
+          ) : (
+            <p className={styles.headerSubCaughtUp}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              All caught up
+            </p>
+          )}
+        </div>
+        {hasUnread && (
           <button
             type="button"
             className={styles.markAllBtn}
@@ -306,56 +425,48 @@ export default function InboxClient({ inboxData }) {
         )}
       </div>
 
-      <div className={styles.tabsRow}>
-        <div className={styles.tabs}>
-          <button
-            type="button"
-            className={`${styles.tab} ${tab === "updates" ? styles.active : ""}`}
-            onClick={() => setTab("updates")}
-          >
-            Updates
-            {unreadUpdates > 0 && (
-              <span className={`${styles.tabBadge} ${styles.red}`}>{unreadUpdates}</span>
-            )}
-          </button>
-          <button
-            type="button"
-            className={`${styles.tab} ${tab === "shoutouts" ? styles.active : ""}`}
-            onClick={() => setTab("shoutouts")}
-          >
-            Shout-outs
-            {unreadShoutOuts > 0 && (
-              <span className={`${styles.tabBadge} ${styles.teal}`}>{unreadShoutOuts}</span>
-            )}
-          </button>
-        </div>
-        {tab === "shoutouts" && (
-          <button
-            type="button"
-            className={styles.composeBtn}
-            onClick={() => setShowCompose(true)}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Send one
-          </button>
-        )}
+      {/* Tabs */}
+      <div className={styles.tabs}>
+        <button
+          type="button"
+          className={`${styles.tab} ${tab === "updates" ? styles.active : ""}`}
+          onClick={() => setTab("updates")}
+        >
+          Updates
+          {unreadUpdates > 0 && (
+            <span className={`${styles.tabBadge} ${styles.red}`}>{unreadUpdates}</span>
+          )}
+        </button>
+        <button
+          type="button"
+          className={`${styles.tab} ${tab === "shoutouts" ? styles.active : ""}`}
+          onClick={() => setTab("shoutouts")}
+        >
+          Shout-outs
+          {unreadShoutOuts > 0 && (
+            <span className={`${styles.tabBadge} ${styles.teal}`}>{unreadShoutOuts}</span>
+          )}
+        </button>
       </div>
 
+      {/* Content */}
       <div className={styles.content}>
-        {currentItems.length === 0 ? (
-          <div className={styles.emptyState}>
-            {tab === "updates"
-              ? "Nothing new. Schedule changes and notes from the office show up here."
-              : "No shout-outs yet. When a teammate thanks you, it shows up here."}
-          </div>
-        ) : (
+        {tab === "updates" && currentItems.length === 0 && renderUpdatesEmpty()}
+        {tab === "shoutouts" && currentItems.length === 0 && renderShoutOutsEmpty()}
+
+        {currentItems.length > 0 && (
           <>
             {renderItemGroup(needsYouItems, "NEEDS YOU")}
             {renderItemGroup(newItems, "NEW")}
             {renderItemGroup(earlierItems, "EARLIER")}
+
+            {/* Show recent classes card at bottom of shout-outs list */}
+            {tab === "shoutouts" && recentSessions.length > 0 && (
+              <RecentClassesCard
+                sessions={recentSessions}
+                onThankClick={handleThankClick}
+              />
+            )}
           </>
         )}
       </div>
@@ -589,8 +700,91 @@ export default function InboxClient({ inboxData }) {
       {/* Compose Shout-out Sheet */}
       <ComposeShoutOut
         isOpen={showCompose}
-        onClose={() => setShowCompose(false)}
+        onClose={() => {
+          setShowCompose(false);
+          setComposeRecipient(null);
+          setComposeContext(null);
+        }}
+        preselectedRecipient={composeRecipient}
+        contextData={composeContext}
       />
+    </div>
+  );
+}
+
+// Recent classes card component
+function RecentClassesCard({ sessions, onThankClick }) {
+  const [showAll, setShowAll] = useState(false);
+  const displaySessions = showAll ? sessions : sessions.slice(0, 3);
+
+  if (sessions.length === 0) return null;
+
+  return (
+    <div className={styles.recentClassesCard}>
+      <h3 className={styles.recentClassesTitle}>From your recent classes</h3>
+      <p className={styles.recentClassesSub}>Thank someone you taught with or who covered for you.</p>
+
+      <div className={styles.recentClassesList}>
+        {displaySessions.map((session, idx) => {
+          const dateParts = getDateParts(session.date);
+          return (
+            <div key={`${session.classId}-${session.date}-${idx}`} className={styles.recentClassRow}>
+              <div className={styles.dateTile}>
+                <span className={styles.dateTileDay}>{dateParts.day}</span>
+                <span className={styles.dateTileNum}>{dateParts.num}</span>
+              </div>
+              <div className={styles.recentClassInfo}>
+                <div className={styles.recentClassSchool}>{session.schoolName}</div>
+                <div className={styles.recentClassWith}>
+                  {session.otherPersonAvatar ? (
+                    <Image
+                      src={session.otherPersonAvatar}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className={styles.recentClassAvatar}
+                    />
+                  ) : (
+                    <div className={styles.recentClassAvatarPlaceholder}>
+                      {session.otherPersonName?.charAt(0)?.toUpperCase() || "?"}
+                    </div>
+                  )}
+                  <span>{session.relationText}</span>
+                </div>
+              </div>
+              {session.alreadyThanked ? (
+                <span className={styles.thankedLabel}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="14" height="14">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Thanked
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.thankBtn}
+                  onClick={() => onThankClick(session)}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                  Thank
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {sessions.length > 3 && (
+        <button
+          type="button"
+          className={styles.showMoreBtn}
+          onClick={() => setShowAll(!showAll)}
+        >
+          {showAll ? "Show less" : "Show older classes"}
+        </button>
+      )}
     </div>
   );
 }
