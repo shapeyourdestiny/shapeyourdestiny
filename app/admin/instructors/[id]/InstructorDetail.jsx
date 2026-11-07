@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./InstructorDetail.module.css";
 import {
   archiveInstructorAction,
@@ -10,6 +10,7 @@ import {
   updateInstructorAction,
 } from "@/lib/instructors/actions";
 import Modal from "@/app/admin/components/Modal";
+import NotesHistory from "./NotesHistory";
 
 const AVATAR_COLORS = [
   "#3E8FA0",
@@ -58,11 +59,30 @@ function formatSessionDate(dateStr) {
   return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
 }
 
-export default function InstructorDetail({ instructor }) {
+export default function InstructorDetail({ instructor, notesData }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editPhone, setEditPhone] = useState(instructor.phone || "");
+
+  // Tab state from URL
+  const currentTab = searchParams.get("tab") || "overview";
+
+  const handleTabChange = (tab) => {
+    const params = new URLSearchParams(searchParams);
+    if (tab === "overview") {
+      params.delete("tab");
+    } else {
+      params.set("tab", tab);
+    }
+    const query = params.toString();
+    router.push(`/admin/instructors/${instructor.id}${query ? `?${query}` : ""}`, { scroll: false });
+  };
+
+  const handleRefreshNotes = () => {
+    router.refresh();
+  };
 
   const canDelete = instructor.totalSessions === 0;
   const isArchived = instructor.status === "archived";
@@ -200,7 +220,42 @@ export default function InstructorDetail({ instructor }) {
         </button>
       </div>
 
-      <div className={styles.statRow}>
+      {/* Tabs */}
+      <div className={styles.tabRow}>
+        <button
+          type="button"
+          className={`${styles.tab} ${currentTab === "overview" ? styles.tabActive : ""}`}
+          onClick={() => handleTabChange("overview")}
+        >
+          Overview
+        </button>
+        <button
+          type="button"
+          className={`${styles.tab} ${currentTab === "schedule" ? styles.tabActive : ""}`}
+          onClick={() => handleTabChange("schedule")}
+        >
+          Schedule
+        </button>
+        <button
+          type="button"
+          className={`${styles.tab} ${currentTab === "notes" ? styles.tabActive : ""}`}
+          onClick={() => handleTabChange("notes")}
+        >
+          Notes &amp; history
+        </button>
+        <div className={styles.lockPill}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="12" height="12">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0110 0v4" />
+          </svg>
+          Admins only. {instructor.full_name.split(" ")[0]} never sees this tab.
+        </div>
+      </div>
+
+      {/* Overview Tab */}
+      {currentTab === "overview" && (
+        <>
+          <div className={styles.statRow}>
         <div className={styles.statCard}>
           <div className={styles.statNum}>{instructor.totalSessions}</div>
           <div className={styles.statLabel}>Sessions Taught</div>
@@ -257,33 +312,6 @@ export default function InstructorDetail({ instructor }) {
       </div>
 
       <div className={styles.sectionCard}>
-        <h3>Reviews &amp; Audits</h3>
-        <div className={styles.emptyNote}>Nothing open right now</div>
-      </div>
-
-      <div className={styles.sectionCard}>
-        <h3>Upcoming Sessions</h3>
-        {instructor.upcomingSessions.length > 0 ? (
-          instructor.upcomingSessions.map((session, idx) => (
-            <div key={idx} className={styles.miniRow}>
-              <span
-                className={styles.miniDot}
-                style={{ background: "#3E8FA0" }}
-              />
-              <span className={styles.miniRowText}>
-                {session.schoolName}
-                <div className={styles.miniRowSub}>
-                  {formatSessionDate(session.date)} &middot; {session.time}
-                </div>
-              </span>
-            </div>
-          ))
-        ) : (
-          <div className={styles.emptyNote}>No upcoming sessions scheduled</div>
-        )}
-      </div>
-
-      <div className={styles.sectionCard}>
         <h3>Account Actions</h3>
         <div className={styles.actionRow}>
           <button
@@ -330,6 +358,42 @@ export default function InstructorDetail({ instructor }) {
           </p>
         )}
       </div>
+        </>
+      )}
+
+      {/* Schedule Tab */}
+      {currentTab === "schedule" && (
+        <div className={styles.sectionCard}>
+          <h3>Upcoming Sessions</h3>
+          {instructor.upcomingSessions.length > 0 ? (
+            instructor.upcomingSessions.map((session, idx) => (
+              <div key={idx} className={styles.miniRow}>
+                <span
+                  className={styles.miniDot}
+                  style={{ background: "#3E8FA0" }}
+                />
+                <span className={styles.miniRowText}>
+                  {session.schoolName}
+                  <div className={styles.miniRowSub}>
+                    {formatSessionDate(session.date)} &middot; {session.time}
+                  </div>
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className={styles.emptyNote}>No upcoming sessions scheduled</div>
+          )}
+        </div>
+      )}
+
+      {/* Notes & History Tab */}
+      {currentTab === "notes" && notesData && (
+        <NotesHistory
+          instructor={instructor}
+          notesData={notesData}
+          onRefresh={handleRefreshNotes}
+        />
+      )}
 
       <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
         <div className={styles.editModal}>

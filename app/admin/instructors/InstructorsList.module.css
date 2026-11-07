@@ -272,6 +272,14 @@
   gap: 8px;
 }
 
+.attentionDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #E0594C;
+  flex: none;
+}
+
 .adminBadge {
   display: inline-flex;
   font-family: 'Nunito', sans-serif;

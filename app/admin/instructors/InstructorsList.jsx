@@ -210,6 +210,9 @@ export default function InstructorsList({ instructors, districts = [] }) {
                     </div>
                   )}
                   <span className={styles.nameText}>
+                    {instructor.needsAttention && (
+                      <span className={styles.attentionDot} aria-label="Needs attention" />
+                    )}
                     {instructor.full_name}
                     {instructor.role === "admin" && (
                       <span className={styles.adminBadge}>Admin</span>
