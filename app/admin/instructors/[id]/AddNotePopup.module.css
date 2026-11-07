@@ -393,13 +393,40 @@
   border-top: 1px solid var(--tint);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
 }
 
+.footerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .footerNote {
-  flex: 1;
   font-size: 11px;
   color: var(--ink-soft);
+}
+
+.shareCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.shareCheckbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--teal);
+}
+
+.footerButtons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .archiveBtn {

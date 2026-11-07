@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import styles from "./NotesHistory.module.css";
-import { archiveNote, restoreNote, completeFollowUp, getFileUrl } from "@/lib/instructor-notes/actions";
+import { archiveNote, restoreNote, deleteNote, completeFollowUp, getFileUrl, shareNote, unshareNote } from "@/lib/instructor-notes/actions";
 import AddNotePopup from "./AddNotePopup";
 
 const TYPE_COLORS = {
@@ -163,6 +163,18 @@ export default function NotesHistory({ instructor, notesData, onRefresh }) {
     }
   };
 
+  const handleDelete = async (noteId) => {
+    if (!confirm("Permanently delete this note? This cannot be undone.")) return;
+    setLoading(true);
+    const result = await deleteNote(noteId);
+    setLoading(false);
+    if (result.error) {
+      alert(result.error);
+    } else if (onRefresh) {
+      onRefresh();
+    }
+  };
+
   const handleMarkDone = async (noteId) => {
     const noteText = prompt("Optional: Add a note about the follow-up completion");
     setLoading(true);
@@ -181,6 +193,30 @@ export default function NotesHistory({ instructor, notesData, onRefresh }) {
       alert(result.error);
     } else if (result.url) {
       window.open(result.url, "_blank");
+    }
+  };
+
+  const handleShare = async (noteId, currentlyShared) => {
+    if (currentlyShared) {
+      const firstName = instructor.full_name?.split(" ")[0] || "the instructor";
+      if (!confirm(`${firstName} won't see this anymore. Their acknowledgment and comment are kept.`)) return;
+      setLoading(true);
+      const result = await unshareNote(noteId);
+      setLoading(false);
+      if (result.error) {
+        alert(result.error);
+      } else if (onRefresh) {
+        onRefresh();
+      }
+    } else {
+      setLoading(true);
+      const result = await shareNote(noteId);
+      setLoading(false);
+      if (result.error) {
+        alert(result.error);
+      } else if (onRefresh) {
+        onRefresh();
+      }
     }
   };
 
@@ -650,9 +686,80 @@ export default function NotesHistory({ instructor, notesData, onRefresh }) {
                           >
                             Restore
                           </button>
+                          <button
+                            type="button"
+                            className={styles.deleteBtn}
+                            onClick={() => handleDelete(entry.id)}
+                            disabled={loading}
+                          >
+                            Delete
+                          </button>
                         </>
                       )}
                     </div>
+
+                    {/* Sharing strip for shareable types */}
+                    {["review", "recognition", "disciplinary"].includes(entry.type) && !isArchived && (
+                      <div className={`${styles.sharingStrip} ${entry.shared_at && !entry.unshared_at ? styles.shared : ""}`}>
+                        <label className={styles.shareSwitch}>
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={!!(entry.shared_at && !entry.unshared_at)}
+                            className={`${styles.switchTrack} ${entry.shared_at && !entry.unshared_at ? styles.on : ""}`}
+                            onClick={() => handleShare(entry.id, entry.shared_at && !entry.unshared_at)}
+                            disabled={loading}
+                          >
+                            <span className={styles.switchThumb} />
+                          </button>
+                          <span className={styles.switchLabel}>
+                            {entry.shared_at && !entry.unshared_at
+                              ? `Shared with ${instructor.full_name?.split(" ")[0]}`
+                              : `Share with ${instructor.full_name?.split(" ")[0]}`}
+                          </span>
+                        </label>
+
+                        {entry.shared_at && !entry.unshared_at ? (
+                          <div className={styles.shareStatus}>
+                            <span className={styles.shareDate}>
+                              Shared {formatFullDate(entry.shared_at.split("T")[0])}
+                            </span>
+                            <span className={styles.shareDot} />
+                            {entry.acknowledged_at ? (
+                              <span className={styles.shareRead}>
+                                {entry.type === "disciplinary"
+                                  ? `${instructor.full_name?.split(" ")[0]} acknowledged ${formatFullDate(entry.acknowledged_at.split("T")[0])}`
+                                  : `${instructor.full_name?.split(" ")[0]} read it ${formatFullDate(entry.first_viewed_at?.split("T")[0] || entry.acknowledged_at.split("T")[0])}`}
+                              </span>
+                            ) : entry.first_viewed_at ? (
+                              <span className={styles.shareRead}>
+                                {instructor.full_name?.split(" ")[0]} read it {formatFullDate(entry.first_viewed_at.split("T")[0])}
+                              </span>
+                            ) : (
+                              <span className={styles.shareNotOpened}>not opened yet</span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className={styles.shareHint}>
+                            {entry.type === "disciplinary"
+                              ? `Private. Share it so ${instructor.full_name?.split(" ")[0]} can acknowledge it in the app.`
+                              : "Private. Only admins can see this."}
+                          </div>
+                        )}
+
+                        {/* Instructor comment */}
+                        {entry.instructor_comment && (
+                          <div className={styles.instructorComment}>
+                            <div className={styles.commentAvatar}>
+                              {instructor.full_name?.charAt(0)?.toUpperCase() || "?"}
+                            </div>
+                            <div className={styles.commentBubble}>
+                              <strong>{instructor.full_name?.split(" ")[0]}:</strong> {entry.instructor_comment}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               );

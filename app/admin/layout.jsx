@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOpenIncidentCount } from "@/lib/incidents/queries";
+import { getAdminInbox } from "@/lib/admin/inbox";
 import Sidebar from "./components/Sidebar";
 import styles from "./layout.module.css";
 
@@ -32,14 +33,22 @@ export default async function AdminLayout({ children }) {
   let incidentCount = 0;
   try {
     incidentCount = await getOpenIncidentCount();
-  } catch (e) {
+  } catch {
     // incident_reports table might not exist yet
-    console.error("Error fetching incident count:", e);
+  }
+
+  // Get inbox count for badge
+  let inboxCount = 0;
+  try {
+    const inboxData = await getAdminInbox();
+    inboxCount = inboxData.totalPending;
+  } catch {
+    // tables might not exist yet
   }
 
   return (
     <div className={styles.layout}>
-      <Sidebar profile={profile} incidentCount={incidentCount} />
+      <Sidebar profile={profile} incidentCount={incidentCount} inboxCount={inboxCount} />
       <main className={styles.main}>
         {children}
       </main>

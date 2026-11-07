@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getInboxBadgeCount } from "@/lib/instructor/inbox";
 import InstructorShell from "./components/InstructorShell";
 import styles from "./layout.module.css";
 
@@ -57,9 +58,17 @@ export default async function InstructorLayout({ children }) {
     redirect("/instructor-login?error=archived");
   }
 
+  // Get inbox badge count (urgent items needing attention)
+  let inboxBadge = 0;
+  try {
+    inboxBadge = await getInboxBadgeCount();
+  } catch {
+    // Ignore errors - badge will just be 0
+  }
+
   return (
     <div className={styles.layout}>
-      <InstructorShell profile={profile} />
+      <InstructorShell profile={profile} inboxBadge={inboxBadge} />
       <main className={styles.main}>
         {children}
       </main>

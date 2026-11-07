@@ -29,11 +29,24 @@ const ProfileIcon = () => (
   </svg>
 );
 
+const InboxIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+    <path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" />
+  </svg>
+);
+
 const NAV_MENU = [
   {
     href: "/instructor/dashboard",
     label: "Schedule",
     icon: <CalendarIcon />,
+  },
+  {
+    href: "/instructor/inbox",
+    label: "Inbox",
+    icon: <InboxIcon />,
+    hasBadge: true,
   },
 ];
 
@@ -53,13 +66,20 @@ const NAV_PROFILE = [
   },
 ];
 
-// Mobile bottom tabs - Schedule and Forms only (Profile is in topbar)
+// Mobile bottom tabs - Schedule, Inbox, and Forms (Profile is in topbar)
 const MOBILE_TABS = [
   {
     href: "/instructor/dashboard",
     label: "Schedule",
     icon: <CalendarIcon />,
     activeFor: ["/instructor/dashboard"],
+  },
+  {
+    href: "/instructor/inbox",
+    label: "Inbox",
+    icon: <InboxIcon />,
+    activeFor: ["/instructor/inbox"],
+    hasBadge: true,
   },
   {
     href: "/instructor/forms",
@@ -69,7 +89,7 @@ const MOBILE_TABS = [
   },
 ];
 
-export default function InstructorShell({ profile }) {
+export default function InstructorShell({ profile, inboxBadge = 0 }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -125,6 +145,7 @@ export default function InstructorShell({ profile }) {
           <span className={styles.navLabel}>Menu</span>
           {NAV_MENU.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const badgeCount = item.hasBadge ? inboxBadge : 0;
             return (
               <a
                 key={item.href}
@@ -133,6 +154,7 @@ export default function InstructorShell({ profile }) {
               >
                 <span className={styles.navIcon}>{item.icon}</span>
                 {item.label}
+                {badgeCount > 0 && <span className={styles.badge}>{badgeCount}</span>}
               </a>
             );
           })}
@@ -210,6 +232,7 @@ export default function InstructorShell({ profile }) {
         <div className={styles.bottomTabsInner}>
           {MOBILE_TABS.map((item) => {
             const isActive = isTabActive(item);
+            const badgeCount = item.hasBadge ? inboxBadge : 0;
             return (
               <a
                 key={item.href}
@@ -217,7 +240,10 @@ export default function InstructorShell({ profile }) {
                 className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
                 aria-current={isActive ? "page" : undefined}
               >
-                <span className={styles.tabIcon}>{item.icon}</span>
+                <span className={styles.tabIconWrap}>
+                  <span className={styles.tabIcon}>{item.icon}</span>
+                  {badgeCount > 0 && <span className={styles.tabBadge}>{badgeCount}</span>}
+                </span>
                 <span className={styles.tabLabel}>{item.label}</span>
               </a>
             );

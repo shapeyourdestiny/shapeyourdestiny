@@ -1,0 +1,596 @@
+"use client";
+
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import styles from "./Inbox.module.css";
+import { markNoteViewed, acknowledgeNote, markInboxRead, markAllRead } from "@/lib/instructor/actions";
+import ComposeShoutOut from "./ComposeShoutOut";
+
+const TAG_LABELS = {
+  saved_the_day: "Saved the day",
+  great_with_kids: "Great with the kids",
+  team_player: "Team player",
+  made_it_fun: "Made it fun",
+  super_prepared: "Super prepared",
+};
+
+const RATING_WORDS = {
+  5: "Excellent",
+  4: "Strong",
+  3: "Getting there",
+  2: "Needs work",
+  1: "Needs work",
+};
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr.includes("T") ? dateStr : dateStr + "T00:00:00");
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
+function formatDayDate(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr + "T00:00:00");
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
+}
+
+export default function InboxClient({ inboxData }) {
+  const router = useRouter();
+  const [tab, setTab] = useState("updates");
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showCompose, setShowCompose] = useState(false);
+
+  const { updates, shoutOuts, unreadUpdates, unreadShoutOuts, sharedNotes } = inboxData;
+
+  // Group items
+  const currentItems = tab === "updates" ? updates : shoutOuts;
+  const needsYouItems = currentItems.filter((i) => i.needsYou);
+  const newItems = currentItems.filter((i) => !i.needsYou && !i.isRead);
+  const earlierItems = currentItems.filter((i) => !i.needsYou && i.isRead);
+
+  const handleItemClick = async (item) => {
+    setSelectedItem(item);
+    setComment("");
+
+    // Mark as read
+    if (!item.isRead && !item.needsYou) {
+      const [type, id] = item.id.split(":");
+      await markInboxRead(type, id);
+    }
+
+    // Mark note as viewed
+    if (item.noteId) {
+      await markNoteViewed(item.noteId);
+    }
+  };
+
+  const handleClose = () => {
+    setSelectedItem(null);
+    setComment("");
+  };
+
+  const handleAcknowledge = async () => {
+    if (!selectedItem?.noteId) return;
+    setLoading(true);
+    const result = await acknowledgeNote(selectedItem.noteId, comment);
+    setLoading(false);
+    if (result.error) {
+      alert(result.error);
+    } else {
+      handleClose();
+      router.refresh();
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    setLoading(true);
+    await markAllRead(tab);
+    setLoading(false);
+    router.refresh();
+  };
+
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === "Escape" && selectedItem) {
+      handleClose();
+    }
+  }, [selectedItem]);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  // Get full note data for selected item
+  const selectedNote = selectedItem?.noteId
+    ? sharedNotes.find((n) => n.id === selectedItem.noteId)
+    : null;
+
+  const renderUpdateItem = (item) => {
+    switch (item.type) {
+      case "needs_ack":
+        return (
+          <div className={styles.itemContent}>
+            <div className={`${styles.itemIcon} ${styles.alert}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4M12 16h.01" />
+              </svg>
+            </div>
+            <div className={styles.itemMain}>
+              <div className={styles.itemTitle}>Please read and acknowledge</div>
+              <div className={styles.itemSub}>{item.step} - {formatDate(item.sharedAt)}</div>
+            </div>
+            <span className={`${styles.itemPill} ${styles.needsYou}`}>Needs you</span>
+          </div>
+        );
+
+      case "subbing":
+        return (
+          <div className={styles.itemContent}>
+            <div className={`${styles.itemIcon} ${styles.teal}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" />
+              </svg>
+            </div>
+            <div className={styles.itemMain}>
+              <div className={styles.itemTitle}>You&apos;re covering {item.schoolName}</div>
+              <div className={styles.itemSub}>
+                {formatDayDate(item.sessionDate)} - {item.time} - for {item.forName}
+              </div>
+            </div>
+            <span className={styles.itemPill}>See class</span>
+          </div>
+        );
+
+      case "time_off":
+        return (
+          <div className={styles.itemContent}>
+            <div className={`${styles.itemIcon} ${item.status === "approved" ? styles.green : styles.gray}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </div>
+            <div className={styles.itemMain}>
+              <div className={styles.itemTitle}>
+                Time off {item.status === "approved" ? "approved" : "not approved"}
+              </div>
+              <div className={styles.itemSub}>
+                {formatDate(item.startDate)}
+                {item.startDate !== item.endDate && ` - ${formatDate(item.endDate)}`}
+                {item.classesAffected > 0 ? ` - ${item.classesAffected} classes affected` : " - No classes affected"}
+              </div>
+            </div>
+          </div>
+        );
+
+      case "review":
+        return (
+          <div className={styles.itemContent}>
+            <div className={`${styles.itemIcon} ${styles.teal}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+            </div>
+            <div className={styles.itemMain}>
+              <div className={styles.itemTitle}>Your {item.title} is ready</div>
+              <div className={styles.itemSub}>Tap to read and reply.</div>
+            </div>
+            <span className={`${styles.itemPill} ${item.isRead ? styles.read : styles.new}`}>
+              {item.isRead ? "Read" : "New"}
+            </span>
+          </div>
+        );
+
+      case "announcement":
+        return (
+          <div className={styles.itemContent}>
+            <div className={`${styles.itemIcon} ${styles.navy}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+              </svg>
+            </div>
+            <div className={styles.itemMain}>
+              <div className={styles.itemTitle}>From {item.createdByName}: {item.title}</div>
+              <div className={styles.itemSub}>{item.body?.slice(0, 60)}...</div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const renderShoutOutItem = (item) => {
+    if (item.type === "shoutout") {
+      return (
+        <div className={styles.itemContent}>
+          {item.fromAvatarUrl ? (
+            <Image
+              src={item.fromAvatarUrl}
+              alt=""
+              width={40}
+              height={40}
+              className={styles.shoutOutAvatar}
+            />
+          ) : (
+            <div className={styles.shoutOutAvatarPlaceholder}>
+              {item.fromFirstName?.charAt(0)?.toUpperCase() || "?"}
+            </div>
+          )}
+          <div className={styles.itemMain}>
+            <div className={styles.itemTitle}>Shout-out from {item.fromFirstName}</div>
+            <div className={styles.itemSub}>&ldquo;{item.message?.slice(0, 60)}{item.message?.length > 60 ? "..." : ""}&rdquo;</div>
+          </div>
+          {item.tag && (
+            <span className={`${styles.itemPill} ${styles.tag}`}>{TAG_LABELS[item.tag]}</span>
+          )}
+        </div>
+      );
+    }
+
+    // Recognition note
+    return (
+      <div className={styles.itemContent}>
+        <div className={`${styles.itemIcon} ${styles.tealStar}`}>
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        </div>
+        <div className={styles.itemMain}>
+          <div className={styles.itemTitle}>{item.title}</div>
+          <div className={styles.itemSub}>&ldquo;{item.body?.slice(0, 60)}{item.body?.length > 60 ? "..." : ""}&rdquo;</div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderItemGroup = (items, title) => {
+    if (items.length === 0) return null;
+    return (
+      <div className={styles.itemGroup}>
+        <div className={styles.groupLabel}>{title}</div>
+        <div className={styles.groupCard}>
+          {items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`${styles.itemRow} ${!item.isRead && !item.needsYou ? styles.unread : ""}`}
+              onClick={() => handleItemClick(item)}
+            >
+              {!item.isRead && !item.needsYou && <span className={styles.unreadDot} />}
+              {tab === "updates" ? renderUpdateItem(item) : renderShoutOutItem(item)}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderRatingBar = (value) => (
+    <div className={styles.ratingBarWide}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div key={i} className={`${styles.ratingSegWide} ${i <= value ? styles.filled : ""}`} />
+      ))}
+    </div>
+  );
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1>Inbox</h1>
+        <p className={styles.headerSub}>
+          {unreadUpdates > 0 ? `${unreadUpdates} new update${unreadUpdates !== 1 ? "s" : ""}` : "All caught up"}
+        </p>
+        {(tab === "updates" ? newItems.length : shoutOuts.filter((s) => !s.isRead).length) > 0 && (
+          <button
+            type="button"
+            className={styles.markAllBtn}
+            onClick={handleMarkAllRead}
+            disabled={loading}
+          >
+            Mark all read
+          </button>
+        )}
+      </div>
+
+      <div className={styles.tabsRow}>
+        <div className={styles.tabs}>
+          <button
+            type="button"
+            className={`${styles.tab} ${tab === "updates" ? styles.active : ""}`}
+            onClick={() => setTab("updates")}
+          >
+            Updates
+            {unreadUpdates > 0 && (
+              <span className={`${styles.tabBadge} ${styles.red}`}>{unreadUpdates}</span>
+            )}
+          </button>
+          <button
+            type="button"
+            className={`${styles.tab} ${tab === "shoutouts" ? styles.active : ""}`}
+            onClick={() => setTab("shoutouts")}
+          >
+            Shout-outs
+            {unreadShoutOuts > 0 && (
+              <span className={`${styles.tabBadge} ${styles.teal}`}>{unreadShoutOuts}</span>
+            )}
+          </button>
+        </div>
+        {tab === "shoutouts" && (
+          <button
+            type="button"
+            className={styles.composeBtn}
+            onClick={() => setShowCompose(true)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Send one
+          </button>
+        )}
+      </div>
+
+      <div className={styles.content}>
+        {currentItems.length === 0 ? (
+          <div className={styles.emptyState}>
+            {tab === "updates"
+              ? "Nothing new. Schedule changes and notes from the office show up here."
+              : "No shout-outs yet. When a teammate thanks you, it shows up here."}
+          </div>
+        ) : (
+          <>
+            {renderItemGroup(needsYouItems, "NEEDS YOU")}
+            {renderItemGroup(newItems, "NEW")}
+            {renderItemGroup(earlierItems, "EARLIER")}
+          </>
+        )}
+      </div>
+
+      {/* Bottom Sheet */}
+      {selectedItem && (
+        <div className={styles.sheetOverlay} onClick={handleClose}>
+          <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.sheetHandle} />
+
+            {/* Review */}
+            {selectedNote?.type === "review" && (
+              <>
+                <div className={styles.sheetHeader}>
+                  <span className={`${styles.sheetPill} ${styles.review}`}>Review</span>
+                  <h2>{selectedNote.title}</h2>
+                  <p className={styles.sheetDate}>{formatDate(selectedNote.note_date)}</p>
+                </div>
+
+                <div className={styles.sheetBody}>
+                  {selectedNote.ratings && (
+                    <div className={styles.ratingsGrid}>
+                      {Object.entries(selectedNote.ratings).map(([key, value]) => (
+                        <div key={key} className={styles.ratingRow}>
+                          <span className={styles.ratingLabel}>
+                            {key.charAt(0).toUpperCase() + key.slice(1)}
+                          </span>
+                          <span className={styles.ratingWord}>{RATING_WORDS[value] || ""}</span>
+                          {renderRatingBar(value)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedNote.doing_well && (
+                    <div className={styles.textSection}>
+                      <div className={styles.textLabel}>DOING WELL</div>
+                      <p>{selectedNote.doing_well}</p>
+                    </div>
+                  )}
+
+                  {selectedNote.work_on_next && (
+                    <div className={styles.textSection}>
+                      <div className={styles.textLabel}>WORK ON NEXT</div>
+                      <p>{selectedNote.work_on_next}</p>
+                    </div>
+                  )}
+
+                  {selectedNote.next_review_date && (
+                    <div className={styles.nextReviewStrip}>
+                      Next review around {formatDate(selectedNote.next_review_date)}
+                    </div>
+                  )}
+                </div>
+
+                {selectedNote.acknowledged_at ? (
+                  <div className={styles.acknowledgedBox}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    You read this {formatDate(selectedNote.acknowledged_at)}
+                    {selectedNote.instructor_comment && (
+                      <p className={styles.yourComment}>You said: &ldquo;{selectedNote.instructor_comment}&rdquo;</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className={styles.sheetFooter}>
+                    <div className={styles.commentField}>
+                      <label>Anything you want to say</label>
+                      <textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Thanks, a question, or what you'll work on"
+                        maxLength={500}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.ackBtn}
+                      onClick={handleAcknowledge}
+                      disabled={loading}
+                    >
+                      {loading ? "..." : "Got it"}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Disciplinary */}
+            {selectedNote?.type === "disciplinary" && (
+              <>
+                <div className={styles.sheetHeader}>
+                  <span className={`${styles.sheetPill} ${styles.disciplinary}`}>
+                    {selectedNote.step}
+                  </span>
+                  <h2>{selectedNote.title}</h2>
+                  <p className={styles.sheetDate}>{formatDate(selectedNote.note_date)}</p>
+                </div>
+
+                <div className={styles.sheetBody}>
+                  <div className={styles.disciplinaryBox}>
+                    {selectedNote.what_happened && (
+                      <div className={styles.textSection}>
+                        <div className={styles.textLabel}>WHAT HAPPENED</div>
+                        <p>{selectedNote.what_happened}</p>
+                      </div>
+                    )}
+                    {selectedNote.expectation && (
+                      <div className={styles.textSection}>
+                        <div className={styles.textLabel}>WHAT WE EXPECT</div>
+                        <p>{selectedNote.expectation}</p>
+                      </div>
+                    )}
+                    {selectedNote.if_repeated && (
+                      <div className={styles.textSection}>
+                        <div className={styles.textLabel}>IF IT HAPPENS AGAIN</div>
+                        <p>{selectedNote.if_repeated}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {selectedNote.acknowledged_at ? (
+                  <div className={styles.acknowledgedBox}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    You acknowledged this {formatDate(selectedNote.acknowledged_at)}
+                    {selectedNote.instructor_comment && (
+                      <p className={styles.yourComment}>You said: &ldquo;{selectedNote.instructor_comment}&rdquo;</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className={styles.sheetFooter}>
+                    <p className={styles.ackNote}>
+                      Acknowledging means you&apos;ve read this. It doesn&apos;t mean you agree.
+                      You can add your side below.
+                    </p>
+                    <div className={styles.commentField}>
+                      <label>Anything you want to add</label>
+                      <textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Your side, or what you'll do differently"
+                        maxLength={500}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.ackBtn}
+                      onClick={handleAcknowledge}
+                      disabled={loading}
+                    >
+                      {loading ? "..." : "I've read this"}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Recognition */}
+            {selectedNote?.type === "recognition" && (
+              <>
+                <div className={styles.sheetHeader}>
+                  <span className={`${styles.sheetPill} ${styles.recognition}`}>Recognition</span>
+                  <h2>{selectedNote.title}</h2>
+                  <p className={styles.sheetDate}>{formatDate(selectedNote.note_date)}</p>
+                </div>
+                <div className={styles.sheetBody}>
+                  <p className={styles.recognitionBody}>{selectedNote.body}</p>
+                  {selectedNote.shout_out_from_name && (
+                    <p className={styles.fromLine}>
+                      From {selectedNote.shout_out_from_name}
+                      {selectedNote.shout_out_tag && ` - ${TAG_LABELS[selectedNote.shout_out_tag]}`}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Shout-out (not from a note) */}
+            {selectedItem.type === "shoutout" && !selectedNote && (
+              <>
+                <div className={styles.sheetHeader}>
+                  <div className={styles.shoutOutHeader}>
+                    {selectedItem.fromAvatarUrl ? (
+                      <Image
+                        src={selectedItem.fromAvatarUrl}
+                        alt=""
+                        width={48}
+                        height={48}
+                        className={styles.shoutOutAvatarLarge}
+                      />
+                    ) : (
+                      <div className={styles.shoutOutAvatarPlaceholderLarge}>
+                        {selectedItem.fromFirstName?.charAt(0)?.toUpperCase() || "?"}
+                      </div>
+                    )}
+                    <div>
+                      <h2>Shout-out from {selectedItem.fromFirstName}</h2>
+                      {selectedItem.tag && (
+                        <span className={styles.tagPill}>{TAG_LABELS[selectedItem.tag]}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.sheetBody}>
+                  <p className={styles.recognitionBody}>&ldquo;{selectedItem.message}&rdquo;</p>
+                </div>
+              </>
+            )}
+
+            {/* Announcement */}
+            {selectedItem.type === "announcement" && (
+              <>
+                <div className={styles.sheetHeader}>
+                  <span className={`${styles.sheetPill} ${styles.announcement}`}>Announcement</span>
+                  <h2>{selectedItem.title}</h2>
+                  <p className={styles.sheetDate}>From {selectedItem.createdByName}</p>
+                </div>
+                <div className={styles.sheetBody}>
+                  <p className={styles.recognitionBody}>{selectedItem.body}</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Compose Shout-out Sheet */}
+      <ComposeShoutOut
+        isOpen={showCompose}
+        onClose={() => setShowCompose(false)}
+      />
+    </div>
+  );
+}

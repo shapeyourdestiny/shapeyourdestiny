@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import styles from "./AddNotePopup.module.css";
-import { createNote, updateNote, uploadNoteFile, removeNoteFile } from "@/lib/instructor-notes/actions";
+import { createNote, updateNote, uploadNoteFile, removeNoteFile, shareNote } from "@/lib/instructor-notes/actions";
 
 const TYPE_COLORS = {
   review: "#2C6E7D",
@@ -88,6 +88,10 @@ export default function AddNotePopup({ instructor, note, onClose, onSave, onArch
   const [existingFiles, setExistingFiles] = useState(note?.files || []);
   const [newFiles, setNewFiles] = useState([]);
   const [filesToRemove, setFilesToRemove] = useState([]);
+
+  // Sharing
+  const [shareAfterSaving, setShareAfterSaving] = useState(false);
+  const isShareable = ["review", "recognition", "disciplinary"].includes(type);
 
   // Type-specific details
   const [details, setDetails] = useState(getInitialDetails);
@@ -201,6 +205,14 @@ export default function AddNotePopup({ instructor, note, onClose, onSave, onArch
         const uploadResult = await uploadNoteFile(noteId, formData);
         if (uploadResult.error) {
           console.error("File upload failed:", uploadResult.error);
+        }
+      }
+
+      // Share the note if checkbox was checked (for new shareable notes)
+      if (!isEditing && shareAfterSaving && isShareable && noteId) {
+        const shareResult = await shareNote(noteId);
+        if (shareResult.error) {
+          console.error("Failed to share note:", shareResult.error);
         }
       }
 
@@ -582,35 +594,49 @@ export default function AddNotePopup({ instructor, note, onClose, onSave, onArch
         </div>
 
         <div className={styles.footer}>
-          <span className={styles.footerNote}>
-            Saved with your name and the time. Edits are kept in history.
-          </span>
-          {isEditing && onArchive && (
+          <div className={styles.footerLeft}>
+            <span className={styles.footerNote}>
+              Saved with your name and the time. Edits are kept in history.
+            </span>
+            {!isEditing && isShareable && (
+              <label className={styles.shareCheckbox}>
+                <input
+                  type="checkbox"
+                  checked={shareAfterSaving}
+                  onChange={(e) => setShareAfterSaving(e.target.checked)}
+                />
+                Share with {instructor.full_name?.split(" ")[0]} after saving
+              </label>
+            )}
+          </div>
+          <div className={styles.footerButtons}>
+            {isEditing && onArchive && (
+              <button
+                type="button"
+                className={styles.archiveBtn}
+                onClick={onArchive}
+                disabled={loading}
+              >
+                Archive
+              </button>
+            )}
             <button
               type="button"
-              className={styles.archiveBtn}
-              onClick={onArchive}
+              className={styles.cancelBtn}
+              onClick={onClose}
               disabled={loading}
             >
-              Archive
+              Cancel
             </button>
-          )}
-          <button
-            type="button"
-            className={styles.cancelBtn}
-            onClick={onClose}
-            disabled={loading}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className={styles.saveBtn}
-            onClick={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? "Saving..." : "Save note"}
-          </button>
+            <button
+              type="button"
+              className={styles.saveBtn}
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save note"}
+            </button>
+          </div>
         </div>
       </div>
     </div>,
