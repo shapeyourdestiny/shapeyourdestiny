@@ -97,6 +97,19 @@ export default async function InstructorDetailPage({ params }) {
     // Table may not exist yet
   }
 
+  // Fetch pay rate
+  let payRate = null;
+  try {
+    const { data: payRateData } = await supabase
+      .from("instructor_pay_rates")
+      .select("rate_per_class")
+      .eq("profile_id", id)
+      .single();
+    payRate = payRateData?.rate_per_class ?? null;
+  } catch {
+    // Table may not exist yet
+  }
+
   return (
     <Suspense fallback={null}>
       <InstructorDetail
@@ -105,6 +118,7 @@ export default async function InstructorDetailPage({ params }) {
         notesData={notesData}
         attendanceData={attendanceData}
         calendarSyncStatus={calendarSyncStatus}
+        payRate={payRate}
       />
     </Suspense>
   );

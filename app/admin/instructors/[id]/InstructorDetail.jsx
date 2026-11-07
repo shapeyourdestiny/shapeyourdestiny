@@ -10,6 +10,7 @@ import {
   updateInstructorAction,
   updateInstructorDistrictsAction,
   sendInviteEmailAction,
+  updatePayRateAction,
 } from "@/lib/instructors/actions";
 import NotesHistory from "./NotesHistory";
 import AttendanceTab from "./AttendanceTab";
@@ -70,7 +71,7 @@ const CALENDAR_APPS = {
   other: "other app",
 };
 
-export default function InstructorDetail({ instructor, districts = [], notesData, attendanceData, calendarSyncStatus }) {
+export default function InstructorDetail({ instructor, districts = [], notesData, attendanceData, calendarSyncStatus, payRate: initialPayRate }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -87,6 +88,12 @@ export default function InstructorDetail({ instructor, districts = [], notesData
   const [inviteEmail, setInviteEmail] = useState("");
   const [sendingInvite, setSendingInvite] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
+
+  // Pay rate state
+  const [payRate, setPayRate] = useState(initialPayRate);
+  const [editingPay, setEditingPay] = useState(false);
+  const [payRateInput, setPayRateInput] = useState(initialPayRate?.toString() || "");
+  const [savingPay, setSavingPay] = useState(false);
 
   // Tab state from URL
   const currentTab = searchParams.get("tab") || "details";
@@ -243,6 +250,27 @@ export default function InstructorDetail({ instructor, districts = [], notesData
     } else {
       alert("Invite resent!");
       router.refresh();
+    }
+  };
+
+  const handleStartEditPay = () => {
+    setPayRateInput(payRate?.toString() || "");
+    setEditingPay(true);
+  };
+
+  const handleCancelEditPay = () => {
+    setEditingPay(false);
+  };
+
+  const handleSavePay = async () => {
+    setSavingPay(true);
+    const result = await updatePayRateAction(instructor.id, payRateInput);
+    setSavingPay(false);
+    if (result.error) {
+      alert(result.error);
+    } else {
+      setPayRate(parseFloat(payRateInput));
+      setEditingPay(false);
     }
   };
 
@@ -461,6 +489,61 @@ export default function InstructorDetail({ instructor, districts = [], notesData
                 </div>
               ) : (
                 <p className={styles.emptyNote}>No districts assigned</p>
+              )}
+            </div>
+
+            {/* Pay Section */}
+            <div className={styles.sectionCard}>
+              <div className={styles.sectionHeader}>
+                <h3>Pay</h3>
+                {!editingPay && (
+                  <button
+                    type="button"
+                    className={styles.editLink}
+                    onClick={handleStartEditPay}
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
+              <div className={styles.detailRow}>
+                <span>Rate per class</span>
+                {editingPay ? (
+                  <div className={styles.payInputRow}>
+                    <span className={styles.payDollar}>$</span>
+                    <input
+                      type="number"
+                      value={payRateInput}
+                      onChange={(e) => setPayRateInput(e.target.value)}
+                      className={styles.payInput}
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                ) : (
+                  <span>{payRate != null ? `$${Number(payRate).toFixed(2)}` : "—"}</span>
+                )}
+              </div>
+              {editingPay && (
+                <div className={styles.payActions}>
+                  <button
+                    type="button"
+                    className={styles.payCancelBtn}
+                    onClick={handleCancelEditPay}
+                    disabled={savingPay}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.paySaveBtn}
+                    onClick={handleSavePay}
+                    disabled={savingPay}
+                  >
+                    {savingPay ? "Saving..." : "Save"}
+                  </button>
+                </div>
               )}
             </div>
           </div>

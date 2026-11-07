@@ -317,6 +317,82 @@
   border-color: var(--navy);
 }
 
+/* Pay input */
+.payInputRow {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.payDollar {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.payInput {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--tint-deep);
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-family: inherit;
+  text-align: right;
+  transition: border-color 0.15s ease;
+}
+
+.payInput:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+.payActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.payCancelBtn {
+  background: none;
+  border: none;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 6px 12px;
+  transition: color 0.15s ease;
+}
+
+.payCancelBtn:hover {
+  color: var(--navy);
+}
+
+.paySaveBtn {
+  background: var(--navy);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.paySaveBtn:hover {
+  background: var(--navy-deep);
+}
+
+.paySaveBtn:disabled,
+.payCancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Chips */
 .chipList {
   display: flex;
