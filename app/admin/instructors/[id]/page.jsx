@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { createClient } from "@/lib/supabase/server";
 import { getInstructorDetail } from "@/lib/instructors/queries";
 import { getInstructorFile } from "@/lib/instructor-notes/queries";
 import InstructorDetail from "./InstructorDetail";
@@ -21,14 +22,20 @@ export async function generateMetadata({ params }) {
 
 export default async function InstructorDetailPage({ params }) {
   const { id } = await params;
+  const supabase = await createClient();
 
-  const instructor = await getInstructorDetail(id);
+  const [instructor, districtsResult] = await Promise.all([
+    getInstructorDetail(id),
+    supabase.from("districts").select("id, name, color").order("name"),
+  ]);
 
   if (!instructor) {
     redirect("/admin/instructors");
   }
 
-  // Only fetch notes data if on notes tab (or fetch always for summary data)
+  const districts = districtsResult?.data || [];
+
+  // Fetch notes data
   let notesData = null;
   try {
     notesData = await getInstructorFile(id);
@@ -52,7 +59,7 @@ export default async function InstructorDetailPage({ params }) {
 
   return (
     <Suspense fallback={null}>
-      <InstructorDetail instructor={instructor} notesData={notesData} />
+      <InstructorDetail instructor={instructor} districts={districts} notesData={notesData} />
     </Suspense>
   );
 }

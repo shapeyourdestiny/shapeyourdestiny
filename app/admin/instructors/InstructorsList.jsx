@@ -3,8 +3,8 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./InstructorsList.module.css";
-import InstructorDrawer from "./InstructorDrawer";
 import AddInstructorModal from "./AddInstructorModal";
+import { formatPhone } from "@/lib/format";
 
 const AVATAR_COLORS = [
   "#3E8FA0",
@@ -29,19 +29,20 @@ function getInitials(name) {
     .slice(0, 2);
 }
 
-function formatDate(dateStr) {
-  const date = new Date(dateStr);
+function formatSessionDate(dateStr) {
+  if (!dateStr) return null;
+  const date = new Date(dateStr + "T00:00:00");
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
   ];
-  return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
 }
 
-export default function InstructorsList({ instructors, districts = [] }) {
+export default function InstructorsList({ instructors }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedId, setSelectedId] = useState(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const router = useRouter();
 
@@ -52,19 +53,21 @@ export default function InstructorsList({ instructors, districts = [] }) {
       counts.all++;
       counts[inst.status] = (counts[inst.status] || 0) + 1;
     });
-    // Combine not_invited + invited as "Pending" for simplicity
+    // Combine not_invited + invited as "Pending"
     counts.pending = (counts.not_invited || 0) + (counts.invited || 0);
     return counts;
   }, [instructors]);
 
   const filteredInstructors = useMemo(() => {
     return instructors.filter((inst) => {
-      // Search filter - matches name or district
+      // Search filter - matches name, email, phone, or school
       const q = searchQuery.toLowerCase();
       const matchesSearch =
         q === "" ||
         inst.full_name.toLowerCase().includes(q) ||
-        inst.districts.toLowerCase().includes(q);
+        (inst.email && inst.email.toLowerCase().includes(q)) ||
+        (inst.phone && inst.phone.includes(q)) ||
+        (inst.teachesAt && inst.teachesAt.toLowerCase().includes(q));
 
       // Status filter
       let matchesStatus = statusFilter === "all" || inst.status === statusFilter;
@@ -77,20 +80,11 @@ export default function InstructorsList({ instructors, districts = [] }) {
     });
   }, [instructors, searchQuery, statusFilter]);
 
-  const selectedInstructor = useMemo(() => {
-    return instructors.find((i) => i.id === selectedId) || null;
-  }, [instructors, selectedId]);
-
   const handleRowClick = (id) => {
-    setSelectedId(id);
-  };
-
-  const handleCloseDrawer = () => {
-    setSelectedId(null);
+    router.push(`/admin/instructors/${id}`);
   };
 
   const handleOpenAddModal = () => {
-    setSelectedId(null);
     setAddModalOpen(true);
   };
 
@@ -101,9 +95,9 @@ export default function InstructorsList({ instructors, districts = [] }) {
   const handleInstructorAdded = (profileId) => {
     setAddModalOpen(false);
     router.refresh();
-    // Optionally open the drawer for the new instructor
+    // Navigate to the new instructor's profile
     if (profileId) {
-      setSelectedId(profileId);
+      router.push(`/admin/instructors/${profileId}`);
     }
   };
 
@@ -124,7 +118,7 @@ export default function InstructorsList({ instructors, districts = [] }) {
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Search name or district..."
+            placeholder="Search name, email, phone, or school..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -177,10 +171,10 @@ export default function InstructorsList({ instructors, districts = [] }) {
       <div className={styles.listCard}>
         <div className={styles.listHead}>
           <span>Instructor</span>
+          <span>Contact</span>
+          <span>Teaches at</span>
+          <span>Next class</span>
           <span>Status</span>
-          <span>District(s)</span>
-          <span>Sessions</span>
-          <span>Joined</span>
         </div>
         <div className={styles.listBody}>
           {filteredInstructors.length === 0 ? (
@@ -191,9 +185,10 @@ export default function InstructorsList({ instructors, districts = [] }) {
             filteredInstructors.map((instructor) => (
               <div
                 key={instructor.id}
-                className={`${styles.listRow} ${selectedId === instructor.id ? styles.listRowSelected : ""}`}
+                className={styles.listRow}
                 onClick={() => handleRowClick(instructor.id)}
               >
+                {/* Instructor column */}
                 <div className={styles.nameCell}>
                   {instructor.headshotUrl ? (
                     <img
@@ -219,31 +214,64 @@ export default function InstructorsList({ instructors, districts = [] }) {
                     )}
                   </span>
                 </div>
-                <span>
+
+                {/* Contact column */}
+                <div className={styles.contactCell}>
+                  {instructor.email && (
+                    <div className={styles.contactRow}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                        <path d="M3 7l9 6 9-6" />
+                      </svg>
+                      <span>{instructor.email}</span>
+                    </div>
+                  )}
+                  {instructor.phone && (
+                    <div className={styles.contactRow}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+                      </svg>
+                      <span>{formatPhone(instructor.phone)}</span>
+                    </div>
+                  )}
+                  {!instructor.email && !instructor.phone && (
+                    <span className={styles.noContact}>—</span>
+                  )}
+                </div>
+
+                {/* Teaches at column */}
+                <div className={styles.teachesAtCell}>
+                  {instructor.teachesAt || "—"}
+                </div>
+
+                {/* Next class column */}
+                <div className={styles.nextClassCell}>
+                  {instructor.nextClass ? (
+                    <>
+                      <span className={styles.nextClassDate}>
+                        {formatSessionDate(instructor.nextClass.date)}
+                      </span>
+                      <span className={styles.nextClassTime}>
+                        {instructor.nextClass.time}
+                      </span>
+                    </>
+                  ) : (
+                    <span className={styles.noNext}>—</span>
+                  )}
+                </div>
+
+                {/* Status column */}
+                <div className={styles.statusCell}>
                   <span className={`${styles.statusBadge} ${styles[instructor.status === "not_invited" ? "invited" : instructor.status]}`}>
                     {instructor.status === "not_invited" ? "Not invited" :
                      instructor.status.charAt(0).toUpperCase() + instructor.status.slice(1)}
                   </span>
-                </span>
-                <span className={styles.districtCell}>{instructor.districts}</span>
-                <span className={styles.sessionsCell}>{instructor.sessionCount}</span>
-                <span className={styles.joinedCell}>
-                  {formatDate(instructor.created_at)}
-                </span>
+                </div>
               </div>
             ))
           )}
         </div>
       </div>
-
-      {/* Drawer */}
-      {selectedInstructor && (
-        <InstructorDrawer
-          instructor={selectedInstructor}
-          districts={districts}
-          onClose={handleCloseDrawer}
-        />
-      )}
 
       {/* Add Instructor Modal */}
       {addModalOpen && (
@@ -254,13 +282,10 @@ export default function InstructorsList({ instructors, districts = [] }) {
       )}
 
       {/* Scrim */}
-      {(selectedInstructor || addModalOpen) && (
+      {addModalOpen && (
         <div
           className={styles.scrim}
-          onClick={() => {
-            handleCloseDrawer();
-            handleCloseAddModal();
-          }}
+          onClick={handleCloseAddModal}
         />
       )}
     </div>

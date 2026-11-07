@@ -14,7 +14,7 @@
 
 .searchWrap {
   position: relative;
-  width: 240px;
+  width: 280px;
 }
 
 .searchIcon {
@@ -92,38 +92,12 @@
   opacity: 0.7;
 }
 
-.needsChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1.5px solid var(--teal);
-  background: rgba(242, 166, 94, 0.08);
-  color: #E08A3C;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.needsChip:hover {
-  background: rgba(242, 166, 94, 0.15);
-}
-
-.needsChipActive {
-  background: var(--teal);
-  color: #fff;
-}
-
 .headerActions {
   display: flex;
   gap: 10px;
   margin-left: auto;
 }
 
-.arrangeBtn,
 .viewBtn,
 .addBtn {
   display: inline-flex;
@@ -154,18 +128,6 @@
   height: 14px;
 }
 
-.arrangeBtn {
-  background: var(--paper);
-  border: 1.5px solid var(--tint-deep);
-  color: var(--ink);
-}
-
-.arrangeBtn:hover {
-  border-color: var(--navy);
-  color: var(--navy);
-}
-
-.arrangeBtn svg,
 .viewBtn svg {
   width: 14px;
   height: 14px;
@@ -191,8 +153,8 @@
 
 .listHead {
   display: grid;
-  grid-template-columns: 2fr 0.8fr 1.2fr 0.6fr 0.9fr 1.1fr;
-  gap: 10px;
+  grid-template-columns: 2fr 1.8fr 1.4fr 1fr 0.8fr;
+  gap: 16px;
   padding: 14px 20px;
   border-bottom: 2px solid var(--tint);
 }
@@ -213,8 +175,8 @@
 
 .listRow {
   display: grid;
-  grid-template-columns: 2fr 0.8fr 1.2fr 0.6fr 0.9fr 1.1fr;
-  gap: 10px;
+  grid-template-columns: 2fr 1.8fr 1.4fr 1fr 0.8fr;
+  gap: 16px;
   align-items: center;
   padding: 14px 20px;
   border-bottom: 1px solid var(--tint);
@@ -224,10 +186,6 @@
 
 .listRow:hover {
   background: var(--tint);
-}
-
-.listRowSelected {
-  background: rgba(31, 63, 145, 0.06);
 }
 
 .listRow:last-child {
@@ -242,22 +200,22 @@
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   color: #fff;
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
 }
 
 .avatarImg {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   flex: none;
@@ -293,6 +251,77 @@
   letter-spacing: 0.03em;
 }
 
+/* Contact cell */
+.contactCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contactRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.contactRow svg {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  opacity: 0.5;
+}
+
+.contactRow span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.noContact {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* Teaches at cell */
+.teachesAtCell {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Next class cell */
+.nextClassCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nextClassDate {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.nextClassTime {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.noNext {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* Status cell */
+.statusCell {
+  display: flex;
+  align-items: center;
+}
+
 /* Status badge */
 .statusBadge {
   display: inline-flex;
@@ -316,58 +345,6 @@
 .statusBadge.archived {
   background: var(--tint-deep);
   color: var(--ink-soft);
-}
-
-/* Other cells */
-.districtCell {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-}
-
-.sessionsCell {
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 13px;
-}
-
-.joinedCell {
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
-.staffPageCell {
-  font-size: 12px;
-}
-
-/* Staff page status labels */
-.spLiveWrap {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.spLive {
-  color: #4FA347;
-  font-weight: 700;
-}
-
-.spHidden {
-  color: var(--ink-soft);
-  font-weight: 700;
-}
-
-.spPending {
-  color: var(--ink-soft);
-  font-style: italic;
-}
-
-.spOff {
-  color: var(--ink-soft);
-}
-
-.spWarning {
-  color: #E08A3C;
-  font-size: 11px;
 }
 
 /* Empty state */
@@ -395,6 +372,19 @@
     width: 100%;
     margin-left: 0;
     margin-top: 8px;
+  }
+
+  .listHead {
+    grid-template-columns: 2fr 1.5fr 1fr 0.8fr;
+  }
+
+  .listRow {
+    grid-template-columns: 2fr 1.5fr 1fr 0.8fr;
+  }
+
+  .listHead span:nth-child(3),
+  .listRow .teachesAtCell {
+    display: none;
   }
 }
 
@@ -426,34 +416,35 @@
     margin-bottom: 4px;
   }
 
-  .districtCell,
-  .sessionsCell,
-  .joinedCell,
-  .staffPageCell {
+  .contactCell {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .contactCell::before {
+    content: "Contact: ";
+    color: var(--ink-soft);
+    font-weight: 600;
     font-size: 12px;
   }
 
-  .districtCell::before {
-    content: "Districts: ";
+  .teachesAtCell::before {
+    content: "Teaches at: ";
     color: var(--ink-soft);
     font-weight: 600;
+    font-size: 12px;
   }
 
-  .sessionsCell::before {
-    content: "Sessions: ";
-    color: var(--ink-soft);
-    font-weight: 600;
+  .nextClassCell {
+    flex-direction: row;
+    gap: 8px;
+    align-items: baseline;
   }
 
-  .joinedCell::before {
-    content: "Joined: ";
+  .nextClassCell::before {
+    content: "Next class: ";
     color: var(--ink-soft);
     font-weight: 600;
-  }
-
-  .staffPageCell::before {
-    content: "Staff page: ";
-    color: var(--ink-soft);
-    font-weight: 600;
+    font-size: 12px;
   }
 }
