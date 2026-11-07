@@ -10,7 +10,7 @@ const TYPE_COLORS = {
   pay: "#4FA347",
   training: "#7C3AED",
   communication: "#2563EB",
-  behavior: "#D97706",
+  observations: "#D97706",
   disciplinary: "#E0594C",
   recognition: "#DB2777",
 };
@@ -360,7 +360,7 @@ export default function NotesHistory({ instructor, notesData, onRefresh }) {
                   All
                 </button>
               )}
-              {["review", "pay", "attendance", "training", "communication", "behavior", "disciplinary", "recognition"]
+              {["review", "pay", "attendance", "training", "communication", "observations", "disciplinary", "recognition"]
                 .filter((type) => typeCounts[type] > 0)
                 .map((type) => (
                   <button

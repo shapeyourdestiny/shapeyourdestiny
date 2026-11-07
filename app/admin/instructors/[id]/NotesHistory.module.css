@@ -332,7 +332,7 @@
 .typeTag.pay { background: rgba(79, 163, 71, 0.12); color: #4FA347; }
 .typeTag.training { background: rgba(139, 92, 246, 0.12); color: #7C3AED; }
 .typeTag.communication { background: rgba(59, 130, 246, 0.12); color: #2563EB; }
-.typeTag.behavior { background: rgba(245, 158, 11, 0.12); color: #D97706; }
+.typeTag.observations { background: rgba(245, 158, 11, 0.12); color: #D97706; }
 .typeTag.disciplinary { background: rgba(224, 89, 76, 0.12); color: #E0594C; }
 .typeTag.recognition { background: rgba(236, 72, 153, 0.12); color: #DB2777; }
 .typeTag.attendance { background: var(--tint-deep); color: var(--ink-soft); }

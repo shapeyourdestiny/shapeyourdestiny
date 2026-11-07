@@ -10,7 +10,7 @@ const TYPE_COLORS = {
   pay: "#4FA347",
   training: "#7C3AED",
   communication: "#2563EB",
-  behavior: "#D97706",
+  observations: "#D97706",
   disciplinary: "#E0594C",
   recognition: "#DB2777",
 };
@@ -20,7 +20,7 @@ const NOTE_TYPES = [
   { value: "pay", label: "Pay" },
   { value: "training", label: "Training" },
   { value: "communication", label: "Communication" },
-  { value: "behavior", label: "Behavior" },
+  { value: "observations", label: "Observations" },
   { value: "disciplinary", label: "Disciplinary" },
   { value: "recognition", label: "Recognition" },
 ];
