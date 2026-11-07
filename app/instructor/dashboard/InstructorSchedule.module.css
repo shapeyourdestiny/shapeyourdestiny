@@ -187,6 +187,28 @@
   border-radius: 999px;
 }
 
+.pastClassesLink {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--teal-dark, #2C6E7D);
+  text-decoration: none;
+  margin-top: -4px;
+  margin-bottom: 4px;
+}
+
+.pastClassesLink:hover {
+  text-decoration: underline;
+}
+
+.pastClassesLink svg {
+  width: 16px;
+  height: 16px;
+}
+
 .classesList {
   display: flex;
   flex-direction: column;

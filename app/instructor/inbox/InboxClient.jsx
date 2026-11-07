@@ -49,6 +49,14 @@ function getDateParts(dateStr) {
   };
 }
 
+function formatWeekday(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr + "T00:00:00");
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
+}
+
 export default function InboxClient({ inboxData }) {
   const router = useRouter();
   const [tab, setTab] = useState("updates");
@@ -71,6 +79,24 @@ export default function InboxClient({ inboxData }) {
   const hasUnread = (tab === "updates" ? newItems.length : shoutOuts.filter((s) => !s.isRead).length) > 0;
 
   const handleItemClick = async (item) => {
+    // Handle payroll check - navigate to past classes
+    if (item.type === "payroll_check") {
+      if (!item.isRead) {
+        await markInboxRead("payrollcheck", item.periodStart);
+      }
+      router.push(`/instructor/past?period=${item.periodStart}`);
+      return;
+    }
+
+    // Handle resolved payroll issue - navigate to past classes
+    if (item.type === "payroll_issue_resolved") {
+      if (!item.isRead) {
+        await markInboxRead("payrollissue", item.issueId);
+      }
+      router.push("/instructor/past");
+      return;
+    }
+
     setSelectedItem(item);
     setComment("");
 
@@ -234,6 +260,39 @@ export default function InboxClient({ inboxData }) {
             <div className={styles.itemMain}>
               <div className={styles.itemTitle}>From {item.createdByName}: {item.title}</div>
               <div className={styles.itemSub}>{item.body?.slice(0, 60)}...</div>
+            </div>
+          </div>
+        );
+
+      case "payroll_check":
+        return (
+          <div className={styles.itemContent}>
+            <div className={`${styles.itemIcon} ${styles.teal}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+            </div>
+            <div className={styles.itemMain}>
+              <div className={styles.itemTitle}>Check your classes for {item.periodRange}</div>
+              <div className={styles.itemSub}>Due {formatWeekday(item.deadline)}. Takes a few seconds.</div>
+            </div>
+          </div>
+        );
+
+      case "payroll_issue_resolved":
+        return (
+          <div className={styles.itemContent}>
+            <div className={`${styles.itemIcon} ${styles.green}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            </div>
+            <div className={styles.itemMain}>
+              <div className={styles.itemTitle}>The office fixed your {item.periodRange} classes</div>
+              {item.resolutionNote && (
+                <div className={styles.itemSub}>&ldquo;{item.resolutionNote}&rdquo;</div>
+              )}
             </div>
           </div>
         );

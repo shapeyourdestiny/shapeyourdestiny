@@ -14,7 +14,7 @@ const TAGS = [
   { value: "super_prepared", label: "Super prepared", emoji: "📋" },
 ];
 
-export default function ComposeShoutOut({ isOpen, onClose }) {
+export default function ComposeShoutOut({ isOpen, onClose, preselectedRecipient = null }) {
   const router = useRouter();
   const [teammates, setTeammates] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -48,7 +48,7 @@ export default function ComposeShoutOut({ isOpen, onClose }) {
     // Only fetch when transitioning from closed to open
     if (isOpen && !prevIsOpenRef.current) {
       // Reset form state
-      setSelectedRecipient(null);
+      setSelectedRecipient(preselectedRecipient);
       setMessage("");
       setSelectedTag(null);
       setSearchQuery("");
@@ -61,7 +61,7 @@ export default function ComposeShoutOut({ isOpen, onClose }) {
     return () => {
       cancelled = true;
     };
-  }, [isOpen]);
+  }, [isOpen, preselectedRecipient]);
 
   const handleKeyDown = useCallback((e) => {
     if (e.key === "Escape" && isOpen) {

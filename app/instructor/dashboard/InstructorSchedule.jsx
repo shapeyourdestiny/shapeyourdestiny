@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import styles from "./InstructorSchedule.module.css";
 import ClassDetailsSheet from "./ClassDetailsSheet";
 import { getDirectionsUrl } from "@/lib/maps";
@@ -207,6 +208,14 @@ export default function InstructorSchedule({ nextSession, classes }) {
             <span className={styles.sectionCount}>{classes.length}</span>
           )}
         </div>
+
+        {/* Past Classes Link */}
+        <Link href="/instructor/past" className={styles.pastClassesLink}>
+          Past classes
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </Link>
 
         {hasClasses ? (
           <div className={styles.classesList}>

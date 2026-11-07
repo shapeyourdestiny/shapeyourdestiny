@@ -10,6 +10,7 @@ import {
   markReplyDone,
   approveTimeOff,
   declineTimeOff,
+  resolvePayrollIssue,
 } from "@/lib/admin/inbox-actions";
 
 const TAG_LABELS = {
@@ -43,13 +44,22 @@ function formatRelativeTime(dateStr) {
   return formatDate(dateStr);
 }
 
+const ISSUE_KINDS = {
+  missing_class: "Missing class",
+  wrong_role: "Wrong role",
+  wrong_date: "Wrong date",
+  other: "Other",
+};
+
 export default function InboxClient({ inboxData }) {
   const router = useRouter();
   const [loading, setLoading] = useState({});
   const [editingShoutOut, setEditingShoutOut] = useState(null);
   const [editedMessage, setEditedMessage] = useState("");
+  const [resolvingIssue, setResolvingIssue] = useState(null);
+  const [resolutionNote, setResolutionNote] = useState("");
 
-  const { pendingShoutOuts, pendingTimeOff, instructorReplies, totalPending } = inboxData;
+  const { pendingShoutOuts, pendingTimeOff, instructorReplies, payrollIssues, payrollStatus, totalPending } = inboxData;
 
   const handleApproveShoutOut = async (id, message = null) => {
     setLoading((prev) => ({ ...prev, [id]: true }));
@@ -107,6 +117,19 @@ export default function InboxClient({ inboxData }) {
     }
   };
 
+  const handleResolveIssue = async (id, note = null) => {
+    setLoading((prev) => ({ ...prev, [id]: true }));
+    const result = await resolvePayrollIssue(id, note);
+    setLoading((prev) => ({ ...prev, [id]: false }));
+    if (result.error) {
+      alert(result.error);
+    } else {
+      setResolvingIssue(null);
+      setResolutionNote("");
+      router.refresh();
+    }
+  };
+
   const renderAvatar = (profile, size = 36) => {
     if (profile?.avatar_url) {
       return (
@@ -136,6 +159,51 @@ export default function InboxClient({ inboxData }) {
             : "All caught up"}
         </p>
       </div>
+
+      {/* Payroll Check Status Card */}
+      {payrollStatus && (
+        <div className={styles.statusCard}>
+          <div className={styles.statusHeader}>
+            <span className={styles.statusIcon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+            </span>
+            <div className={styles.statusMeta}>
+              <span className={styles.statusTitle}>Payroll Check</span>
+              <span className={styles.statusPeriod}>{payrollStatus.periodRange}</span>
+            </div>
+            <span className={styles.statusDeadline}>
+              Due {formatDate(payrollStatus.deadline)}
+            </span>
+          </div>
+
+          <div className={styles.statusGrid}>
+            <div className={styles.statusTile}>
+              <span className={`${styles.statusDot} ${styles.confirmed}`} />
+              <span className={styles.statusCount}>{payrollStatus.confirmed.length}</span>
+              <span className={styles.statusLabel}>Confirmed</span>
+            </div>
+            <div className={styles.statusTile}>
+              <span className={`${styles.statusDot} ${styles.flagged}`} />
+              <span className={styles.statusCount}>{payrollStatus.flagged.length}</span>
+              <span className={styles.statusLabel}>Flagged</span>
+            </div>
+            <div className={styles.statusTile}>
+              <span className={`${styles.statusDot} ${styles.noReply}`} />
+              <span className={styles.statusCount}>{payrollStatus.noReply.length}</span>
+              <span className={styles.statusLabel}>No reply</span>
+            </div>
+          </div>
+
+          {payrollStatus.noReply.length > 0 && (
+            <div className={styles.statusNames}>
+              <span className={styles.statusNamesLabel}>Waiting:</span>
+              {payrollStatus.noReply.map((i) => i.full_name?.split(" ")[0]).join(", ")}
+            </div>
+          )}
+        </div>
+      )}
 
       {totalPending === 0 && (
         <div className={styles.emptyState}>
@@ -362,6 +430,98 @@ export default function InboxClient({ inboxData }) {
                     {loading[request.id] ? "..." : "Approve"}
                   </button>
                 </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Payroll Issues */}
+      {payrollIssues?.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </span>
+            Payroll issues
+            <span className={styles.sectionCount}>{payrollIssues.length}</span>
+          </h2>
+
+          <div className={styles.cardList}>
+            {payrollIssues.map((issue) => (
+              <div key={issue.id} className={`${styles.card} ${styles.issueCard}`}>
+                <div className={styles.cardHeader}>
+                  {renderAvatar(issue.check?.profile, 36)}
+                  <div className={styles.cardMeta}>
+                    <span className={styles.cardNames}>{issue.check?.profile?.full_name}</span>
+                    <span className={styles.cardTime}>
+                      {issue.periodRange} · {formatRelativeTime(issue.created_at)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.issueDetails}>
+                  <span className={styles.issuePill}>{ISSUE_KINDS[issue.kind] || issue.kind}</span>
+                  {issue.school && (
+                    <span className={styles.issueSchool}>{issue.school.name}</span>
+                  )}
+                  {issue.session_date && (
+                    <span className={styles.issueDate}>{formatDate(issue.session_date)}</span>
+                  )}
+                </div>
+
+                {issue.note && <p className={styles.cardMessage}>&ldquo;{issue.note}&rdquo;</p>}
+
+                {resolvingIssue === issue.id ? (
+                  <div className={styles.editBox}>
+                    <label>Resolution note (optional):</label>
+                    <textarea
+                      value={resolutionNote}
+                      onChange={(e) => setResolutionNote(e.target.value)}
+                      placeholder="What was fixed or why it's resolved..."
+                      maxLength={500}
+                    />
+                    <div className={styles.editActions}>
+                      <button
+                        type="button"
+                        className={styles.cancelBtn}
+                        onClick={() => {
+                          setResolvingIssue(null);
+                          setResolutionNote("");
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.approveBtn}
+                        onClick={() => handleResolveIssue(issue.id, resolutionNote || null)}
+                        disabled={loading[issue.id]}
+                      >
+                        {loading[issue.id] ? "..." : "Mark resolved"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.cardActions}>
+                    <a
+                      href={`/admin/schedule?date=${issue.session_date || issue.issue_date}`}
+                      className={styles.viewLink}
+                      style={{ marginBottom: 0, marginRight: "auto" }}
+                    >
+                      View schedule
+                    </a>
+                    <button
+                      type="button"
+                      className={styles.approveBtn}
+                      onClick={() => setResolvingIssue(issue.id)}
+                    >
+                      Resolve
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

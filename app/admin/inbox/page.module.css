@@ -356,3 +356,151 @@
 .cancelBtn:hover {
   background: var(--tint);
 }
+
+/* Payroll Status Card */
+.statusCard {
+  background: var(--navy-deep, #0F1F4D);
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  margin-bottom: 32px;
+}
+
+.statusHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.statusIcon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusIcon svg {
+  width: 22px;
+  height: 22px;
+  color: var(--teal);
+}
+
+.statusMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statusTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.statusPeriod {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.statusDeadline {
+  margin-left: auto;
+  padding: 6px 12px;
+  background: rgba(242, 166, 94, 0.2);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #F5C99D;
+}
+
+.statusGrid {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.statusTile {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.statusDot.confirmed {
+  background: #4FA347;
+}
+
+.statusDot.flagged {
+  background: #E0594C;
+}
+
+.statusDot.noReply {
+  background: #F2A65E;
+}
+
+.statusCount {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.statusLabel {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.statusNames {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.statusNamesLabel {
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+/* Issue Card */
+.issueCard {
+  border-left: 4px solid #E0594C;
+}
+
+.issueDetails {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.issuePill {
+  padding: 4px 10px;
+  background: rgba(224, 89, 76, 0.12);
+  color: #E0594C;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.issueSchool {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.issueDate {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
