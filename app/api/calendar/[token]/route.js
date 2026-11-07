@@ -97,11 +97,11 @@ export async function GET(request, context) {
   // Check if profile is active
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, full_name, status, is_active")
+    .select("id, full_name, status")
     .eq("id", feed.profile_id)
     .single();
 
-  if (!profile || profile.status === "archived" || profile.is_active === false) {
+  if (!profile || profile.status === "archived") {
     return new NextResponse("Not Found", { status: 404 });
   }
 
