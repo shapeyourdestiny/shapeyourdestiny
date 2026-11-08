@@ -45,24 +45,14 @@ export default function InstructorLoginPage() {
       return;
     }
 
-    // Get user from sign in response
+    // Get user from sign in response and redirect based on role
     const user = signInData?.user;
-    if (!user) {
-      window.location.href = "/instructor/dashboard";
-      return;
-    }
 
-    // Small delay to ensure session is stored
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Check role via API (bypasses RLS issues)
+    const res = await fetch("/api/auth/check-role");
+    const { role } = await res.json();
 
-    // Query profile
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .or(`user_id.eq.${user.id},id.eq.${user.id}`)
-      .maybeSingle();
-
-    if (profile?.role === "admin") {
+    if (role === "admin") {
       window.location.href = "/admin/dashboard";
     } else {
       window.location.href = "/instructor/dashboard";
