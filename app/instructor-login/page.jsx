@@ -47,19 +47,25 @@ export default function InstructorLoginPage() {
 
     // Check user role to redirect appropriately
     const { data: { user } } = await supabase.auth.getUser();
+    console.log("User after login:", user?.id);
+
     if (user) {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
         .or(`user_id.eq.${user.id},id.eq.${user.id}`)
         .maybeSingle();
 
+      console.log("Profile query result:", { profile, error: profileError });
+
       if (profile?.role === "admin") {
+        console.log("Redirecting to admin dashboard");
         window.location.href = "/admin/dashboard";
         return;
       }
     }
 
+    console.log("Redirecting to instructor dashboard");
     window.location.href = "/instructor/dashboard";
   };
 
