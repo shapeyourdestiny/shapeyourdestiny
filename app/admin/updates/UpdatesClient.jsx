@@ -32,7 +32,7 @@ const PROGRAM_LABELS = {
 /**
  * Get audience description text for display.
  */
-function getAudienceText(audience, schools = [], instructors = []) {
+function getAudienceText(audience, schools = [], instructors = [], districts = []) {
   if (!audience) return "No audience";
 
   const type = audience.type;
@@ -42,6 +42,14 @@ function getAudienceText(audience, schools = [], instructors = []) {
   } else if (type === "program") {
     const program = audience.program;
     return PROGRAM_LABELS[program] || program || "Unknown program";
+  } else if (type === "district") {
+    const districtIds = audience.district_ids || [];
+    if (districtIds.length === 0) return "No districts selected";
+    if (districtIds.length === 1) {
+      const district = districts.find(d => d.id === districtIds[0]);
+      return district?.name || "1 district";
+    }
+    return `${districtIds.length} districts`;
   } else if (type === "school") {
     const schoolIds = audience.school_ids || [];
     if (schoolIds.length === 0) return "No schools selected";
@@ -109,7 +117,7 @@ function getDefaultSendAt() {
   return date.toISOString().slice(0, 16);
 }
 
-export default function UpdatesClient({ announcements, schools, instructors, programs, adminName }) {
+export default function UpdatesClient({ announcements, schools, instructors, programs, districts, adminName }) {
   const router = useRouter();
 
   // Composer state
@@ -118,6 +126,7 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
   const [body, setBody] = useState("");
   const [audienceType, setAudienceType] = useState("all");
   const [audienceProgram, setAudienceProgram] = useState(programs[0] || "wellness");
+  const [audienceDistrictIds, setAudienceDistrictIds] = useState([]);
   const [audienceSchoolIds, setAudienceSchoolIds] = useState([]);
   const [audienceProfileIds, setAudienceProfileIds] = useState([]);
   const [sendEmail, setSendEmail] = useState(false);
@@ -143,13 +152,15 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
       return { type: "all" };
     } else if (audienceType === "program") {
       return { type: "program", program: audienceProgram };
+    } else if (audienceType === "district") {
+      return { type: "district", district_ids: audienceDistrictIds };
     } else if (audienceType === "school") {
       return { type: "school", school_ids: audienceSchoolIds };
     } else if (audienceType === "people") {
       return { type: "people", profile_ids: audienceProfileIds };
     }
     return { type: "all" };
-  }, [audienceType, audienceProgram, audienceSchoolIds, audienceProfileIds]);
+  }, [audienceType, audienceProgram, audienceDistrictIds, audienceSchoolIds, audienceProfileIds]);
 
   // Fetch recipient count when audience changes
   useEffect(() => {
@@ -162,7 +173,7 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
   }, [getAudience]);
 
   // Mark as dirty when content changes - use a ref to track previous values
-  const prevValues = useRef({ title, body, audienceType, audienceProgram, audienceSchoolIds, audienceProfileIds, sendEmail, pinned, pinnedUntil });
+  const prevValues = useRef({ title, body, audienceType, audienceProgram, audienceDistrictIds, audienceSchoolIds, audienceProfileIds, sendEmail, pinned, pinnedUntil });
   useEffect(() => {
     const prev = prevValues.current;
     const hasChanged =
@@ -170,6 +181,7 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
       prev.body !== body ||
       prev.audienceType !== audienceType ||
       prev.audienceProgram !== audienceProgram ||
+      JSON.stringify(prev.audienceDistrictIds) !== JSON.stringify(audienceDistrictIds) ||
       JSON.stringify(prev.audienceSchoolIds) !== JSON.stringify(audienceSchoolIds) ||
       JSON.stringify(prev.audienceProfileIds) !== JSON.stringify(audienceProfileIds) ||
       prev.sendEmail !== sendEmail ||
@@ -179,8 +191,8 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
     if (hasChanged && (title || body)) {
       setDirty(true);
     }
-    prevValues.current = { title, body, audienceType, audienceProgram, audienceSchoolIds, audienceProfileIds, sendEmail, pinned, pinnedUntil };
-  }, [title, body, audienceType, audienceProgram, audienceSchoolIds, audienceProfileIds, sendEmail, pinned, pinnedUntil]);
+    prevValues.current = { title, body, audienceType, audienceProgram, audienceDistrictIds, audienceSchoolIds, audienceProfileIds, sendEmail, pinned, pinnedUntil };
+  }, [title, body, audienceType, audienceProgram, audienceDistrictIds, audienceSchoolIds, audienceProfileIds, sendEmail, pinned, pinnedUntil]);
 
   // Autosave drafts every 3 seconds when dirty
   useEffect(() => {
@@ -219,6 +231,7 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
     setBody("");
     setAudienceType("all");
     setAudienceProgram(programs[0] || "wellness");
+    setAudienceDistrictIds([]);
     setAudienceSchoolIds([]);
     setAudienceProfileIds([]);
     setSendEmail(false);
@@ -239,6 +252,7 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
     const audience = announcement.audience || { type: "all" };
     setAudienceType(audience.type || "all");
     setAudienceProgram(audience.program || programs[0] || "wellness");
+    setAudienceDistrictIds(audience.district_ids || []);
     setAudienceSchoolIds(audience.school_ids || []);
     setAudienceProfileIds(audience.profile_ids || []);
 
@@ -261,6 +275,12 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
   const handleTemplateClick = (template) => {
     setTitle(template.title);
     setBody(template.body);
+  };
+
+  const handleDistrictToggle = (districtId) => {
+    setAudienceDistrictIds((prev) =>
+      prev.includes(districtId) ? prev.filter((id) => id !== districtId) : [...prev, districtId]
+    );
   };
 
   const handleSchoolToggle = (schoolId) => {
@@ -543,6 +563,13 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
                   </button>
                   <button
                     type="button"
+                    className={`${styles.audienceBtn} ${audienceType === "district" ? styles.active : ""}`}
+                    onClick={() => setAudienceType("district")}
+                  >
+                    Districts
+                  </button>
+                  <button
+                    type="button"
                     className={`${styles.audienceBtn} ${audienceType === "school" ? styles.active : ""}`}
                     onClick={() => setAudienceType("school")}
                   >
@@ -571,6 +598,25 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
                   </select>
                 )}
 
+                {audienceType === "district" && (
+                  <div className={styles.checkboxList}>
+                    {districts.map((d) => (
+                      <label key={d.id} className={styles.checkboxItem}>
+                        <input
+                          type="checkbox"
+                          checked={audienceDistrictIds.includes(d.id)}
+                          onChange={() => handleDistrictToggle(d.id)}
+                        />
+                        <span
+                          className={styles.districtDot}
+                          style={{ backgroundColor: d.color }}
+                        />
+                        {d.name}
+                      </label>
+                    ))}
+                  </div>
+                )}
+
                 {audienceType === "school" && (
                   <div className={styles.checkboxList}>
                     {schools.map((s) => (
@@ -596,23 +642,31 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
                       className={styles.searchInput}
                     />
                     <div className={styles.peopleList}>
-                      {filteredInstructors.slice(0, 20).map((i) => (
-                        <label key={i.id} className={styles.personItem}>
-                          <input
-                            type="checkbox"
-                            checked={audienceProfileIds.includes(i.id)}
-                            onChange={() => handlePersonToggle(i.id)}
-                          />
-                          <span className={styles.personAvatar}>
-                            {i.avatar_url ? (
-                              <Image src={i.avatar_url} alt="" width={24} height={24} />
-                            ) : (
-                              i.full_name?.charAt(0)?.toUpperCase() || "?"
-                            )}
-                          </span>
-                          {i.full_name}
-                        </label>
-                      ))}
+                      {filteredInstructors.length === 0 ? (
+                        <div className={styles.emptyList}>
+                          {instructors.length === 0
+                            ? "No instructors available"
+                            : "No instructors found"}
+                        </div>
+                      ) : (
+                        filteredInstructors.slice(0, 20).map((i) => (
+                          <label key={i.id} className={styles.personItem}>
+                            <input
+                              type="checkbox"
+                              checked={audienceProfileIds.includes(i.id)}
+                              onChange={() => handlePersonToggle(i.id)}
+                            />
+                            <span className={styles.personAvatar}>
+                              {i.avatar_url ? (
+                                <Image src={i.avatar_url} alt="" width={24} height={24} />
+                              ) : (
+                                i.full_name?.charAt(0)?.toUpperCase() || "?"
+                              )}
+                            </span>
+                            {i.full_name}
+                          </label>
+                        ))
+                      )}
                     </div>
                     {audienceProfileIds.length > 0 && (
                       <div className={styles.selectedCount}>
@@ -808,7 +862,7 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
                       <div className={styles.listItemDate}>{formatDate(a.sent_at || a.created_at)}</div>
                     </div>
                     <div className={styles.listItemMeta}>
-                      {getAudienceText(a.audience, schools, instructors)}
+                      {getAudienceText(a.audience, schools, instructors, districts)}
                       {a.edited_at && <span className={styles.editedBadge}>Edited</span>}
                     </div>
                     {stats[a.id] && (
@@ -851,7 +905,7 @@ export default function UpdatesClient({ announcements, schools, instructors, pro
                       <div className={styles.listItemDate}>Sends {formatDateTime(a.send_at)}</div>
                     </div>
                     <div className={styles.listItemMeta}>
-                      {getAudienceText(a.audience, schools, instructors)}
+                      {getAudienceText(a.audience, schools, instructors, districts)}
                     </div>
                     <div className={styles.listItemActions}>
                       <button type="button" onClick={() => loadDraft(a)}>Edit</button>

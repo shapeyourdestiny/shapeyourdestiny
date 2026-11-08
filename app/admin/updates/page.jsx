@@ -5,6 +5,7 @@ import {
   getSchoolsWithClasses,
   getActiveInstructors,
   getPrograms,
+  getDistricts,
 } from "@/lib/admin/announcements";
 import UpdatesClient from "./UpdatesClient";
 
@@ -32,11 +33,12 @@ export default async function AdminUpdatesPage() {
     redirect("/");
   }
 
-  const [announcements, schools, instructors, programs] = await Promise.all([
+  const [announcements, schools, instructors, programs, districts] = await Promise.all([
     getAdminAnnouncements(),
     getSchoolsWithClasses(),
     getActiveInstructors(),
     getPrograms(),
+    getDistricts(),
   ]);
 
   return (
@@ -45,6 +47,7 @@ export default async function AdminUpdatesPage() {
       schools={schools}
       instructors={instructors}
       programs={programs}
+      districts={districts}
       adminName={profile.full_name?.split(" ")[0] || "Admin"}
     />
   );

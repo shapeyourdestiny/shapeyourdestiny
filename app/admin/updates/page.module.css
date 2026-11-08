@@ -219,6 +219,13 @@
   accent-color: var(--teal);
 }
 
+.districtDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 /* People picker */
 .peoplePicker {
   margin-top: 8px;
@@ -279,6 +286,13 @@
   color: var(--teal-dark);
   font-weight: 700;
   margin-top: 8px;
+}
+
+.emptyList {
+  font-size: 13px;
+  color: var(--ink-secondary);
+  padding: 16px;
+  text-align: center;
 }
 
 .recipientCount {

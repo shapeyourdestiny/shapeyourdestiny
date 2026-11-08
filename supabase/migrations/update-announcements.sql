@@ -89,6 +89,7 @@ DECLARE
   caller_profile_id UUID;
   caller_programs TEXT[];
   caller_school_ids UUID[];
+  caller_district_ids UUID[];
 BEGIN
   SELECT p.id INTO caller_profile_id
   FROM profiles p
@@ -113,6 +114,11 @@ BEGIN
   WHERE ca.profile_id = caller_profile_id
     AND c.start_date IS NOT NULL;
 
+  -- Get districts the instructor belongs to
+  SELECT ARRAY_AGG(DISTINCT id.district_id) INTO caller_district_ids
+  FROM instructor_districts id
+  WHERE id.profile_id = caller_profile_id;
+
   RETURN QUERY
   SELECT
     a.id,
@@ -131,6 +137,14 @@ BEGIN
       a.audience->>'type' = 'all'
       -- Audience: program
       OR (a.audience->>'type' = 'program' AND a.audience->>'program' = ANY(caller_programs))
+      -- Audience: district
+      OR (
+        a.audience->>'type' = 'district'
+        AND EXISTS (
+          SELECT 1 FROM jsonb_array_elements_text(a.audience->'district_ids') did
+          WHERE did::UUID = ANY(caller_district_ids)
+        )
+      )
       -- Audience: school
       OR (
         a.audience->>'type' = 'school'
@@ -185,6 +199,18 @@ BEGIN
       AND c.start_date IS NOT NULL
       AND p.role = 'instructor'
       AND p.status = 'active';
+
+  ELSIF audience_type = 'district' THEN
+    -- Instructors in specific districts
+    SELECT COUNT(DISTINCT id.profile_id) INTO recipient_count
+    FROM instructor_districts id
+    JOIN profiles p ON p.id = id.profile_id
+    WHERE EXISTS (
+      SELECT 1 FROM jsonb_array_elements_text(p_audience->'district_ids') did
+      WHERE did::UUID = id.district_id
+    )
+    AND p.role = 'instructor'
+    AND p.status = 'active';
 
   ELSIF audience_type = 'school' THEN
     -- Instructors at specific schools
