@@ -45,6 +45,21 @@ export default function InstructorLoginPage() {
       return;
     }
 
+    // Check user role to redirect appropriately
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+        .maybeSingle();
+
+      if (profile?.role === "admin") {
+        router.push("/admin/dashboard");
+        return;
+      }
+    }
+
     router.push("/instructor/dashboard");
   };
 
