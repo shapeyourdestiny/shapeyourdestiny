@@ -52,7 +52,10 @@ export default function InstructorLoginPage() {
       return;
     }
 
-    // Query profile using the access token from sign in
+    // Small delay to ensure session is stored
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Query profile
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -61,10 +64,9 @@ export default function InstructorLoginPage() {
 
     if (profile?.role === "admin") {
       window.location.href = "/admin/dashboard";
-      return;
+    } else {
+      window.location.href = "/instructor/dashboard";
     }
-
-    window.location.href = "/instructor/dashboard";
   };
 
   const handleResendConfirmation = async () => {
