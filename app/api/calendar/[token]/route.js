@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildCalendar, buildEventDescription } from "@/lib/calendar/ics";
-import { getSessionsForClass } from "@/lib/schedule/sessions";
+import { computeClassOccurrences } from "@/lib/schedule/occurrences";
 import crypto from "crypto";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://shapeyourdestiny.co";
@@ -53,6 +53,50 @@ function formatDate(date) {
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+/**
+ * Fetch holidays applicable to a specific school using admin client.
+ */
+async function getHolidaysForSchool(supabase, districtId, schoolId, startDate, endDate) {
+  const { data: holidays, error } = await supabase
+    .from("holidays")
+    .select("date, name, district_id, school_id, time_period")
+    .gte("date", startDate)
+    .lte("date", endDate)
+    .order("date");
+
+  if (error) {
+    console.error("Error fetching holidays:", error);
+    return [];
+  }
+
+  return (holidays || []).filter((h) => {
+    if (h.district_id === null && h.school_id === null) return true;
+    if (h.district_id === districtId && h.school_id === null) return true;
+    if (h.school_id === schoolId) return true;
+    return false;
+  });
+}
+
+/**
+ * Fetch program off days using admin client.
+ */
+async function getProgramOffDays(supabase, program, startDate, endDate) {
+  const { data, error } = await supabase
+    .from("program_off_days")
+    .select("date, reason, time_period")
+    .eq("program", program)
+    .gte("date", startDate)
+    .lte("date", endDate)
+    .order("date");
+
+  if (error) {
+    console.error("Error fetching program off days:", error);
+    return [];
+  }
+
+  return data || [];
 }
 
 export async function GET(request, context) {
@@ -218,23 +262,30 @@ export async function GET(request, context) {
     const school = cls.schools;
     const district = school.districts;
 
-    // Get sessions for this class
-    const sessionsResult = await getSessionsForClass(
-      {
-        startDate: cls.start_date,
-        days: cls.days,
-        time: cls.time,
-        targetSessions: cls.target_sessions,
-        program: cls.program || "wellness",
-        districtId: district?.id,
-        schoolId: school.id,
-      },
-      rangeStart,
-      rangeEnd
+    // Fetch holidays and program off days for this class
+    const [holidays, programOffDays] = await Promise.all([
+      getHolidaysForSchool(supabase, district?.id, school.id, cls.start_date, rangeEnd),
+      getProgramOffDays(supabase, cls.program || "wellness", cls.start_date, rangeEnd),
+    ]);
+
+    // Compute sessions for this class
+    const sessionsResult = computeClassOccurrences({
+      startDate: cls.start_date,
+      days: cls.days,
+      targetSessions: cls.target_sessions,
+      holidays,
+      programOffDays,
+      classTime: cls.time,
+      rangeEnd: cls.target_sessions ? null : rangeEnd,
+    });
+
+    // Filter to only occurrences within the requested range
+    const occurrences = sessionsResult.occurrences.filter(
+      (o) => o.date >= rangeStart && o.date <= rangeEnd
     );
 
     // Build events for each occurrence
-    for (const occ of sessionsResult.occurrences) {
+    for (const occ of occurrences) {
       const absenceKey = `${cls.id}|${occ.date}`;
 
       // Skip if instructor is absent
