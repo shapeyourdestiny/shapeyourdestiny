@@ -59,7 +59,7 @@ export default function InboxClient({ inboxData }) {
   const [resolvingIssue, setResolvingIssue] = useState(null);
   const [resolutionNote, setResolutionNote] = useState("");
 
-  const { pendingShoutOuts, pendingTimeOff, instructorReplies, payrollIssues, payrollStatus, totalPending } = inboxData;
+  const { pendingShoutOuts, pendingTimeOff, instructorReplies, payrollIssues, payrollStatus, newApplications, totalPending } = inboxData;
 
   const handleApproveShoutOut = async (id, message = null) => {
     setLoading((prev) => ({ ...prev, [id]: true }));
@@ -431,6 +431,48 @@ export default function InboxClient({ inboxData }) {
                   </button>
                 </div>
               </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* New Applications */}
+      {newApplications?.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </span>
+            New applications
+            <span className={styles.sectionCount}>{newApplications.length}</span>
+          </h2>
+
+          <div className={styles.cardList}>
+            {newApplications.map((application) => (
+              <a
+                key={application.id}
+                href={`/admin/applications?id=${application.id}`}
+                className={`${styles.card} ${styles.linkCard}`}
+              >
+                <div className={styles.cardHeader}>
+                  <div className={styles.avatarPlaceholder} style={{ width: 36, height: 36 }}>
+                    {application.first_name?.charAt(0)?.toUpperCase() || "?"}
+                  </div>
+                  <div className={styles.cardMeta}>
+                    <span className={styles.cardNames}>
+                      {application.first_name} {application.last_name}
+                    </span>
+                    <span className={styles.cardTime}>{formatRelativeTime(application.created_at)}</span>
+                  </div>
+                  <span className={styles.cardArrow}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </div>
+              </a>
             ))}
           </div>
         </section>

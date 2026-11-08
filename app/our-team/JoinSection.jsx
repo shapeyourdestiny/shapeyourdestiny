@@ -6,15 +6,11 @@ export default function JoinSection() {
     <section className={styles.join}>
       <div className={styles.joinCard}>
         <div className={styles.joinContent}>
-          <h2 className={styles.joinHeading}>Teach with Shape</h2>
-          <p className={styles.joinText}>
-            We&apos;re looking for yoga instructors, coaches and wellness leaders for
-            before- and after-school programs across California.
-          </p>
+          <h2 className={styles.joinHeading}>Want to work with us?</h2>
         </div>
         <div className={styles.joinActions}>
-          <Link href="/contact" className={styles.joinBtn}>
-            Apply to teach
+          <Link href="/join" className={styles.joinBtn}>
+            Join Our Team
           </Link>
           <Link href="/instructor-login" className={styles.joinLink}>
             Instructor Sign In

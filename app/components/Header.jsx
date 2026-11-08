@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: "http://campshape.org", label: "Camp Shape Summer Camp", external: true },
   { href: "/corporate-training", label: "Corporate Training", external: false },
   { href: "/our-team", label: "Our Team", external: false },
+  { href: "/join", label: "Join Our Team", external: false },
   { href: "/contact", label: "Contact", external: false },
   { href: "/instructor-login", label: "Instructor Sign In", external: false },
 ];

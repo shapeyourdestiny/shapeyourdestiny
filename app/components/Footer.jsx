@@ -50,6 +50,7 @@ export default function Footer() {
 
             <div className={styles.column}>
               <h4>Instructors</h4>
+              <Link href="/join">Join Our Team</Link>
               <Link href="/instructor-login">Instructor Sign In</Link>
             </div>
           </div>

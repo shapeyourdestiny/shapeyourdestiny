@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOpenIncidentCount } from "@/lib/incidents/queries";
 import { getAdminInbox } from "@/lib/admin/inbox";
 import { getPeriodsNeedingApprovalCount } from "@/lib/payroll/compute";
+import { getNewApplicationsCount } from "@/lib/admin/applications";
 import Sidebar from "./components/Sidebar";
 import styles from "./layout.module.css";
 
@@ -55,9 +56,17 @@ export default async function AdminLayout({ children }) {
     // tables might not exist yet
   }
 
+  // Get applications count for badge (new applications not opened by any admin)
+  let applicationsCount = 0;
+  try {
+    applicationsCount = await getNewApplicationsCount();
+  } catch {
+    // table might not exist yet
+  }
+
   return (
     <div className={styles.layout}>
-      <Sidebar profile={profile} incidentCount={incidentCount} inboxCount={inboxCount} payrollCount={payrollCount} />
+      <Sidebar profile={profile} incidentCount={incidentCount} inboxCount={inboxCount} payrollCount={payrollCount} applicationsCount={applicationsCount} />
       <main className={styles.main}>
         {children}
       </main>

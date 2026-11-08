@@ -258,9 +258,13 @@ export default function InboxClient({ inboxData }) {
               </svg>
             </div>
             <div className={styles.itemMain}>
-              <div className={styles.itemTitle}>From {item.createdByName}: {item.title}</div>
+              <div className={styles.itemTitle}>
+                {item.isPinned && <span className={styles.pinnedLabel}>PINNED</span>}
+                From {item.createdByName}: {item.title}
+              </div>
               <div className={styles.itemSub}>{item.body?.slice(0, 60)}...</div>
             </div>
+            {item.editedAt && <span className={styles.editedBadge}>Edited</span>}
           </div>
         );
 
@@ -356,7 +360,7 @@ export default function InboxClient({ inboxData }) {
             <button
               key={item.id}
               type="button"
-              className={`${styles.itemRow} ${!item.isRead && !item.needsYou ? styles.unread : ""}`}
+              className={`${styles.itemRow} ${!item.isRead && !item.needsYou ? styles.unread : ""} ${item.isPinned ? styles.pinnedRow : ""}`}
               onClick={() => handleItemClick(item)}
             >
               {!item.isRead && !item.needsYou && <span className={styles.unreadDot} />}
@@ -745,7 +749,10 @@ export default function InboxClient({ inboxData }) {
                 <div className={styles.sheetHeader}>
                   <span className={`${styles.sheetPill} ${styles.announcement}`}>Announcement</span>
                   <h2>{selectedItem.title}</h2>
-                  <p className={styles.sheetDate}>From {selectedItem.createdByName}</p>
+                  <p className={styles.sheetDate}>
+                    From {selectedItem.createdByName} - {formatDate(selectedItem.createdAt)}
+                    {selectedItem.editedAt && <span className={styles.editedInline}> (Edited)</span>}
+                  </p>
                 </div>
                 <div className={styles.sheetBody}>
                   <p className={styles.recognitionBody}>{selectedItem.body}</p>
