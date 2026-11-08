@@ -8,6 +8,10 @@ import styles from "./layout.module.css";
 export const metadata = {
   title: "Instructor Portal | Shape Your Destiny",
   description: "Instructor dashboard for Shape Your Destiny.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function InstructorLayout({ children }) {

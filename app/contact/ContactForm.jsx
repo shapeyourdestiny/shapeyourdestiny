@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import Turnstile from "@/components/Turnstile";
 import styles from "./page.module.css";
 
 const REASONS = [
@@ -26,6 +27,11 @@ export default function ContactForm() {
     message: "",
     website: "", // Honeypot field - bots will fill this, humans won't see it
   });
+  const [turnstileToken, setTurnstileToken] = useState("");
+
+  const handleTurnstileVerify = useCallback((token) => {
+    setTurnstileToken(token);
+  }, []);
 
   const currentReason = REASONS.find((r) => r.value === reason) || REASONS[0];
 
@@ -41,7 +47,7 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, reason, _ts: Date.now() }),
+        body: JSON.stringify({ ...form, reason, _ts: Date.now(), turnstileToken }),
       });
 
       if (res.ok) {
@@ -170,6 +176,11 @@ export default function ContactForm() {
           tabIndex={-1}
           autoComplete="off"
         />
+      </div>
+
+      {/* Cloudflare Turnstile CAPTCHA */}
+      <div className={styles.turnstile}>
+        <Turnstile onVerify={handleTurnstileVerify} />
       </div>
 
       <button

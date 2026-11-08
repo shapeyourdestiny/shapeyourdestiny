@@ -219,3 +219,8 @@
   width: 0;
   overflow: hidden;
 }
+
+/* Turnstile CAPTCHA */
+.turnstile {
+  margin-top: 8px;
+}

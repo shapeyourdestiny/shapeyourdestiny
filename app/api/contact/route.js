@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { sendContactNotification, sendContactConfirmation } from "@/lib/email/index";
+import { verifyTurnstileToken } from "@/lib/security/turnstile";
+import { getClientIP } from "@/lib/security/rate-limit";
 
 const REASON_LABELS = {
   school: "Bring the program to my school",
@@ -12,14 +14,6 @@ const REASON_LABELS = {
 const rateLimitStore = new Map();
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
 const RATE_LIMIT_MAX = 5; // Max submissions per window
-
-function getClientIP(request) {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  const realIP = request.headers.get("x-real-ip");
-  if (realIP) return realIP;
-  return "unknown";
-}
 
 function isRateLimited(ip) {
   const now = Date.now();
@@ -60,7 +54,7 @@ export async function POST(request) {
     cleanupRateLimitStore();
 
     const body = await request.json();
-    const { name, email, phone, org, message, reason, website, _ts } = body;
+    const { name, email, phone, org, message, reason, website, _ts, turnstileToken } = body;
 
     // Honeypot check - if filled, silently reject (return success to not alert spammers)
     if (website) {
@@ -74,8 +68,18 @@ export async function POST(request) {
       return NextResponse.json({ success: true });
     }
 
-    // Rate limiting
+    // Verify Turnstile token
     const clientIP = getClientIP(request);
+    const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIP);
+    if (!turnstileResult.success) {
+      console.log("Spam blocked: Turnstile verification failed");
+      return NextResponse.json(
+        { error: turnstileResult.error || "Please complete the security check" },
+        { status: 400 }
+      );
+    }
+
+    // Rate limiting (in-memory fallback - keep as secondary protection)
     if (isRateLimited(clientIP)) {
       console.log(`Rate limited: ${clientIP}`);
       return NextResponse.json(

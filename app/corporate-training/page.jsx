@@ -2,6 +2,39 @@ import styles from "./page.module.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
+export const metadata = {
+  title: "Corporate Wellness for Educators & School Staff | Shape Your Destiny",
+  description:
+    "Professional wellness programs designed for educators and school staff. SEL training, yoga, breathwork, and functional fitness built around real school schedules.",
+  openGraph: {
+    title: "Corporate Wellness for Educators | Shape Your Destiny",
+    description:
+      "Professional wellness programs for educators: SEL training, yoga, breathwork, and fitness built for school schedules.",
+    url: "https://shapeyourdestiny.co/corporate-training",
+    siteName: "Shape Your Destiny",
+    images: [
+      {
+        url: "/Images/og-default.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Shape Your Destiny - Corporate Wellness for Educators",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Corporate Wellness for Educators | Shape Your Destiny",
+    description:
+      "Professional wellness programs for educators built around real school schedules.",
+    images: ["/Images/og-default.jpg"],
+  },
+  alternates: {
+    canonical: "https://shapeyourdestiny.co/corporate-training",
+  },
+};
+
 const PROGRAMS = [
   {
     icon: "yoga",

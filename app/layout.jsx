@@ -45,6 +45,26 @@ export const viewport = {
   themeColor: "#1F3F91",
 };
 
+// Organization JSON-LD structured data
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  name: "Shape Your Destiny",
+  url: "https://shapeyourdestiny.co",
+  logo: "https://shapeyourdestiny.co/Images/logo.png",
+  description:
+    "Shape Your Destiny provides holistic youth wellness programs combining fitness, mindfulness, nutrition, and social-emotional learning.",
+  areaServed: {
+    "@type": "Place",
+    name: "Inland Empire, CA",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "General Inquiries",
+    url: "https://shapeyourdestiny.co/contact",
+  },
+};
+
 export default function RootLayout({ children }) {
   return (
     <html
@@ -54,6 +74,10 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
         <ServiceWorkerRegistration />

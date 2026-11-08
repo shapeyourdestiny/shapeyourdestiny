@@ -9,6 +9,39 @@ import ResearchGrid from "./components/ResearchGrid";
 import CTA from "./components/CTA";
 import Footer from "./components/Footer";
 
+export const metadata = {
+  title: "Youth Wellness & After-School Programs in the Inland Empire | Shape Your Destiny",
+  description:
+    "Shape Your Destiny offers holistic youth wellness programs in the Inland Empire, combining fitness, mindfulness, nutrition, and social-emotional learning to help children build confidence and thrive.",
+  openGraph: {
+    title: "Youth Wellness & After-School Programs | Shape Your Destiny",
+    description:
+      "Holistic youth wellness programs combining fitness, mindfulness, nutrition, and SEL to help children thrive.",
+    url: "https://shapeyourdestiny.co",
+    siteName: "Shape Your Destiny",
+    images: [
+      {
+        url: "/Images/og-default.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Shape Your Destiny - Youth Wellness Programs",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Youth Wellness & After-School Programs | Shape Your Destiny",
+    description:
+      "Holistic youth wellness programs combining fitness, mindfulness, nutrition, and SEL to help children thrive.",
+    images: ["/Images/og-default.jpg"],
+  },
+  alternates: {
+    canonical: "https://shapeyourdestiny.co",
+  },
+};
+
 export default function Home() {
   return (
     <>

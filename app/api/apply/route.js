@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendNewApplicationEmail, sendApplicationReceivedEmail } from "@/lib/email";
+import { verifyTurnstile } from "@/lib/security/turnstile";
 import { PDFDocument } from "pdf-lib";
 import crypto from "crypto";
 
@@ -117,6 +118,20 @@ export async function POST(request) {
       }
     }
 
+    // Verify Turnstile token
+    const turnstileToken = formData.get("cf-turnstile-response");
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
+
+    const turnstileResult = await verifyTurnstile(turnstileToken, ip);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { errors: { turnstile: "Please complete the verification" } },
+        { status: 400 }
+      );
+    }
+
     // Get form fields
     const firstName = (formData.get("firstName") || "").trim();
     const lastName = (formData.get("lastName") || "").trim();
@@ -171,10 +186,7 @@ export async function POST(request) {
       );
     }
 
-    // Get and hash IP for rate limiting
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      "unknown";
+    // Hash IP for rate limiting (ip already extracted above for Turnstile)
     const ipHash = hashIP(ip);
 
     // Check IP rate limit

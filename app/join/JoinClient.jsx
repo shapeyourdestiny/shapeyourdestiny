@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Turnstile from "@/components/Turnstile";
 import styles from "./join.module.css";
 
 function formatFileSize(bytes) {
@@ -24,6 +25,7 @@ export default function JoinClient({ hiringOpen }) {
   const [submittedName, setSubmittedName] = useState("");
   const [submittedEmail, setSubmittedEmail] = useState("");
   const [pageLoadTime] = useState(() => Date.now());
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const fileInputRef = useRef(null);
   const formRef = useRef(null);
@@ -72,6 +74,7 @@ export default function JoinClient({ hiringOpen }) {
     formData.append("message", message);
     formData.append("ageConfirm", ageConfirm.toString());
     formData.append("_plt", pageLoadTime.toString());
+    formData.append("cf-turnstile-response", turnstileToken);
     // Honeypot field
     formData.append("website", "");
 
@@ -347,6 +350,9 @@ export default function JoinClient({ hiringOpen }) {
               </label>
               {errors.ageConfirm && <span className={styles.fieldError}>{errors.ageConfirm}</span>}
             </div>
+
+            <Turnstile onVerify={setTurnstileToken} />
+            {errors.turnstile && <span className={styles.fieldError}>{errors.turnstile}</span>}
 
             <button
               type="submit"

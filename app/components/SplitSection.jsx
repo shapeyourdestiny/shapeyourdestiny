@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./SplitSection.module.css";
 
 /**
@@ -28,7 +29,14 @@ export default function SplitSection({
         </div>
 
         <div className={styles.media} style={{ order: reverse ? 1 : 2 }}>
-          <img src={imageSrc} alt={imageAlt} className={styles.designedImage} />
+          <Image
+            src={imageSrc}
+            alt={imageAlt}
+            width={500}
+            height={400}
+            className={styles.designedImage}
+            sizes="(max-width: 768px) 100vw, 500px"
+          />
         </div>
       </div>
     </section>

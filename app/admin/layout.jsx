@@ -11,6 +11,10 @@ import styles from "./layout.module.css";
 export const metadata = {
   title: "Admin | Shape Your Destiny",
   description: "Admin dashboard for Shape Your Destiny.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function AdminLayout({ children }) {

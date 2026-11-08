@@ -1,15 +1,15 @@
 import Image from "next/image";
 import styles from "./TrustMarquee.module.css";
 
-// Replace each src below with the real logo file path once you have them.
+// Partner logos with descriptive alt text for accessibility
 const PARTNERS = [
-  "/Images/partner3.png",
-  "/Images/partner4.png",
-  "/Images/partner5.png",
-  "/Images/Garden-City-Community-College-NSKS.jpg",
-  "/Images/partner7.png",
-  "/Images/partner9.png",
-  "/Images/partner10.png",
+  { src: "/Images/partner3.png", alt: "Partner school district" },
+  { src: "/Images/partner4.png", alt: "Partner educational organization" },
+  { src: "/Images/partner5.png", alt: "Partner elementary school" },
+  { src: "/Images/Garden-City-Community-College-NSKS.jpg", alt: "Garden City Community College" },
+  { src: "/Images/partner7.png", alt: "Partner school" },
+  { src: "/Images/partner9.png", alt: "Partner organization" },
+  { src: "/Images/partner10.png", alt: "Partner institution" },
 ];
 
 export default function TrustMarquee() {
@@ -25,11 +25,11 @@ export default function TrustMarquee() {
 
       <div className={styles.marquee} role="region" aria-label="Partner school and organization logos">
         <div className={styles.track}>
-          {looped.map((src, i) => (
+          {looped.map((partner, i) => (
             <div className={styles.logo} key={i} aria-hidden={i >= PARTNERS.length}>
               <Image
-                src={src}
-                alt={i < PARTNERS.length ? "Partner school logo" : ""}
+                src={partner.src}
+                alt={i < PARTNERS.length ? partner.alt : ""}
                 width={120}
                 height={60}
                 style={{ objectFit: "contain" }}
