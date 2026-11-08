@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET() {
   const supabase = await createClient();
@@ -9,7 +10,9 @@ export async function GET() {
     return Response.json({ role: null });
   }
 
-  const { data: profile } = await supabase
+  // Use admin client to bypass RLS
+  const adminClient = createAdminClient();
+  const { data: profile } = await adminClient
     .from("profiles")
     .select("role")
     .or(`user_id.eq.${user.id},id.eq.${user.id}`)
