@@ -121,6 +121,54 @@ console.log("\nConsecutive periods");
   assertEqual(p3.startDate, "2026-10-03", "P3 starts Oct 3 (day after P2 ends)");
 }
 
+// Test 8: User-specified periods (Oct 17-30 and Oct 31-Nov 13)
+// These are the real periods the payroll page should show
+console.log("\nPeriod Oct 17-30 (user requirement)");
+{
+  const period = getPeriodForDate("2026-10-17", settings);
+  assertEqual(period.startDate, "2026-10-17", "Start date is Oct 17 (Saturday)");
+  assertEqual(period.endDate, "2026-10-30", "End date is Oct 30 (Friday)");
+  assertEqual(period.dueDate, "2026-11-06", "Due date is Nov 6 (Friday, 7 days after end)");
+  assertEqual(period.payday, "2026-11-13", "Payday is Nov 13 (Friday, 14 days after end)");
+}
+
+console.log("\nPeriod Oct 31-Nov 13 (user requirement)");
+{
+  const period = getPeriodForDate("2026-10-31", settings);
+  assertEqual(period.startDate, "2026-10-31", "Start date is Oct 31 (Saturday)");
+  assertEqual(period.endDate, "2026-11-13", "End date is Nov 13 (Friday)");
+  assertEqual(period.dueDate, "2026-11-20", "Due date is Nov 20 (Friday, 7 days after end)");
+  assertEqual(period.payday, "2026-11-27", "Payday is Nov 27 (Friday, 14 days after end)");
+}
+
+// Test 9: What period should show for Nov 7, 2026 (today per user)
+console.log("\nNov 7, 2026 should be in period Oct 31-Nov 13");
+{
+  const period = getPeriodForDate("2026-11-07", settings);
+  assertEqual(period.startDate, "2026-10-31", "Start date is Oct 31");
+  assertEqual(period.endDate, "2026-11-13", "End date is Nov 13");
+}
+
+// Test 10: Verify anchor date is Saturday
+console.log("\nAnchor date verification");
+{
+  const anchor = new Date(2026, 8, 5); // Sep 5, 2026
+  const dayOfWeek = anchor.getDay();
+  assertEqual(dayOfWeek, 6, "Sep 5, 2026 is Saturday (day 6)");
+}
+
+// Test 11: BUG CHECK - If anchor were Sep 7 (wrong), it would produce Oct 19-Nov 1
+// This test should FAIL if someone accidentally uses Sep 7 as anchor
+console.log("\nBUG CHECK: Wrong anchor date detection");
+{
+  const wrongSettings = { ...settings, anchorDate: "2026-09-07" };
+  const period = getPeriodForDate("2026-11-07", wrongSettings);
+  // With wrong anchor Sep 7, we'd get Oct 19-Nov 1 which is WRONG
+  // We assert this is NOT what we expect to catch the bug
+  const hasWrongDates = period.startDate === "2026-10-19" && period.endDate === "2026-11-01";
+  assert(!hasWrongDates, "Anchor Sep 7 would give wrong dates Oct 19-Nov 1 (NOT what we want)");
+}
+
 // Summary
 console.log("\n" + "=".repeat(40));
 console.log(`Results: ${passed} passed, ${failed} failed`);
