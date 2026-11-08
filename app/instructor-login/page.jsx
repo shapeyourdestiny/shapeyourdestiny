@@ -25,7 +25,7 @@ export default function InstructorLoginPage() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -45,27 +45,25 @@ export default function InstructorLoginPage() {
       return;
     }
 
-    // Check user role to redirect appropriately
-    const { data: { user } } = await supabase.auth.getUser();
-    console.log("User after login:", user?.id);
-
-    if (user) {
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .or(`user_id.eq.${user.id},id.eq.${user.id}`)
-        .maybeSingle();
-
-      console.log("Profile query result:", { profile, error: profileError });
-
-      if (profile?.role === "admin") {
-        console.log("Redirecting to admin dashboard");
-        window.location.href = "/admin/dashboard";
-        return;
-      }
+    // Get user from sign in response
+    const user = signInData?.user;
+    if (!user) {
+      window.location.href = "/instructor/dashboard";
+      return;
     }
 
-    console.log("Redirecting to instructor dashboard");
+    // Query profile using the access token from sign in
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+      .maybeSingle();
+
+    if (profile?.role === "admin") {
+      window.location.href = "/admin/dashboard";
+      return;
+    }
+
     window.location.href = "/instructor/dashboard";
   };
 
