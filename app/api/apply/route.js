@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendNewApplicationEmail, sendApplicationReceivedEmail } from "@/lib/email";
-import { verifyTurnstile } from "@/lib/security/turnstile";
+import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { PDFDocument } from "pdf-lib";
 import crypto from "crypto";
 
@@ -124,7 +124,7 @@ export async function POST(request) {
       request.headers.get("x-real-ip") ||
       "unknown";
 
-    const turnstileResult = await verifyTurnstile(turnstileToken, ip);
+    const turnstileResult = await verifyTurnstileToken(turnstileToken, ip);
     if (!turnstileResult.success) {
       return NextResponse.json(
         { errors: { turnstile: "Please complete the verification" } },
