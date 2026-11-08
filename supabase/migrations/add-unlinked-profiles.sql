@@ -97,6 +97,19 @@ CREATE POLICY "Admins can update profiles"
     )
   );
 
+-- Step 7b: Allow admins to read all profiles
+DROP POLICY IF EXISTS "Admins can read all profiles" ON profiles;
+CREATE POLICY "Admins can read all profiles"
+  ON profiles
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.user_id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
 -- Step 8: Update public_staff() function to include not_invited profiles
 CREATE OR REPLACE FUNCTION public_staff()
 RETURNS TABLE (
