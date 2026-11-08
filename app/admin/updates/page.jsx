@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   getAdminAnnouncements,
   getSchoolsWithClasses,
@@ -23,13 +24,14 @@ export default async function AdminUpdatesPage() {
     redirect("/admin-login");
   }
 
-  const { data: profile } = await supabase
+  const adminClient = createAdminClient();
+  const { data: profile } = await adminClient
     .from("profiles")
     .select("id, role, full_name")
-    .eq("id", user.id)
-    .single();
+    .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+    .maybeSingle();
 
-  if (profile?.role !== "admin") {
+  if (!profile || profile.role !== "admin") {
     redirect("/");
   }
 

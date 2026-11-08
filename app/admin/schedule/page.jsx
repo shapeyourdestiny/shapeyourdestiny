@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { getScheduleData } from "@/lib/schedule/queries";
 import ScheduleBoard from "./ScheduleBoard";
@@ -19,11 +20,12 @@ export default async function AdminSchedulePage() {
     redirect("/instructor-login");
   }
 
-  const { data: profile } = await supabase
+  const adminClient = createAdminClient();
+  const { data: profile } = await adminClient
     .from("profiles")
     .select("role")
-    .eq("id", user.id)
-    .single();
+    .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+    .maybeSingle();
 
   if (!profile || profile.role !== "admin") {
     redirect("/instructor/dashboard");

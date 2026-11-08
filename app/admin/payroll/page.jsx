@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   getPeriodForDate,
   getNextPeriod,
@@ -39,11 +40,12 @@ export default async function PayrollPage({ searchParams }) {
     redirect("/instructor-login");
   }
 
-  const { data: profile } = await supabase
+  const adminClient = createAdminClient();
+  const { data: profile } = await adminClient
     .from("profiles")
     .select("role")
-    .eq("id", user.id)
-    .single();
+    .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+    .maybeSingle();
 
   if (!profile || profile.role !== "admin") {
     redirect("/instructor/dashboard");

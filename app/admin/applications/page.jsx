@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getApplications, getHiringSettings } from "@/lib/admin/applications";
 import ApplicationsClient from "./ApplicationsClient";
 
@@ -17,13 +18,14 @@ export default async function AdminApplicationsPage() {
     redirect("/admin-login");
   }
 
-  const { data: profile } = await supabase
+  const adminClient = createAdminClient();
+  const { data: profile } = await adminClient
     .from("profiles")
     .select("id, role")
-    .eq("id", user.id)
-    .single();
+    .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+    .maybeSingle();
 
-  if (profile?.role !== "admin") {
+  if (!profile || profile.role !== "admin") {
     redirect("/");
   }
 
