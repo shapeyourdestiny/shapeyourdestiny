@@ -24,8 +24,8 @@ export default async function AdminLayout({ children }) {
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, role")
-    .or("user_id.eq." + user.id + ",id.eq." + user.id)
-    .single();
+    .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+    .maybeSingle();
 
   if (!profile || profile.role !== "admin") {
     redirect("/instructor/dashboard");

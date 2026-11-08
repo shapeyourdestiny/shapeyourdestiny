@@ -23,8 +23,8 @@ export default async function InstructorLayout({ children }) {
   const { data: profileWithStatus, error: statusError } = await supabase
     .from("profiles")
     .select("full_name, role, status, avatar_url")
-    .or("user_id.eq." + user.id + ",id.eq." + user.id)
-    .single();
+    .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+    .maybeSingle();
 
   // Check if error is about missing column
   const isColumnError = statusError && (
@@ -38,8 +38,8 @@ export default async function InstructorLayout({ children }) {
     const { data: profileWithArchived } = await supabase
       .from("profiles")
       .select("full_name, role, archived, avatar_url")
-      .or("user_id.eq." + user.id + ",id.eq." + user.id)
-      .single();
+      .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+      .maybeSingle();
 
     profile = profileWithArchived
       ? { ...profileWithArchived, status: profileWithArchived.archived ? "archived" : "active" }
