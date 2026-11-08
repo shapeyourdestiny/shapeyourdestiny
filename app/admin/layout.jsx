@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getOpenIncidentCount } from "@/lib/incidents/queries";
 import { getAdminInbox } from "@/lib/admin/inbox";
 import { getPeriodsNeedingApprovalCount } from "@/lib/payroll/compute";
@@ -21,7 +22,9 @@ export default async function AdminLayout({ children }) {
     redirect("/instructor-login");
   }
 
-  const { data: profile } = await supabase
+  // Use admin client to bypass RLS for profile check
+  const adminClient = createAdminClient();
+  const { data: profile } = await adminClient
     .from("profiles")
     .select("full_name, role")
     .or(`user_id.eq.${user.id},id.eq.${user.id}`)

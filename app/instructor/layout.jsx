@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getInboxBadgeCount } from "@/lib/instructor/inbox";
 import InstructorShell from "./components/InstructorShell";
 import styles from "./layout.module.css";
@@ -18,9 +19,12 @@ export default async function InstructorLayout({ children }) {
     redirect("/instructor-login");
   }
 
+  // Use admin client to bypass RLS for profile check
+  const adminClient = createAdminClient();
+
   // Try fetching with status column, fall back to archived if it doesn't exist
   let profile;
-  const { data: profileWithStatus, error: statusError } = await supabase
+  const { data: profileWithStatus, error: statusError } = await adminClient
     .from("profiles")
     .select("full_name, role, status, avatar_url")
     .or(`user_id.eq.${user.id},id.eq.${user.id}`)
@@ -35,7 +39,7 @@ export default async function InstructorLayout({ children }) {
 
   if (isColumnError) {
     // status column doesn't exist, fall back to archived
-    const { data: profileWithArchived } = await supabase
+    const { data: profileWithArchived } = await adminClient
       .from("profiles")
       .select("full_name, role, archived, avatar_url")
       .or(`user_id.eq.${user.id},id.eq.${user.id}`)
