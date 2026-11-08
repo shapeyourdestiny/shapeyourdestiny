@@ -55,12 +55,12 @@ export default function InstructorLoginPage() {
         .maybeSingle();
 
       if (profile?.role === "admin") {
-        router.push("/admin/dashboard");
+        window.location.href = "/admin/dashboard";
         return;
       }
     }
 
-    router.push("/instructor/dashboard");
+    window.location.href = "/instructor/dashboard";
   };
 
   const handleResendConfirmation = async () => {
