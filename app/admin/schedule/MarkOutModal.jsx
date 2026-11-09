@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import styles from "./MarkOutModal.module.css";
 import { computeClassOccurrences } from "@/lib/schedule/occurrences";
 import { createSessionChangesBulkAction } from "@/lib/schedule/actions";
+import { sendSubAssignedEmail } from "@/lib/email";
 
 const REASONS = [
   { value: "vacation", label: "Vacation" },
@@ -54,6 +55,7 @@ export default function MarkOutModal({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [sendEmail, setSendEmail] = useState(true);
 
   // Reset form when modal opens (only when transitioning from closed to open)
   if (open && !lastOpen) {
@@ -68,6 +70,7 @@ export default function MarkOutModal({
     setUseSameSub(false);
     setSameSub("");
     setError("");
+    setSendEmail(true);
   } else if (!open && lastOpen) {
     setLastOpen(false);
   }
@@ -341,6 +344,44 @@ export default function MarkOutModal({
         await createSessionChangesBulkAction(changes);
       }
 
+      // Send notification emails to subs if enabled
+      if (sendEmail) {
+        // Group sessions by sub
+        const sessionsBySub = {};
+        for (const session of affectedSessions) {
+          if (isOffDay(session)) continue;
+          const subId = useSameSub ? sameSub : subAssignments[session.id];
+          if (!subId) continue;
+
+          if (!sessionsBySub[subId]) {
+            sessionsBySub[subId] = [];
+          }
+          sessionsBySub[subId].push({
+            date: session.date,
+            time: session.cls.time,
+            schoolName: session.cls.school?.name || "Unknown School",
+            schoolAddress: session.cls.school?.address || null,
+            program: session.cls.program || "Wellness",
+          });
+        }
+
+        // Send emails to each sub
+        const emailPromises = Object.entries(sessionsBySub).map(([subId, sessions]) => {
+          const subInstructor = data.instructors.find(i => i.id === subId);
+          if (!subInstructor?.email) return Promise.resolve();
+
+          return sendSubAssignedEmail({
+            sub: subInstructor,
+            absentInstructor: instructorObj,
+            sessions,
+          }).catch(err => {
+            console.error(`Failed to send email to ${subInstructor.email}:`, err);
+          });
+        });
+
+        await Promise.all(emailPromises);
+      }
+
       await onSave();
     } catch (err) {
       console.error("Failed to save:", err);
@@ -563,6 +604,21 @@ export default function MarkOutModal({
             </div>
           )}
 
+          {/* Email notification checkbox */}
+          {selectedInstructor && affectedSessions.some(s => {
+            if (isOffDay(s)) return false;
+            const subId = useSameSub ? sameSub : subAssignments[s.id];
+            return !!subId;
+          }) && (
+            <label className={styles.emailCheckbox}>
+              <input
+                type="checkbox"
+                checked={sendEmail}
+                onChange={e => setSendEmail(e.target.checked)}
+              />
+              Email subs about their assignments
+            </label>
+          )}
         </div>
 
         <div className={styles.footer}>

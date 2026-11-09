@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 export default function InstructorLoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -24,39 +22,31 @@ export default function InstructorLoginPage() {
     setResendSuccess(false);
     setLoading(true);
 
-    const supabase = createClient();
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInError) {
-      // Check if email not confirmed
-      if (signInError.message.toLowerCase().includes("email not confirmed")) {
-        setError("Your email hasn't been confirmed yet.");
-        setShowResend(true);
-      } else {
-        setError(signInError.message === "Invalid login credentials"
-          ? "Invalid email or password. Please try again."
-          : signInError.message
-        );
-      }
-      setLoading(false);
-      return;
-    }
-
-    // Redirect based on role
     try {
-      const res = await fetch("/api/auth/check-role");
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
       const data = await res.json();
 
-      if (data.role === "admin") {
-        window.location.href = "/admin/dashboard";
-      } else {
-        window.location.href = "/instructor/dashboard";
+      if (!res.ok) {
+        if (data.error === "email_not_confirmed") {
+          setError(data.message);
+          setShowResend(true);
+        } else {
+          setError(data.error || "Login failed. Please try again.");
+        }
+        setLoading(false);
+        return;
       }
+
+      // Redirect to appropriate dashboard
+      window.location.href = data.redirectUrl;
     } catch {
-      window.location.href = "/instructor/dashboard";
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
     }
   };
 

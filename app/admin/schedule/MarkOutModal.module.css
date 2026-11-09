@@ -106,31 +106,6 @@
   border-color: var(--navy);
 }
 
-.modeToggle {
-  display: flex;
-  background: var(--tint);
-  border-radius: 8px;
-  padding: 4px;
-}
-
-.modeBtn {
-  padding: 8px 16px;
-  border: none;
-  background: none;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--ink-soft);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.modeBtn.active {
-  background: var(--paper);
-  color: var(--ink);
-  box-shadow: 0 2px 4px rgba(20, 44, 107, 0.1);
-}
-
 .section {
   display: flex;
   flex-direction: column;
