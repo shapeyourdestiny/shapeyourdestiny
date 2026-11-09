@@ -1,104 +1,162 @@
-.container {
-  padding: 0 16px 100px;
-  max-width: 600px;
-  margin: 0 auto;
+/* =============================================================================
+   INBOX V3 - Cards expand in place, no pop-ups
+   ============================================================================= */
+
+/* Layout container - full width on mobile */
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  /* Remove any max-width constraints on mobile */
+  width: 100%;
 }
 
-@media (max-width: 759px) {
-  .container {
-    max-width: none;
-    margin: 0;
+/* =============================================================================
+   HEADER - Navy band with rounded bottom corners
+   ============================================================================= */
+.header {
+  background: var(--navy);
+  padding: 20px 16px 48px;
+  border-radius: 0 0 32px 32px;
+  margin: -24px -16px 0;
+  position: relative;
+}
+
+@media (min-width: 760px) {
+  .header {
+    margin: -32px -32px 0;
+    padding: 24px 32px 48px;
   }
 }
 
-/* Header */
-.header {
+/* Top row: hidden on mobile (shell shows it), visible on desktop */
+.headerTop {
+  display: none;
+}
+
+@media (min-width: 760px) {
+  .headerTop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0 0 16px;
+    min-height: 56px;
+  }
+}
+
+.headerLogo {
+  height: 28px;
+  width: auto;
+}
+
+.headerAvatar {
+  position: absolute;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.headerAvatarImg {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.headerAvatarInitial {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--navy-deep);
+}
+
+/* Title row */
+.headerTitle {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 20px;
+  gap: 12px;
+  padding-top: 8px;
 }
 
-.headerLeft h1 {
+.headerTitle h1 {
   font-family: 'Baloo 2', sans-serif;
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 700;
-  margin: 0 0 4px 0;
-  color: var(--ink);
+  color: #fff;
+  margin: 0;
+  line-height: 1.1;
 }
 
 .headerSub {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: var(--ink-soft);
-  margin: 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  color: #A8BFEF;
+  margin: 4px 0 0;
 }
 
 .headerSubCaughtUp {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: var(--teal-dark);
-  margin: 0;
+  color: #7DD8E8;
 }
 
-.headerSubCaughtUp svg {
-  width: 16px;
-  height: 16px;
-}
-
+/* Mark all read pill */
 .markAllBtn {
-  background: white;
-  border: none;
+  flex-shrink: 0;
+  margin-top: 6px;
+  padding: 10px 16px;
+  min-height: 44px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
-  font-size: 13px;
-  color: var(--ink);
+  font-size: 14px;
+  color: #fff;
   cursor: pointer;
-  padding: 8px 14px;
-  border-radius: 999px;
-  box-shadow: 0 2px 8px rgba(20, 44, 107, 0.1);
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .markAllBtn:hover {
-  box-shadow: 0 4px 12px rgba(20, 44, 107, 0.15);
-  transform: translateY(-1px);
-}
-
-.markAllBtn:active {
-  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .markAllBtn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Tabs */
-.tabs {
-  display: flex;
-  background: white;
+/* =============================================================================
+   TAB CARD - White card overlapping navy band
+   ============================================================================= */
+.tabCard {
+  background: #fff;
   border-radius: 16px;
   padding: 4px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
+  margin: -30px 16px 0;
+  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.12);
+  display: flex;
+  position: relative;
+  z-index: 10;
 }
 
 .tab {
   flex: 1;
-  height: 44px;
+  height: 48px;
+  min-height: 44px;
   border: none;
   background: transparent;
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ink-soft);
   cursor: pointer;
   border-radius: 12px;
@@ -107,221 +165,550 @@
   justify-content: center;
   gap: 8px;
   transition: all 0.15s ease;
+  position: relative;
 }
 
-.tab.active {
+.tab:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.tabActive {
   background: var(--navy);
-  color: white;
+  color: #fff;
 }
 
+/* Tab badge - red on unselected, white on selected */
 .tabBadge {
   padding: 2px 8px;
   border-radius: 10px;
-  font-size: 11px;
-  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
   background: #E0594C;
-  color: white;
+  color: #fff;
 }
 
-.tab.active .tabBadge {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
+.tabActive .tabBadge {
+  background: #fff;
+  color: var(--navy);
 }
 
-/* Content */
+/* Screen reader text for badges */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =============================================================================
+   CONTENT AREA
+   ============================================================================= */
 .content {
+  padding: 20px 16px 120px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-/* Empty States */
-.emptyHero {
-  border-radius: 24px;
-  padding: 30px 24px 28px;
-  text-align: center;
-  position: relative;
+/* =============================================================================
+   PINNED UPDATES - Teal gradient card at top
+   ============================================================================= */
+.pinnedCard {
+  background: linear-gradient(135deg, #E8F6F8 0%, #D4EEF2 100%);
+  border: 1.5px solid #9FD4DE;
+  border-radius: 16px;
+  padding: 16px;
   overflow: hidden;
 }
 
-.emptyHeroShoutouts {
-  background: linear-gradient(160deg, #DFF1F4 0%, #fff 70%);
-}
-
-.emptyHeroUpdates {
-  background: linear-gradient(160deg, #E4EBF9 0%, #fff 70%);
-}
-
-/* Decorative shapes */
-.heroDecorations {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.heroDot1 {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #9FD4DE;
-  top: 20px;
-  left: 24px;
-  opacity: 0.6;
-}
-
-.heroDot2 {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #C9D5EE;
-  top: 40px;
-  right: 30px;
-  opacity: 0.7;
-}
-
-.heroSquare {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  background: #9FD4DE;
-  bottom: 30px;
-  right: 20px;
-  opacity: 0.5;
-  transform: rotate(15deg);
-}
-
-/* Shout-outs illustration */
-.heroIllustration {
-  position: relative;
-  width: 96px;
-  height: 80px;
-  margin: 0 auto 16px;
-}
-
-.heroTileBehind {
-  position: absolute;
-  width: 58px;
-  height: 58px;
-  background: white;
-  border-radius: 14px;
-  transform: rotate(-10deg);
-  left: 8px;
-  top: 10px;
+.pinnedTop {
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(20, 44, 107, 0.08);
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
-.heroTileBehind svg {
-  width: 26px;
-  height: 26px;
-  color: var(--navy-mid);
+.pinnedIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--teal-dark);
 }
 
-.heroTileFront {
-  position: absolute;
-  width: 62px;
-  height: 62px;
-  background: var(--teal);
-  border-radius: 16px;
-  transform: rotate(8deg);
-  right: 8px;
-  top: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 20px rgba(62, 143, 160, 0.35);
+.pinnedLabel {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teal-dark);
 }
 
-.heroTileFront svg {
-  width: 28px;
-  height: 28px;
-  color: white;
+.pinnedUntil {
+  margin-left: auto;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  color: var(--teal-dark);
 }
 
-/* Updates empty icon */
-.heroIcon {
-  width: 72px;
-  height: 72px;
-  background: var(--navy);
-  border-radius: 22px;
-  margin: 0 auto 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 20px rgba(31, 63, 145, 0.25);
-}
-
-.heroIcon svg {
-  width: 32px;
-  height: 32px;
-  color: white;
-}
-
-.heroHeading {
+.pinnedTitle {
   font-family: 'Baloo 2', sans-serif;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--ink);
-  margin: 0 0 8px 0;
+  margin: 0 0 8px;
+  line-height: 1.2;
 }
 
-.heroText {
+.pinnedPreview {
   font-family: 'Nunito', sans-serif;
   font-size: 15px;
-  color: var(--ink-soft);
+  color: var(--ink);
   line-height: 1.5;
-  max-width: 270px;
-  margin: 0 auto;
+  margin: 0;
 }
 
-/* Recent classes card */
-.recentClassesCard {
-  background: white;
+.pinnedFull {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.pinnedToggle {
+  display: inline;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--teal-dark);
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.pinnedToggle:hover {
+  text-decoration: underline;
+}
+
+/* =============================================================================
+   GROUP SECTIONS - Today, This week, Earlier
+   ============================================================================= */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.groupLabel {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+.groupLine {
+  flex: 1;
+  height: 1px;
+  background: var(--tint-deep);
+}
+
+/* =============================================================================
+   ITEM CARDS - Expand in place
+   ============================================================================= */
+.card {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.cardUnread {
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(20, 44, 107, 0.08);
+}
+
+.cardExpanded {
+  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.12);
+}
+
+/* Card header button */
+.cardHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.cardHeader:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: -2px;
+  border-radius: 14px;
+}
+
+/* Avatar */
+.avatar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatarCircle {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.avatarNavy {
+  background: var(--navy);
+  color: #fff;
+}
+
+.avatarAmber {
+  background: #FDF0DF;
+  color: #8A4A12;
+}
+
+.avatarTeal {
+  background: #E8F4F6;
+  color: var(--teal-dark);
+}
+
+.avatarTeal svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Unread dot */
+.unreadDot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  background: var(--teal);
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+
+/* Card main content */
+.cardMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.cardFrom {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.cardFromNavy {
+  color: var(--navy);
+}
+
+.cardFromAmber {
+  color: #B45309;
+}
+
+.cardFromTeal {
+  color: var(--teal-dark);
+}
+
+.cardTitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardTitleRead {
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.cardPreview {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 2px 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Time and chevron */
+.cardMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.cardTime {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.cardChevron {
+  width: 20px;
+  height: 20px;
+  color: var(--ink-soft);
+  transition: transform 0.2s ease;
+}
+
+.cardChevronOpen {
+  transform: rotate(180deg);
+}
+
+/* =============================================================================
+   EXPANDED CONTENT
+   ============================================================================= */
+.expandWrapper {
+  animation: expandIn 0.2s ease;
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expandWrapper {
+    animation: none;
+  }
+}
+
+.expandContent {
+  padding: 0 16px 16px 72px;
+}
+
+.expandMessage {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Schedule change box */
+.scheduleBox {
+  background: #E8F6F8;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.scheduleInfo {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  margin: 0;
+}
+
+.scheduleInfo strong {
+  font-weight: 700;
+}
+
+/* Shout-out quote box */
+.quoteBox {
+  background: #FFF7EC;
+  border-radius: 12px;
+  padding: 16px;
+  position: relative;
+}
+
+.quoteIcon {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  width: 24px;
+  height: 24px;
+  color: #F5D5B0;
+}
+
+.quoteText {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.6;
+  margin: 0;
+  padding-left: 20px;
+}
+
+/* Footer row */
+.expandFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--tint);
+}
+
+.expandDate {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.expandLink {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--teal-dark);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 8px 0;
+}
+
+.expandLink:hover {
+  text-decoration: underline;
+}
+
+/* =============================================================================
+   EMPTY STATES
+   ============================================================================= */
+.emptyCard {
+  background: #fff;
   border-radius: 20px;
-  padding: 20px;
+  padding: 40px 24px;
+  text-align: center;
   box-shadow: 0 4px 16px rgba(20, 44, 107, 0.08);
 }
 
-.recentClassesTitle {
+.emptyIcon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  background: var(--tint);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyIcon svg {
+  width: 28px;
+  height: 28px;
+  color: var(--navy);
+}
+
+.emptyTitle {
   font-family: 'Baloo 2', sans-serif;
-  font-size: 19px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--ink);
-  margin: 0 0 4px 0;
+  margin: 0 0 8px;
 }
 
-.recentClassesSub {
+.emptySub {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 260px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* =============================================================================
+   RECENT CLASSES CARD (for shout-outs)
+   ============================================================================= */
+.recentCard {
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 4px 16px rgba(20, 44, 107, 0.08);
+}
+
+.recentTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+
+.recentSub {
+  font-family: 'Nunito', sans-serif;
   font-size: 13px;
   color: var(--ink-soft);
-  margin: 0 0 16px 0;
+  margin: 0 0 14px;
 }
 
-.recentClassesList {
+.recentList {
   display: flex;
   flex-direction: column;
 }
 
-.recentClassRow {
+.recentRow {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 0;
+  gap: 12px;
+  padding: 12px 0;
   border-top: 1px solid var(--tint);
+  min-height: 44px;
 }
 
-.recentClassRow:first-child {
+.recentRow:first-child {
   border-top: none;
   padding-top: 0;
 }
 
-.dateTile {
-  width: 48px;
-  height: 48px;
+.recentDateTile {
+  width: 44px;
+  height: 44px;
   background: var(--tint);
   border-radius: 10px;
   display: flex;
@@ -331,7 +718,7 @@
   flex-shrink: 0;
 }
 
-.dateTileDay {
+.recentDateDay {
   font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
@@ -339,26 +726,26 @@
   color: var(--ink-soft);
 }
 
-.dateTileNum {
+.recentDateNum {
   font-family: 'Baloo 2', sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--ink);
   line-height: 1;
 }
 
-.recentClassInfo {
+.recentInfo {
   flex: 1;
   min-width: 0;
 }
 
-.recentClassSchool {
+.recentSchool {
   font-weight: 700;
   font-size: 14px;
   color: var(--ink);
 }
 
-.recentClassWith {
+.recentWith {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -367,16 +754,16 @@
   margin-top: 2px;
 }
 
-.recentClassAvatar {
-  width: 20px;
-  height: 20px;
+.recentAvatarSmall {
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-.recentClassAvatarPlaceholder {
-  width: 20px;
-  height: 20px;
+.recentAvatarPlaceholder {
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--teal);
   color: white;
@@ -392,10 +779,11 @@
   align-items: center;
   gap: 4px;
   padding: 8px 14px;
+  min-height: 44px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--teal);
-  color: white;
+  color: #fff;
   font-family: 'Baloo 2', sans-serif;
   font-weight: 700;
   font-size: 13px;
@@ -423,782 +811,70 @@
   flex-shrink: 0;
 }
 
-.showMoreBtn {
+.pastLink {
   display: block;
   width: 100%;
   padding: 14px;
-  margin-top: 8px;
+  margin-top: 10px;
   border: none;
   background: none;
-  font-family: 'Baloo 2', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-weight: 700;
   font-size: 14px;
   color: var(--teal-dark);
   cursor: pointer;
   text-align: center;
+  text-decoration: none;
+  min-height: 44px;
 }
 
-.showMoreBtn:hover {
+.pastLink:hover {
   text-decoration: underline;
 }
 
-/* Next class section */
-.nextClassSection {
-  margin-top: 24px;
-}
-
-.nextClassLabel {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--ink-soft);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 10px;
-}
-
-.nextClassCard {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: white;
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 4px 16px rgba(20, 44, 107, 0.08);
-  cursor: pointer;
-  transition: box-shadow 0.15s ease;
-}
-
-.nextClassCard:hover {
-  box-shadow: 0 6px 20px rgba(20, 44, 107, 0.12);
-}
-
-.nextClassDateTile {
-  width: 52px;
-  height: 52px;
-  background: var(--navy);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.nextClassDateDay {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.nextClassDateNum {
-  font-family: 'Baloo 2', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: white;
-  line-height: 1;
-}
-
-.nextClassInfo {
-  flex: 1;
-  min-width: 0;
-}
-
-.nextClassSchool {
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--ink);
-}
-
-.nextClassMeta {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin-top: 2px;
-}
-
-.nextClassChevron {
-  width: 20px;
-  height: 20px;
-  color: var(--ink-soft);
-  flex-shrink: 0;
-}
-
-/* Item groups */
-.itemGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.groupLabel {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--ink-soft);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding-left: 4px;
-}
-
-.groupCard {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(20, 44, 107, 0.08);
-}
-
-/* Earlier section: flat light card, no shadow */
-.groupCardEarlier {
-  background: #F7F9FD;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: none;
-}
-
-.groupCardEarlier .itemTitle {
-  font-weight: 600;
-}
-
-.itemRow {
-  display: flex;
-  width: 100%;
-  padding: 14px 16px;
-  border: none;
-  background: none;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  position: relative;
-}
-
-.itemRow:not(:last-child) {
-  border-bottom: 1px solid var(--tint);
-}
-
-.itemRow.pinnedRow {
-  border-left: 4px solid var(--navy);
-}
-
-.itemRow:hover {
-  background: var(--tint);
-}
-
-.itemRow.unread {
-  background: rgba(62, 143, 160, 0.04);
-}
-
-.unreadDot {
-  position: absolute;
-  left: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--teal);
-}
-
-.itemContent {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding-left: 10px;
-}
-
-.itemIcon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.itemIcon svg {
-  width: 18px;
-  height: 18px;
-}
-
-/* Icon tile colors by type */
-.itemIcon.alert {
+/* =============================================================================
+   NEEDS YOU ITEMS (disciplinary acknowledgment)
+   ============================================================================= */
+.needsYouCard {
   background: #FDF6F5;
-  color: #E0594C;
+  border: 1.5px solid #F5D0CC;
 }
 
-.itemIcon.teal {
-  background: #E8F4F6;
-  color: var(--teal-dark);
-}
-
-.itemIcon.green {
-  background: rgba(79, 163, 71, 0.12);
-  color: #4FA347;
-}
-
-.itemIcon.gray {
-  background: var(--tint);
-  color: var(--ink-soft);
-}
-
-/* Update/Announcement: megaphone - navy on light navy */
-.itemIcon.navy {
-  background: #E5ECFA;
-  color: var(--navy);
-}
-
-/* Schedule change: calendar - teal on light teal */
-.itemIcon.calendar {
-  background: #E8F4F6;
-  color: var(--teal-dark);
-}
-
-/* Shout-out: star - amber on light amber */
-.itemIcon.amber {
-  background: #FDF0DF;
-  color: #D97706;
-}
-
-.itemMain {
-  flex: 1;
-  min-width: 0;
-}
-
-.itemFromLine {
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-
-.itemFromLine.navy {
-  color: var(--navy);
-}
-
-.itemFromLine.teal {
-  color: var(--teal-dark);
-}
-
-.itemFromLine.amber {
-  color: #D97706;
-}
-
-.itemTitle {
+.needsYouBadge {
+  padding: 4px 10px;
+  background: #E0594C;
+  color: #fff;
   font-family: 'Nunito', sans-serif;
+  font-size: 11px;
   font-weight: 800;
-  font-size: 16px;
-  color: var(--ink);
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.itemSub {
-  font-size: 14px;
-  color: var(--ink-soft);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.4;
-}
-
-.itemTime {
-  font-size: 12px;
-  color: var(--ink-soft);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.itemTimeDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--teal);
-}
-
-.itemPill {
-  padding: 4px 10px;
   border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  flex-shrink: 0;
-  background: var(--tint);
-  color: var(--ink-soft);
-}
-
-.itemPill.needsYou {
-  background: #FDF6F5;
-  color: #E0594C;
-}
-
-.itemPill.new {
-  background: var(--teal);
-  color: white;
-}
-
-.itemPill.read {
-  background: rgba(79, 163, 71, 0.12);
-  color: #4FA347;
-}
-
-.itemPill.tag {
-  background: rgba(62, 143, 160, 0.12);
-  color: var(--teal-dark);
-}
-
-/* Pinned announcement label */
-.pinnedLabel {
-  display: inline-block;
-  padding: 2px 6px;
-  margin-right: 6px;
-  background: var(--navy);
-  color: white;
-  font-size: 9px;
-  font-weight: 700;
-  border-radius: 3px;
-  letter-spacing: 0.05em;
-  vertical-align: middle;
-}
-
-/* Edited badge */
-.editedBadge {
-  padding: 4px 8px;
-  background: rgba(242, 166, 94, 0.15);
-  color: #B87D3B;
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 700;
   flex-shrink: 0;
 }
 
-.editedInline {
-  color: var(--ink-soft);
-  font-style: italic;
-}
-
-/* Shout-out avatars */
-.shoutOutAvatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.shoutOutAvatarPlaceholder {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--teal);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-/* Bottom Sheet */
-.sheetOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(20, 44, 107, 0.3);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-}
-
-.sheet {
-  background: white;
-  border-radius: 24px 24px 0 0;
-  width: 100%;
-  max-width: 500px;
-  max-height: 85vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.sheetHandle {
-  width: 40px;
-  height: 4px;
-  background: var(--tint-deep);
-  border-radius: 2px;
-  margin: 12px auto;
-}
-
-.sheetHeader {
-  padding: 0 24px 16px;
-  border-bottom: 1px solid var(--tint);
-}
-
-.sheetIconTile {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-.sheetIconTile svg {
-  width: 24px;
-  height: 24px;
-}
-
-.sheetIconTile.navy {
-  background: #E5ECFA;
-  color: var(--navy);
-}
-
-.sheetIconTile.calendar {
-  background: #E8F4F6;
-  color: var(--teal-dark);
-}
-
-.sheetIconTile.amber {
-  background: #FDF0DF;
-  color: #D97706;
-}
-
-.sheetFromLine {
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.sheetFromLine.navy {
-  color: var(--navy);
-}
-
-.sheetFromLine.teal {
-  color: var(--teal-dark);
-}
-
-.sheetFromLine.amber {
-  color: #D97706;
-}
-
-.sheetHeader h2 {
-  font-family: 'Baloo 2', sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--ink);
-  margin: 0 0 4px;
-  line-height: 1.2;
-}
-
-.sheetDate {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin: 0;
-}
-
-.sheetPill {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.sheetPill.review {
-  background: rgba(62, 143, 160, 0.12);
-  color: var(--teal-dark);
-}
-
-.sheetPill.disciplinary {
-  background: #FDF6F5;
-  color: #E0594C;
-}
-
-.sheetPill.recognition {
-  background: rgba(219, 39, 119, 0.1);
-  color: #DB2777;
-}
-
-.sheetPill.announcement {
-  background: rgba(31, 63, 145, 0.1);
-  color: var(--navy);
-}
-
-.sheetBody {
-  padding: 20px 24px;
-  flex: 1;
-}
-
-.sheetMessage {
-  font-size: 16px;
-  color: var(--ink);
-  line-height: 1.6;
-  white-space: pre-wrap;
-  margin: 0;
-}
-
-.sheetDoneBtn {
-  width: 100%;
-  padding: 16px;
-  border: none;
-  border-radius: 14px;
-  background: var(--navy);
-  color: white;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-  min-height: 44px;
-  transition: background 0.15s ease;
-}
-
-.sheetDoneBtn:hover {
-  background: var(--navy-deep);
-}
-
-.sheetSimpleFooter {
-  padding: 16px 24px 24px;
-}
-
-/* Ratings */
-.ratingsGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-bottom: 24px;
-}
-
-.ratingRow {
-  display: grid;
-  grid-template-columns: 100px 80px 1fr;
-  align-items: center;
-  gap: 12px;
-}
-
-.ratingLabel {
-  font-size: 13px;
-  color: var(--ink);
-}
-
-.ratingWord {
-  font-size: 12px;
-  color: var(--ink-soft);
-  text-align: right;
-}
-
-.ratingBarWide {
-  display: flex;
-  gap: 4px;
-}
-
-.ratingSegWide {
-  flex: 1;
-  height: 10px;
-  background: var(--tint-deep);
-  border-radius: 5px;
-}
-
-.ratingSegWide.filled {
-  background: var(--teal);
-}
-
-/* Text sections */
-.textSection {
-  margin-bottom: 20px;
-}
-
-.textLabel {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--ink-soft);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
-}
-
-.textSection p {
-  font-size: 16px;
-  color: var(--ink);
-  line-height: 1.5;
-  margin: 0;
-}
-
-.nextReviewStrip {
-  padding: 12px 16px;
-  background: rgba(31, 63, 145, 0.06);
-  border-radius: 10px;
-  font-size: 13px;
-  color: var(--navy);
-  text-align: center;
-}
-
-/* Disciplinary box */
-.disciplinaryBox {
-  background: #FDF6F5;
-  border-radius: 12px;
-  padding: 16px;
-}
-
-.disciplinaryBox .textSection:last-child {
-  margin-bottom: 0;
-}
-
-/* Recognition */
-.recognitionBody {
-  font-size: 16px;
-  color: var(--ink);
-  line-height: 1.6;
-  margin: 0;
-}
-
-.fromLine {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin-top: 16px;
-}
-
-/* Shout-out header */
-.shoutOutHeader {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.shoutOutAvatarLarge {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.shoutOutAvatarPlaceholderLarge {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--teal);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 20px;
-}
-
-.tagPill {
-  display: inline-block;
-  padding: 4px 10px;
-  background: rgba(62, 143, 160, 0.12);
-  color: var(--teal-dark);
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  margin-top: 4px;
-}
-
-/* Acknowledged state */
-.acknowledgedBox {
-  padding: 16px 24px;
-  background: rgba(79, 163, 71, 0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #4FA347;
-}
-
-.acknowledgedBox svg {
-  width: 20px;
-  height: 20px;
-}
-
-.yourComment {
-  font-size: 13px;
-  color: var(--ink);
-  font-style: italic;
-  margin-top: 8px;
-  text-align: center;
-}
-
-/* Footer with comment */
-.sheetFooter {
-  padding: 16px 24px 24px;
-  border-top: 1px solid var(--tint);
-}
-
-.ackNote {
-  font-size: 12px;
-  color: var(--ink-soft);
-  margin: 0 0 16px;
-  line-height: 1.5;
-}
-
-.commentField {
-  margin-bottom: 16px;
-}
-
-.commentField label {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--ink);
-  margin-bottom: 6px;
-}
-
-.commentField textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 12px;
-  border: 2px solid var(--tint-deep);
-  border-radius: 10px;
-  font-family: inherit;
-  font-size: 14px;
-  resize: vertical;
-}
-
-.commentField textarea:focus {
-  outline: none;
-  border-color: var(--navy);
-}
-
-.ackBtn {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  background: var(--navy);
-  color: white;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 15px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.ackBtn:hover {
-  background: var(--navy-deep);
-}
-
-.ackBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Responsive */
-@media (min-width: 768px) {
-  .container {
-    padding-top: 40px;
+/* =============================================================================
+   DESKTOP ADJUSTMENTS
+   ============================================================================= */
+@media (min-width: 760px) {
+  .page {
+    max-width: 600px;
+    margin: 0 auto;
   }
 
-  .sheet {
-    border-radius: 24px;
-    margin-bottom: 20px;
+  .header {
+    margin-left: -32px;
+    margin-right: -32px;
+    padding-left: 32px;
+    padding-right: 32px;
+    margin-top: -32px;
+  }
+
+  .tabCard {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .content {
+    padding-left: 0;
+    padding-right: 0;
   }
 }

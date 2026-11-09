@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getInstructorInbox } from "@/lib/instructor/inbox";
 import InboxClient from "./InboxClient";
 
@@ -16,6 +17,14 @@ export default async function InstructorInboxPage() {
     redirect("/instructor-login");
   }
 
+  // Get profile for header avatar
+  const adminClient = createAdminClient();
+  const { data: profile } = await adminClient
+    .from("profiles")
+    .select("full_name, avatar_url")
+    .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+    .maybeSingle();
+
   let inboxData;
   try {
     inboxData = await getInstructorInbox();
@@ -27,8 +36,9 @@ export default async function InstructorInboxPage() {
       unreadUpdates: 0,
       unreadShoutOuts: 0,
       sharedNotes: [],
+      recentSessions: [],
     };
   }
 
-  return <InboxClient inboxData={inboxData} />;
+  return <InboxClient inboxData={inboxData} profile={profile} />;
 }
