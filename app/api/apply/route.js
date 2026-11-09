@@ -242,77 +242,13 @@ export async function POST(request) {
     console.log("Existing app check:", { existingApp, email });
 
     if (existingApp) {
-      // Update existing application instead of creating duplicate
-      const storagePath = `applications/${existingApp.id}/${random}-${safeName}`;
-
-      // Delete old resume
-      if (existingApp.resume_path) {
-        await adminClient.storage.from("resumes").remove([existingApp.resume_path]);
-      }
-
-      // Upload new resume
-      const { error: uploadError } = await adminClient.storage
-        .from("resumes")
-        .upload(storagePath, finalBuffer, {
-          contentType: file.type,
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error("Failed to upload resume:", uploadError);
-        return NextResponse.json(
-          { error: "Something went wrong. Please try again." },
-          { status: 500 }
-        );
-      }
-
-      // Update application
-      const { error: updateError } = await adminClient
-        .from("instructor_applications")
-        .update({
-          message: message || null,
-          resume_path: storagePath,
-          resume_name: file.name,
-          resume_size: finalSize,
-          ip_hash: ipHash,
-        })
-        .eq("id", existingApp.id);
-
-      if (updateError) {
-        // Clean up uploaded file
-        await adminClient.storage.from("resumes").remove([storagePath]);
-        console.error("Failed to update application:", updateError);
-        return NextResponse.json(
-          { error: "Something went wrong. Please try again." },
-          { status: 500 }
-        );
-      }
-
-      // Add system note
-      const { data: adminProfile } = await adminClient
-        .from("profiles")
-        .select("id")
-        .eq("role", "admin")
-        .limit(1)
-        .single();
-
-      if (adminProfile) {
-        const formattedDate = new Date().toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        });
-
-        await adminClient.from("instructor_application_notes").insert({
-          application_id: existingApp.id,
-          author_id: adminProfile.id,
-          body: `Applied again on ${formattedDate}`,
-          is_system: true,
-        });
-      }
-
-      // Don't send emails again for duplicate
-      return NextResponse.json({ success: true, firstName });
+      // Already applied recently - show helpful message
+      return NextResponse.json(
+        {
+          error: "We already have your application. If you need to make changes or have questions, please email heather@shapeyourdestiny.co"
+        },
+        { status: 400 }
+      );
     }
 
     // Create new application
