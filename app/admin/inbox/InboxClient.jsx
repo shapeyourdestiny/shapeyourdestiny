@@ -8,8 +8,6 @@ import {
   approveShoutOut,
   holdShoutOut,
   markReplyDone,
-  approveTimeOff,
-  declineTimeOff,
   resolvePayrollIssue,
 } from "@/lib/admin/inbox-actions";
 
@@ -59,7 +57,7 @@ export default function InboxClient({ inboxData }) {
   const [resolvingIssue, setResolvingIssue] = useState(null);
   const [resolutionNote, setResolutionNote] = useState("");
 
-  const { pendingShoutOuts, pendingTimeOff, instructorReplies, payrollIssues, payrollStatus, newApplications, totalPending } = inboxData;
+  const { pendingShoutOuts, instructorReplies, payrollIssues, payrollStatus, newApplications, totalPending } = inboxData;
 
   const handleApproveShoutOut = async (id, message = null) => {
     setLoading((prev) => ({ ...prev, [id]: true }));
@@ -87,28 +85,6 @@ export default function InboxClient({ inboxData }) {
   const handleMarkReplyDone = async (id) => {
     setLoading((prev) => ({ ...prev, [id]: true }));
     const result = await markReplyDone(id);
-    setLoading((prev) => ({ ...prev, [id]: false }));
-    if (result.error) {
-      alert(result.error);
-    } else {
-      router.refresh();
-    }
-  };
-
-  const handleApproveTimeOff = async (id) => {
-    setLoading((prev) => ({ ...prev, [id]: true }));
-    const result = await approveTimeOff(id);
-    setLoading((prev) => ({ ...prev, [id]: false }));
-    if (result.error) {
-      alert(result.error);
-    } else {
-      router.refresh();
-    }
-  };
-
-  const handleDeclineTimeOff = async (id) => {
-    setLoading((prev) => ({ ...prev, [id]: true }));
-    const result = await declineTimeOff(id);
     setLoading((prev) => ({ ...prev, [id]: false }));
     if (result.error) {
       alert(result.error);
@@ -367,67 +343,6 @@ export default function InboxClient({ inboxData }) {
                     disabled={loading[reply.id]}
                   >
                     {loading[reply.id] ? "..." : "Mark as read"}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Time Off Requests */}
-      {pendingTimeOff.length > 0 && (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>
-            <span className={styles.sectionIcon}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            </span>
-            Time off requests
-            <span className={styles.sectionCount}>{pendingTimeOff.length}</span>
-          </h2>
-
-          <div className={styles.cardList}>
-            {pendingTimeOff.map((request) => (
-              <div key={request.id} className={styles.card}>
-                <div className={styles.cardHeader}>
-                  {renderAvatar(request.profile, 36)}
-                  <div className={styles.cardMeta}>
-                    <span className={styles.cardNames}>{request.profile?.full_name}</span>
-                    <span className={styles.cardTime}>{formatRelativeTime(request.created_at)}</span>
-                  </div>
-                </div>
-
-                <div className={styles.timeOffDates}>
-                  <span className={styles.dateRange}>
-                    {formatDate(request.start_date)}
-                    {request.start_date !== request.end_date && ` - ${formatDate(request.end_date)}`}
-                  </span>
-                  {request.reason && <span className={styles.reason}>{request.reason}</span>}
-                </div>
-
-                {request.notes && <p className={styles.notes}>{request.notes}</p>}
-
-                <div className={styles.cardActions}>
-                  <button
-                    type="button"
-                    className={styles.declineBtn}
-                    onClick={() => handleDeclineTimeOff(request.id)}
-                    disabled={loading[request.id]}
-                  >
-                    Decline
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.approveBtn}
-                    onClick={() => handleApproveTimeOff(request.id)}
-                    disabled={loading[request.id]}
-                  >
-                    {loading[request.id] ? "..." : "Approve"}
                   </button>
                 </div>
               </div>

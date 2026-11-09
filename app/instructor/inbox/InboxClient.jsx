@@ -307,30 +307,6 @@ export default function InboxClient({ inboxData }) {
           </div>
         );
 
-      case "time_off":
-        return (
-          <div className={styles.itemContent}>
-            <div className={`${styles.itemIcon} ${item.status === "approved" ? styles.green : styles.gray}`}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            </div>
-            <div className={styles.itemMain}>
-              <div className={styles.itemTitle}>
-                Time off {item.status === "approved" ? "approved" : "not approved"}
-              </div>
-              <div className={styles.itemSub}>
-                {formatDate(item.startDate)}
-                {item.startDate !== item.endDate && ` - ${formatDate(item.endDate)}`}
-                {item.classesAffected > 0 ? ` - ${item.classesAffected} classes affected` : " - No classes affected"}
-              </div>
-            </div>
-          </div>
-        );
-
       case "review":
         return (
           <div className={styles.itemContent}>
