@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./Inbox.module.css";
@@ -57,6 +57,63 @@ function formatWeekday(dateStr) {
   return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
 }
 
+/**
+ * Format time for card display (e.g., "2:30 pm", "Yesterday", "Mon")
+ */
+function formatTimeAgo(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    // Today - show time
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "pm" : "am";
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = minutes.toString().padStart(2, "0");
+    return `${displayHours}:${displayMinutes} ${ampm}`;
+  } else if (diffDays === 1) {
+    return "Yesterday";
+  } else if (diffDays < 7) {
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    return days[date.getDay()];
+  } else {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${months[date.getMonth()]} ${date.getDate()}`;
+  }
+}
+
+/**
+ * Format full date/time for sheet display (e.g., "Today, 3:12 pm")
+ */
+function formatFullDateTime(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "pm" : "am";
+  const displayHours = hours % 12 || 12;
+  const displayMinutes = minutes.toString().padStart(2, "0");
+  const timeStr = `${displayHours}:${displayMinutes} ${ampm}`;
+
+  if (diffDays === 0) {
+    return `Today, ${timeStr}`;
+  } else if (diffDays === 1) {
+    return `Yesterday, ${timeStr}`;
+  } else {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${timeStr}`;
+  }
+}
+
 export default function InboxClient({ inboxData }) {
   const router = useRouter();
   const [tab, setTab] = useState("updates");
@@ -66,17 +123,59 @@ export default function InboxClient({ inboxData }) {
   const [showCompose, setShowCompose] = useState(false);
   const [composeRecipient, setComposeRecipient] = useState(null);
   const [composeContext, setComposeContext] = useState(null);
+  const sheetRef = useRef(null);
 
   const { updates, shoutOuts, unreadUpdates, unreadShoutOuts, sharedNotes, recentSessions = [], nextClass } = inboxData;
 
-  // Group items
-  const currentItems = tab === "updates" ? updates : shoutOuts;
-  const needsYouItems = currentItems.filter((i) => i.needsYou);
-  const newItems = currentItems.filter((i) => !i.needsYou && !i.isRead);
-  const earlierItems = currentItems.filter((i) => !i.needsYou && i.isRead);
+  // Focus trap for bottom sheet
+  useEffect(() => {
+    if (!selectedItem || !sheetRef.current) return;
 
-  const totalUnread = tab === "updates" ? unreadUpdates : unreadShoutOuts;
-  const hasUnread = (tab === "updates" ? newItems.length : shoutOuts.filter((s) => !s.isRead).length) > 0;
+    const sheet = sheetRef.current;
+    const focusableElements = sheet.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    // Focus first element
+    firstElement?.focus();
+
+    const handleTabKey = (e) => {
+      if (e.key !== "Tab") return;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement?.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement?.focus();
+        }
+      }
+    };
+
+    sheet.addEventListener("keydown", handleTabKey);
+    return () => sheet.removeEventListener("keydown", handleTabKey);
+  }, [selectedItem]);
+
+  // Group items for current tab
+  const currentItems = tab === "updates" ? updates : shoutOuts;
+
+  // For Updates tab: Pinned, New (unread, not pinned), Earlier (read, not pinned)
+  // Pinned items stay in Pinned section even after read
+  const pinnedItems = tab === "updates"
+    ? currentItems.filter((i) => i.isPinned && !i.needsYou)
+    : [];
+  const needsYouItems = currentItems.filter((i) => i.needsYou);
+  const newItems = currentItems.filter((i) => !i.needsYou && !i.isRead && !i.isPinned);
+  const earlierItems = currentItems.filter((i) => !i.needsYou && i.isRead && !i.isPinned);
+
+  // Total unread for header
+  const totalUnread = unreadUpdates + unreadShoutOuts;
+  const hasUnread = newItems.length > 0 || (tab === "shoutouts" && shoutOuts.filter((s) => !s.isRead).length > 0);
 
   const handleItemClick = async (item) => {
     // Handle payroll check - navigate to past classes
@@ -132,7 +231,8 @@ export default function InboxClient({ inboxData }) {
 
   const handleMarkAllRead = async () => {
     setLoading(true);
-    await markAllRead(tab);
+    // Mark all read in BOTH tabs with one call
+    await markAllRead("all");
     setLoading(false);
     router.refresh();
   };
@@ -189,18 +289,21 @@ export default function InboxClient({ inboxData }) {
       case "subbing":
         return (
           <div className={styles.itemContent}>
-            <div className={`${styles.itemIcon} ${styles.teal}`}>
+            <div className={`${styles.itemIcon} ${styles.calendar}`}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" />
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
               </svg>
             </div>
             <div className={styles.itemMain}>
+              <div className={`${styles.itemFromLine} ${styles.teal}`}>Schedule change</div>
               <div className={styles.itemTitle}>You&apos;re covering {item.schoolName}</div>
               <div className={styles.itemSub}>
-                {formatDayDate(item.sessionDate)} - {item.time} - for {item.forName}
+                {formatDayDate(item.sessionDate)} · {item.time} · for {item.forName}
               </div>
             </div>
-            <span className={styles.itemPill}>See class</span>
           </div>
         );
 
@@ -258,10 +361,11 @@ export default function InboxClient({ inboxData }) {
               </svg>
             </div>
             <div className={styles.itemMain}>
-              <div className={styles.itemTitle}>
+              <div className={`${styles.itemFromLine} ${styles.navy}`}>
                 {item.isPinned && <span className={styles.pinnedLabel}>PINNED</span>}
-                From {item.createdByName}: {item.title}
+                From {item.createdByName}
               </div>
+              <div className={styles.itemTitle}>{item.title}</div>
               <div className={styles.itemSub}>{item.body?.slice(0, 60)}...</div>
             </div>
             {item.editedAt && <span className={styles.editedBadge}>Edited</span>}
@@ -310,21 +414,14 @@ export default function InboxClient({ inboxData }) {
     if (item.type === "shoutout") {
       return (
         <div className={styles.itemContent}>
-          {item.fromAvatarUrl ? (
-            <Image
-              src={item.fromAvatarUrl}
-              alt=""
-              width={40}
-              height={40}
-              className={styles.shoutOutAvatar}
-            />
-          ) : (
-            <div className={styles.shoutOutAvatarPlaceholder}>
-              {item.fromFirstName?.charAt(0)?.toUpperCase() || "?"}
-            </div>
-          )}
+          <div className={`${styles.itemIcon} ${styles.amber}`}>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </div>
           <div className={styles.itemMain}>
-            <div className={styles.itemTitle}>Shout-out from {item.fromFirstName}</div>
+            <div className={`${styles.itemFromLine} ${styles.amber}`}>From {item.fromFirstName}</div>
+            <div className={styles.itemTitle}>Shout-out</div>
             <div className={styles.itemSub}>&ldquo;{item.message?.slice(0, 60)}{item.message?.length > 60 ? "..." : ""}&rdquo;</div>
           </div>
           {item.tag && (
@@ -337,12 +434,15 @@ export default function InboxClient({ inboxData }) {
     // Recognition note
     return (
       <div className={styles.itemContent}>
-        <div className={`${styles.itemIcon} ${styles.tealStar}`}>
+        <div className={`${styles.itemIcon} ${styles.amber}`}>
           <svg viewBox="0 0 24 24" fill="currentColor">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
         </div>
         <div className={styles.itemMain}>
+          {item.fromName && (
+            <div className={`${styles.itemFromLine} ${styles.amber}`}>From {item.fromName}</div>
+          )}
           <div className={styles.itemTitle}>{item.title}</div>
           <div className={styles.itemSub}>&ldquo;{item.body?.slice(0, 60)}{item.body?.length > 60 ? "..." : ""}&rdquo;</div>
         </div>
@@ -350,12 +450,13 @@ export default function InboxClient({ inboxData }) {
     );
   };
 
-  const renderItemGroup = (items, title) => {
+  const renderItemGroup = (items, title, variant = "default") => {
     if (items.length === 0) return null;
+    const cardClass = variant === "earlier" ? styles.groupCardEarlier : styles.groupCard;
     return (
       <div className={styles.itemGroup}>
         <div className={styles.groupLabel}>{title}</div>
-        <div className={styles.groupCard}>
+        <div className={cardClass}>
           {items.map((item) => (
             <button
               key={item.id}
@@ -365,6 +466,19 @@ export default function InboxClient({ inboxData }) {
             >
               {!item.isRead && !item.needsYou && <span className={styles.unreadDot} />}
               {tab === "updates" ? renderUpdateItem(item) : renderShoutOutItem(item)}
+              {/* Time display for New items */}
+              {!item.needsYou && !item.isRead && (item.createdAt || item.sharedAt || item.reviewedAt || item.decidedAt) && (
+                <span className={styles.itemTime}>
+                  <span className={styles.itemTimeDot} />
+                  {formatTimeAgo(item.createdAt || item.sharedAt || item.reviewedAt || item.decidedAt)}
+                </span>
+              )}
+              {/* Time display for Earlier items (no dot) */}
+              {!item.needsYou && item.isRead && (item.createdAt || item.sharedAt || item.reviewedAt || item.decidedAt) && (
+                <span className={styles.itemTime}>
+                  {formatTimeAgo(item.createdAt || item.sharedAt || item.reviewedAt || item.decidedAt)}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -489,25 +603,39 @@ export default function InboxClient({ inboxData }) {
       </div>
 
       {/* Tabs */}
-      <div className={styles.tabs}>
+      <div className={styles.tabs} role="tablist">
         <button
           type="button"
+          role="tab"
+          aria-selected={tab === "updates"}
           className={`${styles.tab} ${tab === "updates" ? styles.active : ""}`}
           onClick={() => setTab("updates")}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight") {
+              setTab("shoutouts");
+            }
+          }}
         >
           Updates
           {unreadUpdates > 0 && (
-            <span className={`${styles.tabBadge} ${styles.red}`}>{unreadUpdates}</span>
+            <span className={styles.tabBadge}>{unreadUpdates}</span>
           )}
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={tab === "shoutouts"}
           className={`${styles.tab} ${tab === "shoutouts" ? styles.active : ""}`}
           onClick={() => setTab("shoutouts")}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft") {
+              setTab("updates");
+            }
+          }}
         >
           Shout-outs
           {unreadShoutOuts > 0 && (
-            <span className={`${styles.tabBadge} ${styles.teal}`}>{unreadShoutOuts}</span>
+            <span className={styles.tabBadge}>{unreadShoutOuts}</span>
           )}
         </button>
       </div>
@@ -520,8 +648,9 @@ export default function InboxClient({ inboxData }) {
         {currentItems.length > 0 && (
           <>
             {renderItemGroup(needsYouItems, "NEEDS YOU")}
+            {renderItemGroup(pinnedItems, "PINNED")}
             {renderItemGroup(newItems, "NEW")}
-            {renderItemGroup(earlierItems, "EARLIER")}
+            {renderItemGroup(earlierItems, "EARLIER", "earlier")}
 
             {/* Show recent classes card at bottom of shout-outs list */}
             {tab === "shoutouts" && recentSessions.length > 0 && (
@@ -537,7 +666,13 @@ export default function InboxClient({ inboxData }) {
       {/* Bottom Sheet */}
       {selectedItem && (
         <div className={styles.sheetOverlay} onClick={handleClose}>
-          <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
+          <div
+            ref={sheetRef}
+            className={styles.sheet}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
             <div className={styles.sheetHandle} />
 
             {/* Review */}
@@ -695,18 +830,29 @@ export default function InboxClient({ inboxData }) {
             {selectedNote?.type === "recognition" && (
               <>
                 <div className={styles.sheetHeader}>
-                  <span className={`${styles.sheetPill} ${styles.recognition}`}>Recognition</span>
-                  <h2>{selectedNote.title}</h2>
-                  <p className={styles.sheetDate}>{formatDate(selectedNote.note_date)}</p>
-                </div>
-                <div className={styles.sheetBody}>
-                  <p className={styles.recognitionBody}>{selectedNote.body}</p>
+                  <div className={`${styles.sheetIconTile} ${styles.amber}`}>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  </div>
                   {selectedNote.shout_out_from_name && (
-                    <p className={styles.fromLine}>
+                    <p className={`${styles.sheetFromLine} ${styles.amber}`}>
                       From {selectedNote.shout_out_from_name}
-                      {selectedNote.shout_out_tag && ` - ${TAG_LABELS[selectedNote.shout_out_tag]}`}
                     </p>
                   )}
+                  <h2>{selectedNote.title}</h2>
+                  <p className={styles.sheetDate}>
+                    {formatFullDateTime(selectedNote.created_at || selectedNote.note_date)}
+                    {selectedNote.shout_out_tag && ` · ${TAG_LABELS[selectedNote.shout_out_tag]}`}
+                  </p>
+                </div>
+                <div className={styles.sheetBody}>
+                  <p className={styles.sheetMessage}>{selectedNote.body}</p>
+                </div>
+                <div className={styles.sheetSimpleFooter}>
+                  <button type="button" className={styles.sheetDoneBtn} onClick={handleClose}>
+                    Done
+                  </button>
                 </div>
               </>
             )}
@@ -715,30 +861,27 @@ export default function InboxClient({ inboxData }) {
             {selectedItem.type === "shoutout" && !selectedNote && (
               <>
                 <div className={styles.sheetHeader}>
-                  <div className={styles.shoutOutHeader}>
-                    {selectedItem.fromAvatarUrl ? (
-                      <Image
-                        src={selectedItem.fromAvatarUrl}
-                        alt=""
-                        width={48}
-                        height={48}
-                        className={styles.shoutOutAvatarLarge}
-                      />
-                    ) : (
-                      <div className={styles.shoutOutAvatarPlaceholderLarge}>
-                        {selectedItem.fromFirstName?.charAt(0)?.toUpperCase() || "?"}
-                      </div>
-                    )}
-                    <div>
-                      <h2>Shout-out from {selectedItem.fromFirstName}</h2>
-                      {selectedItem.tag && (
-                        <span className={styles.tagPill}>{TAG_LABELS[selectedItem.tag]}</span>
-                      )}
-                    </div>
+                  <div className={`${styles.sheetIconTile} ${styles.amber}`}>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
                   </div>
+                  <p className={`${styles.sheetFromLine} ${styles.amber}`}>
+                    From {selectedItem.fromFirstName}
+                  </p>
+                  <h2>Shout-out</h2>
+                  <p className={styles.sheetDate}>
+                    {formatFullDateTime(selectedItem.createdAt)}
+                    {selectedItem.tag && ` · ${TAG_LABELS[selectedItem.tag]}`}
+                  </p>
                 </div>
                 <div className={styles.sheetBody}>
-                  <p className={styles.recognitionBody}>&ldquo;{selectedItem.message}&rdquo;</p>
+                  <p className={styles.sheetMessage}>&ldquo;{selectedItem.message}&rdquo;</p>
+                </div>
+                <div className={styles.sheetSimpleFooter}>
+                  <button type="button" className={styles.sheetDoneBtn} onClick={handleClose}>
+                    Done
+                  </button>
                 </div>
               </>
             )}
@@ -747,15 +890,27 @@ export default function InboxClient({ inboxData }) {
             {selectedItem.type === "announcement" && (
               <>
                 <div className={styles.sheetHeader}>
-                  <span className={`${styles.sheetPill} ${styles.announcement}`}>Announcement</span>
+                  <div className={`${styles.sheetIconTile} ${styles.navy}`}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                    </svg>
+                  </div>
+                  <p className={`${styles.sheetFromLine} ${styles.navy}`}>
+                    From {selectedItem.createdByName}
+                  </p>
                   <h2>{selectedItem.title}</h2>
                   <p className={styles.sheetDate}>
-                    From {selectedItem.createdByName} - {formatDate(selectedItem.createdAt)}
+                    {formatFullDateTime(selectedItem.createdAt)}
                     {selectedItem.editedAt && <span className={styles.editedInline}> (Edited)</span>}
                   </p>
                 </div>
                 <div className={styles.sheetBody}>
-                  <p className={styles.recognitionBody}>{selectedItem.body}</p>
+                  <p className={styles.sheetMessage}>{selectedItem.body}</p>
+                </div>
+                <div className={styles.sheetSimpleFooter}>
+                  <button type="button" className={styles.sheetDoneBtn} onClick={handleClose}>
+                    Done
+                  </button>
                 </div>
               </>
             )}

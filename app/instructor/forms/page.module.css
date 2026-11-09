@@ -1,6 +1,12 @@
 .page {
   max-width: 660px;
-  padding: 16px;
+  padding: 0 16px;
+}
+
+@media (max-width: 759px) {
+  .page {
+    max-width: none;
+  }
 }
 
 .header {

@@ -36,6 +36,14 @@ const InboxIcon = () => (
   </svg>
 );
 
+/**
+ * Format badge count - show "9+" for counts above 9
+ */
+function formatBadgeCount(count) {
+  if (count <= 0) return null;
+  return count > 9 ? "9+" : count.toString();
+}
+
 const NAV_MENU = [
   {
     href: "/instructor/dashboard",
@@ -146,15 +154,22 @@ export default function InstructorShell({ profile, inboxBadge = 0 }) {
           {NAV_MENU.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             const badgeCount = item.hasBadge ? inboxBadge : 0;
+            const badgeDisplay = formatBadgeCount(badgeCount);
+            const ariaLabel = badgeCount > 0
+              ? `${item.label}, ${badgeCount} new`
+              : item.label;
             return (
               <a
                 key={item.href}
                 href={item.href}
                 className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+                aria-label={ariaLabel}
               >
                 <span className={styles.navIcon}>{item.icon}</span>
-                {item.label}
-                {badgeCount > 0 && <span className={styles.badge}>{badgeCount}</span>}
+                <span aria-hidden={badgeCount > 0}>{item.label}</span>
+                {badgeDisplay && (
+                  <span className={styles.badge} aria-hidden="true">{badgeDisplay}</span>
+                )}
               </a>
             );
           })}
@@ -233,18 +248,25 @@ export default function InstructorShell({ profile, inboxBadge = 0 }) {
           {MOBILE_TABS.map((item) => {
             const isActive = isTabActive(item);
             const badgeCount = item.hasBadge ? inboxBadge : 0;
+            const badgeDisplay = formatBadgeCount(badgeCount);
+            const ariaLabel = badgeCount > 0
+              ? `${item.label}, ${badgeCount} new`
+              : item.label;
             return (
               <a
                 key={item.href}
                 href={item.href}
                 className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
                 aria-current={isActive ? "page" : undefined}
+                aria-label={ariaLabel}
               >
                 <span className={styles.tabIconWrap}>
-                  <span className={styles.tabIcon}>{item.icon}</span>
-                  {badgeCount > 0 && <span className={styles.tabBadge}>{badgeCount}</span>}
+                  <span className={styles.tabIcon} aria-hidden="true">{item.icon}</span>
+                  {badgeDisplay && (
+                    <span className={styles.tabBadge} aria-hidden="true">{badgeDisplay}</span>
+                  )}
                 </span>
-                <span className={styles.tabLabel}>{item.label}</span>
+                <span className={styles.tabLabel} aria-hidden="true">{item.label}</span>
               </a>
             );
           })}
