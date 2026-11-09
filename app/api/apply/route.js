@@ -239,6 +239,8 @@ export async function POST(request) {
     const random = crypto.randomBytes(8).toString("hex");
     const safeName = sanitizeFilename(file.name);
 
+    console.log("Existing app check:", { existingApp, email });
+
     if (existingApp) {
       // Update existing application instead of creating duplicate
       const storagePath = `applications/${existingApp.id}/${random}-${safeName}`;
@@ -315,6 +317,7 @@ export async function POST(request) {
 
     // Create new application
     // First, create a placeholder to get the ID for the storage path
+    console.log("Creating new application for:", email);
     const { data: newApp, error: insertError } = await adminClient
       .from("instructor_applications")
       .insert({
@@ -330,6 +333,8 @@ export async function POST(request) {
       })
       .select("id")
       .single();
+
+    console.log("Insert result:", { newApp, insertError });
 
     if (insertError) {
       console.error("Failed to create application:", insertError);
