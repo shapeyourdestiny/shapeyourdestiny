@@ -46,7 +46,6 @@ export default function MarkOutModal({
   const [notifiedOn, setNotifiedOn] = useState(getTodayString);
   const [startDate, setStartDate] = useState(getInitialDate);
   const [endDate, setEndDate] = useState(getInitialDate);
-  const [sendEmail, setSendEmail] = useState(true);
 
   // Sub assignments per session
   const [subAssignments, setSubAssignments] = useState({});
@@ -342,8 +341,6 @@ export default function MarkOutModal({
         await createSessionChangesBulkAction(changes);
       }
 
-      // TODO: Send email if sendEmail is true
-
       await onSave();
     } catch (err) {
       console.error("Failed to save:", err);
@@ -397,26 +394,6 @@ export default function MarkOutModal({
               </select>
             </div>
 
-            <div className={styles.modeToggle}>
-              <button
-                type="button"
-                className={`${styles.modeBtn} ${mode === "one_day" ? styles.active : ""}`}
-                onClick={() => {
-                  // Can't switch modes in this implementation, would need parent to handle
-                }}
-                disabled
-              >
-                One day
-              </button>
-              <button
-                type="button"
-                className={`${styles.modeBtn} ${mode === "several_days" ? styles.active : ""}`}
-                onClick={() => {}}
-                disabled
-              >
-                Several days
-              </button>
-            </div>
           </div>
 
           {/* Reason */}
@@ -586,15 +563,6 @@ export default function MarkOutModal({
             </div>
           )}
 
-          {/* Email option */}
-          <label className={styles.emailCheckbox}>
-            <input
-              type="checkbox"
-              checked={sendEmail}
-              onChange={e => setSendEmail(e.target.checked)}
-            />
-            Email each sub their class details
-          </label>
         </div>
 
         <div className={styles.footer}>

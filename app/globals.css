@@ -2,7 +2,6 @@
   --navy: #1F3F91;
   --navy-deep: #142C6B;
   --navy-mid: #2B4FA3;
-  --gold: #D8AE4B;
   --orange: #F2A65E;
   --orange-dark: #E08A3C;
   --teal: #3E8FA0;
@@ -17,6 +16,8 @@
   --on-navy: #FFFFFF;
   --on-navy-soft: #C4D0EE;
   --shadow: 0 14px 34px rgba(20, 44, 107, 0.14);
+  --font-display: var(--font-baloo), 'Baloo 2', sans-serif;
+  --font-body: var(--font-nunito), 'Nunito', sans-serif;
 }
 
 * { box-sizing: border-box; }

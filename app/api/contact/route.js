@@ -58,13 +58,11 @@ export async function POST(request) {
 
     // Honeypot check - if filled, silently reject (return success to not alert spammers)
     if (website) {
-      console.log("Spam blocked: honeypot filled");
       return NextResponse.json({ success: true });
     }
 
     // Time-based check - form submitted too quickly (< 2 seconds = likely bot)
     if (_ts && Date.now() - _ts < 2000) {
-      console.log("Spam blocked: submitted too quickly");
       return NextResponse.json({ success: true });
     }
 
@@ -72,7 +70,6 @@ export async function POST(request) {
     const clientIP = getClientIP(request);
     const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIP);
     if (!turnstileResult.success) {
-      console.log("Spam blocked: Turnstile verification failed");
       return NextResponse.json(
         { error: turnstileResult.error || "Please complete the security check" },
         { status: 400 }
@@ -81,7 +78,6 @@ export async function POST(request) {
 
     // Rate limiting (in-memory fallback - keep as secondary protection)
     if (isRateLimited(clientIP)) {
-      console.log(`Rate limited: ${clientIP}`);
       return NextResponse.json(
         { error: "Too many submissions. Please try again later." },
         { status: 429 }

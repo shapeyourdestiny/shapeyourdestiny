@@ -4,7 +4,7 @@ import styles from "./TrustMarquee.module.css";
 // Partner logos with descriptive alt text for accessibility
 const PARTNERS = [
   { src: "/Images/partner3.png", alt: "Partner school district" },
-  { src: "/Images/partner4.png", alt: "Partner educational organization" },
+  { src: "/Images/partner4.webp", alt: "Partner educational organization" },
   { src: "/Images/partner5.png", alt: "Partner elementary school" },
   { src: "/Images/Garden-City-Community-College-NSKS.jpg", alt: "Garden City Community College" },
   { src: "/Images/partner7.png", alt: "Partner school" },

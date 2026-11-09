@@ -21,7 +21,7 @@ export const metadata = {
     siteName: "Shape Your Destiny",
     images: [
       {
-        url: "/Images/og-default.jpg",
+        url: "/Images/hero-kids.webp",
         width: 1200,
         height: 630,
         alt: "Shape Your Destiny - Youth Wellness Programs",
@@ -35,7 +35,7 @@ export const metadata = {
     title: "Youth Wellness & After-School Programs | Shape Your Destiny",
     description:
       "Holistic youth wellness programs combining fitness, mindfulness, nutrition, and SEL to help children thrive.",
-    images: ["/Images/og-default.jpg"],
+    images: ["/Images/hero-kids.webp"],
   },
   alternates: {
     canonical: "https://shapeyourdestiny.co",
@@ -60,7 +60,7 @@ export default function Home() {
             "At Shape Your Destiny, we know kids need more than fitness or nutrition alone. True growth happens when children connect the dots. They see that moving their bodies and eating well also shapes how they feel emotionally.",
             "This approach makes them more engaged, confident, and resilient.",
           ]}
-          imageSrc="/Images/whole-child-main.png"
+          imageSrc="/Images/whole-child-main.webp"
           imageAlt="Instructor leading kids through a mindfulness activity"
         />
 

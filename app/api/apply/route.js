@@ -80,8 +80,6 @@ async function compressPDF(buffer) {
     const originalSize = buffer.byteLength;
     const compressedSize = compressedBytes.byteLength;
 
-    console.log(`resume ${(originalSize / 1024 / 1024).toFixed(1)} MB -> ${(compressedSize / 1024 / 1024).toFixed(1)} MB`);
-
     // Return smaller version
     if (compressedSize < originalSize) {
       return Buffer.from(compressedBytes);
@@ -239,8 +237,6 @@ export async function POST(request) {
     const random = crypto.randomBytes(8).toString("hex");
     const safeName = sanitizeFilename(file.name);
 
-    console.log("Existing app check:", { existingApp, email });
-
     if (existingApp) {
       // Already applied recently - show helpful message
       return NextResponse.json(
@@ -253,7 +249,6 @@ export async function POST(request) {
 
     // Create new application
     // First, create a placeholder to get the ID for the storage path
-    console.log("Creating new application for:", email);
     const { data: newApp, error: insertError } = await adminClient
       .from("instructor_applications")
       .insert({
@@ -269,8 +264,6 @@ export async function POST(request) {
       })
       .select("id")
       .single();
-
-    console.log("Insert result:", { newApp, insertError });
 
     if (insertError) {
       console.error("Failed to create application:", insertError);

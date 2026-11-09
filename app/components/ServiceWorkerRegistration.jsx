@@ -7,14 +7,7 @@ export default function ServiceWorkerRegistration() {
     if ("serviceWorker" in navigator) {
       // Register service worker after page load to not block rendering
       window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("/sw.js")
-          .then((registration) => {
-            console.log("SW registered:", registration.scope);
-          })
-          .catch((error) => {
-            console.log("SW registration failed:", error);
-          });
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
       });
     }
   }, []);

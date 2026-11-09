@@ -367,8 +367,6 @@ export default function ProgramsClient({ initialData, progressMap: initialProgre
         dayOffPreview.timePeriod
       );
 
-      // TODO: Send inbox notifications to affected instructors
-
       await refreshData();
       setHolidayDate("");
       setHolidayName("");
@@ -474,8 +472,6 @@ export default function ProgramsClient({ initialData, progressMap: initialProgre
         throw new Error(data.error || "Failed to add");
       }
       const newOffDay = await res.json();
-
-      // TODO: Send inbox notifications to affected instructors
 
       setProgramOffDays((prev) => [...prev, newOffDay].sort((a, b) => a.date.localeCompare(b.date)));
       setOffDayDate("");

@@ -45,24 +45,17 @@ export default function InstructorLoginPage() {
       return;
     }
 
-    // Get user from sign in response and redirect based on role
-    console.log("Sign in successful, checking role...");
-
+    // Redirect based on role
     try {
       const res = await fetch("/api/auth/check-role");
-      console.log("API response status:", res.status);
       const data = await res.json();
-      console.log("Role check result:", data);
 
       if (data.role === "admin") {
-        console.log("Redirecting to admin...");
         window.location.href = "/admin/dashboard";
       } else {
-        console.log("Redirecting to instructor...");
         window.location.href = "/instructor/dashboard";
       }
-    } catch (err) {
-      console.error("Error checking role:", err);
+    } catch {
       window.location.href = "/instructor/dashboard";
     }
   };
