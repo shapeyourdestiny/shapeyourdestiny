@@ -13,6 +13,7 @@ const TYPE_COLORS = {
   observations: "#D97706",
   disciplinary: "#E0594C",
   recognition: "#DB2777",
+  class_note: "#6366F1",
 };
 
 const DISCIPLINARY_STEPS = ["verbal", "written", "final", "suspension"];
@@ -57,7 +58,7 @@ function getNinetyDaysFromNow() {
   return d;
 }
 
-export default function NotesHistory({ instructor, notesData, onRefresh }) {
+export default function NotesHistory({ instructor, notesData, classNotes = [], onRefresh }) {
   const [typeFilter, setTypeFilter] = useState("all");
   const [showArchived, setShowArchived] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
@@ -95,6 +96,26 @@ export default function NotesHistory({ instructor, notesData, onRefresh }) {
       });
     });
 
+    // Add class notes (instructor feedback)
+    (classNotes || []).forEach((cn) => {
+      entries.push({
+        id: cn.id,
+        entryType: "class_note",
+        type: "class_note",
+        sortDate: cn.session_date,
+        title: `Class feedback`,
+        school: cn.classes?.schools?.name,
+        program: cn.classes?.program,
+        time: cn.classes?.time,
+        overall: cn.overall,
+        attention: cn.attention,
+        behavior: cn.behavior,
+        needs_supplies: cn.needs_supplies,
+        body: cn.body,
+        created_at: cn.created_at,
+      });
+    });
+
     // Sort by date descending
     entries.sort((a, b) => b.sortDate.localeCompare(a.sortDate));
 
@@ -104,7 +125,7 @@ export default function NotesHistory({ instructor, notesData, onRefresh }) {
     }
 
     return entries;
-  }, [notes, attendance, showArchived, typeFilter]);
+  }, [notes, attendance, classNotes, showArchived, typeFilter]);
 
   // Count notes by type
   const typeCounts = useMemo(() => {
@@ -116,8 +137,10 @@ export default function NotesHistory({ instructor, notesData, onRefresh }) {
     });
     counts.attendance = (attendance || []).length;
     counts.all += counts.attendance;
+    counts.class_note = (classNotes || []).length;
+    counts.all += counts.class_note;
     return counts;
-  }, [notes, attendance, showArchived]);
+  }, [notes, attendance, classNotes, showArchived]);
 
   const handleAddNote = () => {
     setEditingNote(null);
@@ -396,7 +419,7 @@ export default function NotesHistory({ instructor, notesData, onRefresh }) {
                   All
                 </button>
               )}
-              {["review", "pay", "attendance", "training", "communication", "observations", "disciplinary", "recognition"]
+              {["review", "pay", "attendance", "class_note", "training", "communication", "observations", "disciplinary", "recognition"]
                 .filter((type) => typeCounts[type] > 0)
                 .map((type) => (
                   <button
@@ -464,6 +487,70 @@ export default function NotesHistory({ instructor, notesData, onRefresh }) {
                       <div className={styles.attendanceSub}>
                         {entry.subName ? `Covered by ${entry.subName}` : "No sub found."}
                       </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              // Class note entry (instructor feedback)
+              if (entry.entryType === "class_note") {
+                return (
+                  <div key={`cn-${entry.id}`} className={`${styles.timelineEntry} ${styles.class_note}`}>
+                    <div className={styles.dateCol}>
+                      <span className={styles.dateMonth}>{dateParts.month}</span>
+                      <span className={styles.dateDay}>{dateParts.day}</span>
+                      <span className={styles.dateYear}>{dateParts.year}</span>
+                    </div>
+                    <div className={styles.entryContent}>
+                      <div className={styles.entryHeader}>
+                        <span className={`${styles.typeTag} ${styles.class_note}`}>Class Note</span>
+                        <span className={styles.attendanceLabel}>From Past Classes</span>
+                      </div>
+                      <div className={styles.entryBody}>
+                        {entry.school} &middot; {entry.program === "soccer" ? "Soccer" : "Wellness"} &middot; {entry.time}
+                      </div>
+                      <div className={styles.classNoteStars}>
+                        <div className={styles.classNoteStarRow}>
+                          <span className={styles.classNoteStarLabel}>Overall</span>
+                          <span className={styles.classNoteStarIcons}>
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <svg key={i} viewBox="0 0 24 24" className={i <= entry.overall ? styles.starFilled : styles.starEmpty}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            ))}
+                          </span>
+                        </div>
+                        {entry.attention && (
+                          <div className={styles.classNoteStarRow}>
+                            <span className={styles.classNoteStarLabel}>Attention</span>
+                            <span className={styles.classNoteStarIcons}>
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <svg key={i} viewBox="0 0 24 24" className={i <= entry.attention ? styles.starFilled : styles.starEmpty}>
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                              ))}
+                            </span>
+                          </div>
+                        )}
+                        {entry.behavior && (
+                          <div className={styles.classNoteStarRow}>
+                            <span className={styles.classNoteStarLabel}>Behavior</span>
+                            <span className={styles.classNoteStarIcons}>
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <svg key={i} viewBox="0 0 24 24" className={i <= entry.behavior ? styles.starFilled : styles.starEmpty}>
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                              ))}
+                            </span>
+                          </div>
+                        )}
+                        {entry.needs_supplies && (
+                          <span className={styles.needsSuppliesBadge}>Needs supplies</span>
+                        )}
+                      </div>
+                      {entry.body && (
+                        <div className={styles.classNoteBody}>{entry.body}</div>
+                      )}
                     </div>
                   </div>
                 );

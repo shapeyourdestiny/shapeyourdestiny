@@ -8,6 +8,7 @@ import {
   deleteClassAction,
   assignInstructorAction,
   unassignInstructorAction,
+  fetchClassNotesAction,
 } from "@/lib/schedule/actions";
 import { computeClassOccurrences } from "@/lib/schedule/occurrences";
 
@@ -196,6 +197,10 @@ export default function ClassPanel({
   // Instructor assignment
   const [showInstructorPicker, setShowInstructorPicker] = useState(null); // 'instructor_1' or 'instructor_2'
 
+  // Class notes
+  const [classNotes, setClassNotes] = useState([]);
+  const [notesLoading, setNotesLoading] = useState(false);
+
   // Get instructors from data
   const instructors = data.instructors || [];
 
@@ -222,6 +227,25 @@ export default function ClassPanel({
     const firstFocusable = panel.querySelector("button, input, select, textarea");
     firstFocusable?.focus();
   }, []);
+
+  // Fetch class notes for existing class
+  useEffect(() => {
+    if (!classId || mode !== "edit") return;
+
+    async function fetchNotes() {
+      setNotesLoading(true);
+      try {
+        const notes = await fetchClassNotesAction(classId, 10);
+        setClassNotes(notes || []);
+      } catch (err) {
+        console.error("Failed to fetch class notes:", err);
+      } finally {
+        setNotesLoading(false);
+      }
+    }
+
+    fetchNotes();
+  }, [classId, mode]);
 
   const handleDayToggle = (day) => {
     setDays((prev) =>
@@ -629,6 +653,143 @@ export default function ClassPanel({
                     )}
                   </div>
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* Class Notes (edit mode only) */}
+          {existingClass && (
+            <div className={styles.notesSection}>
+              <h4>Class notes</h4>
+              {notesLoading ? (
+                <p className={styles.notesLoading}>Loading notes...</p>
+              ) : classNotes.length === 0 ? (
+                <p className={styles.noNotes}>No notes from instructors yet.</p>
+              ) : (
+                <>
+                  {/* 30-day averages */}
+                  {classNotes.length > 0 && (
+                    <div className={styles.notesAverages}>
+                      <span className={styles.averagesLabel}>30-day avg</span>
+                      <div className={styles.averagesRow}>
+                        <span className={styles.avgLabel}>Overall</span>
+                        <span className={styles.avgStars}>
+                          {[1, 2, 3, 4, 5].map((i) => {
+                            const avg = classNotes.reduce((sum, n) => sum + (n.overall || 0), 0) / classNotes.length;
+                            return (
+                              <svg key={i} viewBox="0 0 24 24" className={i <= Math.round(avg) ? styles.starFilled : styles.starEmpty}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            );
+                          })}
+                        </span>
+                        <span className={styles.avgValue}>
+                          {(classNotes.reduce((sum, n) => sum + (n.overall || 0), 0) / classNotes.length).toFixed(1)}
+                        </span>
+                      </div>
+                      {classNotes.some(n => n.attention) && (
+                        <div className={styles.averagesRow}>
+                          <span className={styles.avgLabel}>Attention</span>
+                          <span className={styles.avgStars}>
+                            {[1, 2, 3, 4, 5].map((i) => {
+                              const notes = classNotes.filter(n => n.attention);
+                              const avg = notes.length > 0 ? notes.reduce((sum, n) => sum + n.attention, 0) / notes.length : 0;
+                              return (
+                                <svg key={i} viewBox="0 0 24 24" className={i <= Math.round(avg) ? styles.starFilled : styles.starEmpty}>
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                              );
+                            })}
+                          </span>
+                          <span className={styles.avgValue}>
+                            {(() => {
+                              const notes = classNotes.filter(n => n.attention);
+                              return notes.length > 0 ? (notes.reduce((sum, n) => sum + n.attention, 0) / notes.length).toFixed(1) : "-";
+                            })()}
+                          </span>
+                        </div>
+                      )}
+                      {classNotes.some(n => n.behavior) && (
+                        <div className={styles.averagesRow}>
+                          <span className={styles.avgLabel}>Behavior</span>
+                          <span className={styles.avgStars}>
+                            {[1, 2, 3, 4, 5].map((i) => {
+                              const notes = classNotes.filter(n => n.behavior);
+                              const avg = notes.length > 0 ? notes.reduce((sum, n) => sum + n.behavior, 0) / notes.length : 0;
+                              return (
+                                <svg key={i} viewBox="0 0 24 24" className={i <= Math.round(avg) ? styles.starFilled : styles.starEmpty}>
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                              );
+                            })}
+                          </span>
+                          <span className={styles.avgValue}>
+                            {(() => {
+                              const notes = classNotes.filter(n => n.behavior);
+                              return notes.length > 0 ? (notes.reduce((sum, n) => sum + n.behavior, 0) / notes.length).toFixed(1) : "-";
+                            })()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className={styles.notesList}>
+                    {classNotes.map((note) => (
+                      <div key={note.id} className={styles.noteItem}>
+                        <div className={styles.noteHeader}>
+                          <span className={styles.noteInstructor}>
+                            {note.profile?.full_name?.split(" ")[0]}
+                          </span>
+                          <span className={styles.noteDate}>
+                            {new Date(note.session_date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          </span>
+                        </div>
+                        <div className={styles.noteStars}>
+                          <div className={styles.noteStarRow}>
+                            <span className={styles.noteStarLabel}>Overall</span>
+                            <span className={styles.noteStarIcons}>
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <svg key={i} viewBox="0 0 24 24" className={i <= note.overall ? styles.starFilled : styles.starEmpty}>
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                              ))}
+                            </span>
+                          </div>
+                          {note.attention && (
+                            <div className={styles.noteStarRow}>
+                              <span className={styles.noteStarLabel}>Attention</span>
+                              <span className={styles.noteStarIcons}>
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                  <svg key={i} viewBox="0 0 24 24" className={i <= note.attention ? styles.starFilled : styles.starEmpty}>
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                  </svg>
+                                ))}
+                              </span>
+                            </div>
+                          )}
+                          {note.behavior && (
+                            <div className={styles.noteStarRow}>
+                              <span className={styles.noteStarLabel}>Behavior</span>
+                              <span className={styles.noteStarIcons}>
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                  <svg key={i} viewBox="0 0 24 24" className={i <= note.behavior ? styles.starFilled : styles.starEmpty}>
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                  </svg>
+                                ))}
+                              </span>
+                            </div>
+                          )}
+                          {note.needs_supplies && (
+                            <span className={styles.needsSuppliesBadge}>Needs supplies</span>
+                          )}
+                        </div>
+                        {note.body && (
+                          <p className={styles.noteBody}>{note.body}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           )}

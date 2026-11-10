@@ -523,3 +523,166 @@
   font-weight: 600;
   color: var(--ink-soft);
 }
+
+/* Class notes section */
+.notesSection {
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.notesSection h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.notesLoading {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+.noNotes {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+.notesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.noteItem {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #e5e5e5;
+}
+
+.noteHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.noteInstructor {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.noteDate {
+  font-size: 12px;
+  color: #888;
+  margin-left: auto;
+}
+
+/* 30-day averages */
+.notesAverages {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #e5e5e5;
+  margin-bottom: 12px;
+}
+
+.averagesLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.averagesRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.avgLabel {
+  font-size: 12px;
+  color: #666;
+  min-width: 60px;
+}
+
+.avgStars {
+  display: flex;
+  gap: 2px;
+}
+
+.avgStars svg {
+  width: 14px;
+  height: 14px;
+}
+
+.avgValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  margin-left: auto;
+}
+
+/* Note star ratings */
+.noteStars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.noteStarRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.noteStarLabel {
+  font-size: 11px;
+  color: #888;
+  min-width: 55px;
+}
+
+.noteStarIcons {
+  display: flex;
+  gap: 2px;
+}
+
+.noteStarIcons svg {
+  width: 12px;
+  height: 12px;
+}
+
+.starFilled {
+  fill: #F2A93B;
+}
+
+.starEmpty {
+  fill: #DCE3F1;
+}
+
+.needsSuppliesBadge {
+  display: inline-flex;
+  padding: 3px 8px;
+  background: #fef3c7;
+  color: #b45309;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.noteBody {
+  font-size: 13px;
+  color: #555;
+  margin: 0;
+  line-height: 1.4;
+}

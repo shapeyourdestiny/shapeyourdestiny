@@ -71,7 +71,7 @@ const CALENDAR_APPS = {
   other: "other app",
 };
 
-export default function InstructorDetail({ instructor, districts = [], notesData, attendanceData, calendarSyncStatus, payRate: initialPayRate }) {
+export default function InstructorDetail({ instructor, districts = [], notesData, attendanceData, calendarSyncStatus, payRate: initialPayRate, classNotes = [] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -724,6 +724,7 @@ export default function InstructorDetail({ instructor, districts = [], notesData
         <NotesHistory
           instructor={instructor}
           notesData={notesData}
+          classNotes={classNotes}
           onRefresh={handleRefreshNotes}
         />
       )}

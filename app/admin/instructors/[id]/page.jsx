@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getInstructorDetail } from "@/lib/instructors/queries";
 import { getInstructorFile } from "@/lib/instructor-notes/queries";
 import { getAttendance } from "@/lib/instructors/attendance";
+import { getClassNotesForInstructor } from "@/lib/instructor/class-notes";
 import InstructorDetail from "./InstructorDetail";
 
 export const dynamic = "force-dynamic";
@@ -110,6 +111,15 @@ export default async function InstructorDetailPage({ params }) {
     // Table may not exist yet
   }
 
+  // Fetch class notes (instructor feedback on their classes)
+  let classNotes = [];
+  try {
+    classNotes = await getClassNotesForInstructor(id);
+  } catch (err) {
+    console.error("Error fetching class notes:", err);
+    // Table may not exist yet
+  }
+
   return (
     <Suspense fallback={null}>
       <InstructorDetail
@@ -119,6 +129,7 @@ export default async function InstructorDetailPage({ params }) {
         attendanceData={attendanceData}
         calendarSyncStatus={calendarSyncStatus}
         payRate={payRate}
+        classNotes={classNotes}
       />
     </Suspense>
   );

@@ -49,6 +49,7 @@ const ISSUE_KINDS = {
   other: "Other",
 };
 
+
 export default function InboxClient({ inboxData }) {
   const router = useRouter();
   const [loading, setLoading] = useState({});
@@ -57,7 +58,7 @@ export default function InboxClient({ inboxData }) {
   const [resolvingIssue, setResolvingIssue] = useState(null);
   const [resolutionNote, setResolutionNote] = useState("");
 
-  const { pendingShoutOuts, instructorReplies, payrollIssues, payrollStatus, newApplications, totalPending } = inboxData;
+  const { pendingShoutOuts, instructorReplies, payrollIssues, payrollStatus, newApplications, toughClassNotes, totalPending } = inboxData;
 
   const handleApproveShoutOut = async (id, message = null) => {
     setLoading((prev) => ({ ...prev, [id]: true }));
@@ -387,6 +388,84 @@ export default function InboxClient({ inboxData }) {
                     </svg>
                   </span>
                 </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Class Notes (low ratings or needs supplies) */}
+      {toughClassNotes?.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </span>
+            Class notes
+            <span className={styles.sectionCount}>{toughClassNotes.length}</span>
+          </h2>
+
+          <div className={styles.cardList}>
+            {toughClassNotes.map((note) => (
+              <a
+                key={note.id}
+                href={`/admin/programs?classId=${note.classes?.id}`}
+                className={`${styles.card} ${styles.linkCard}`}
+              >
+                <div className={styles.cardHeader}>
+                  {renderAvatar(note.profile, 36)}
+                  <div className={styles.cardMeta}>
+                    <span className={styles.cardNames}>{note.profile?.full_name?.split(" ")[0]}</span>
+                    <span className={styles.cardTime}>
+                      {note.classes?.schools?.name} - {formatDate(note.session_date)}
+                    </span>
+                  </div>
+                  <span className={styles.cardArrow}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </div>
+
+                <div className={styles.classNoteStars}>
+                  <span className={styles.starRow}>
+                    <span className={styles.starLabel}>Overall</span>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <svg key={i} viewBox="0 0 24 24" className={i <= note.overall ? styles.starFilled : styles.starEmpty}>
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    ))}
+                  </span>
+                  {note.attention && (
+                    <span className={styles.starRow}>
+                      <span className={styles.starLabel}>Attention</span>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <svg key={i} viewBox="0 0 24 24" className={i <= note.attention ? styles.starFilled : styles.starEmpty}>
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      ))}
+                    </span>
+                  )}
+                  {note.behavior && (
+                    <span className={styles.starRow}>
+                      <span className={styles.starLabel}>Behavior</span>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <svg key={i} viewBox="0 0 24 24" className={i <= note.behavior ? styles.starFilled : styles.starEmpty}>
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      ))}
+                    </span>
+                  )}
+                  {note.needs_supplies && (
+                    <span className={styles.needsSuppliesBadge}>Needs supplies</span>
+                  )}
+                </div>
+
+                {note.body && (
+                  <p className={styles.cardMessage}>&ldquo;{note.body}&rdquo;</p>
+                )}
               </a>
             ))}
           </div>
