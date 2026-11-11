@@ -377,6 +377,53 @@ export async function GET(request, context) {
     }
   }
 
+  // Get team events for this instructor
+  const { data: teamEvents } = await supabase
+    .from("team_events")
+    .select(`
+      id,
+      type,
+      title,
+      event_date,
+      start_time,
+      end_time,
+      location,
+      details,
+      status,
+      sequence,
+      team_event_people!inner (
+        profile_id,
+        rsvp
+      )
+    `)
+    .eq("team_event_people.profile_id", feed.profile_id)
+    .gte("event_date", rangeStart)
+    .lte("event_date", rangeEnd);
+
+  // Add team events
+  for (const event of teamEvents || []) {
+    const typeLabels = {
+      meeting: "Team meeting",
+      training: "Team training",
+      social: "Team social",
+    };
+    const typeLabel = typeLabels[event.type] || "Team event";
+
+    events.push({
+      uid: `event-${event.id}@shapeyourdestiny.co`,
+      dateStr: event.event_date,
+      startTime: event.start_time,
+      endTime: event.end_time,
+      hoursPerDay: null,
+      summary: `${typeLabel}: ${event.title}`,
+      location: event.location,
+      description: event.details || "",
+      isAllDay: false,
+      status: event.status === "cancelled" ? "CANCELLED" : "CONFIRMED",
+      sequence: event.sequence || 1,
+    });
+  }
+
   // Get pending session reviews for this instructor
   const { data: pendingReviews } = await supabase
     .from("session_reviews")

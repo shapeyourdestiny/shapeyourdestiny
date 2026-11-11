@@ -1,0 +1,261 @@
+.page {
+  max-width: 660px;
+  padding: 0 16px 32px;
+}
+
+@media (max-width: 759px) {
+  .page {
+    max-width: none;
+  }
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+
+.header p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* Workflow Section */
+.workflowSection {
+  margin-bottom: 32px;
+}
+
+.workflowCard {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3a6e 100%);
+  border-radius: 20px;
+  padding: 24px 20px;
+  color: #fff;
+}
+
+.workflowTitle {
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.workflowTitle svg {
+  width: 24px;
+  height: 24px;
+}
+
+.workflowSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.workflowStep {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.stepNumber {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.stepContent {
+  flex: 1;
+  padding-top: 2px;
+}
+
+.stepTitle {
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.stepDesc {
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 14px;
+  opacity: 0.85;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.stepHint {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* FAQ Section */
+.faqSection {
+  margin-top: 8px;
+}
+
+.sectionLabel {
+  display: block;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
+.faqGroup {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 16px rgba(20, 44, 107, 0.08);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.faqGroupTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  border-bottom: 1px solid var(--tint);
+}
+
+.faqGroupTitle svg {
+  width: 20px;
+  height: 20px;
+  color: var(--navy);
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--tint);
+}
+
+.faqItem:last-child {
+  border-bottom: none;
+}
+
+.faqQuestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  min-height: 48px;
+}
+
+.faqQuestion:hover {
+  background: var(--tint);
+}
+
+.faqQuestion:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: -2px;
+}
+
+.faqChevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  transition: transform 0.2s ease;
+}
+
+.faqChevron.open {
+  transform: rotate(90deg);
+}
+
+.faqAnswer {
+  padding: 0 16px 16px;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.faqAnswer p {
+  margin: 0 0 12px;
+}
+
+.faqAnswer p:last-child {
+  margin-bottom: 0;
+}
+
+.faqAnswer ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.faqAnswer li {
+  margin-bottom: 6px;
+}
+
+.faqAnswer li:last-child {
+  margin-bottom: 0;
+}
+
+/* Contact Card */
+.contactCard {
+  margin-top: 24px;
+  background: var(--tint);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+}
+
+.contactTitle {
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.contactText {
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.contactLink {
+  color: var(--navy);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.contactLink:hover {
+  text-decoration: underline;
+}

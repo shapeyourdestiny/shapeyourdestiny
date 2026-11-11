@@ -62,7 +62,7 @@ const NAV_MENU = [
 const NAV_RESOURCES = [
   {
     href: "/instructor/forms",
-    label: "Forms",
+    label: "Resources",
     icon: <DocumentIcon />,
   },
 ];
@@ -75,7 +75,7 @@ const NAV_PROFILE = [
   },
 ];
 
-// Mobile bottom tabs - Schedule, Inbox, and Forms (Profile is in topbar)
+// Mobile bottom tabs - Schedule, Inbox, Resources (Profile is in topbar)
 const MOBILE_TABS = [
   {
     href: "/instructor/dashboard",
@@ -92,9 +92,9 @@ const MOBILE_TABS = [
   },
   {
     href: "/instructor/forms",
-    label: "Forms",
+    label: "Resources",
     icon: <DocumentIcon />,
-    activeFor: ["/instructor/forms", "/instructor/incident-report"],
+    activeFor: ["/instructor/forms", "/instructor/incident-report", "/instructor/help"],
   },
 ];
 

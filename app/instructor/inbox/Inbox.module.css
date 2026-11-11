@@ -981,3 +981,190 @@
   background: rgba(224, 89, 76, 0.3);
   color: #FFC5C0;
 }
+
+/* =============================================================================
+   TEAM EVENT CARD
+   ============================================================================= */
+.teamEventCard {
+  background: #fff;
+  border-radius: 16px;
+  border-left: 4px solid var(--event-color, var(--navy));
+  padding: 18px;
+  box-shadow: 0 2px 12px rgba(20, 44, 107, 0.08);
+}
+
+.teamEventHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.teamEventIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--event-color, var(--navy));
+}
+.teamEventIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.teamEventType {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--event-color, var(--navy));
+  padding: 3px 10px;
+  background: color-mix(in srgb, var(--event-color, var(--navy)) 12%, transparent);
+  border-radius: 6px;
+}
+
+.teamEventOptional {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  padding: 3px 8px;
+  background: var(--tint);
+  border-radius: 6px;
+  margin-left: auto;
+}
+
+.teamEventTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 6px;
+  line-height: 1.25;
+}
+
+.teamEventDetails {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.teamEventDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  opacity: 0.5;
+}
+
+.teamEventLocation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.teamEventLocation svg {
+  flex-shrink: 0;
+}
+
+.teamEventPaid {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal);
+  padding: 4px 10px;
+  background: rgba(62, 143, 160, 0.12);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.teamEventDescription {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+
+/* RSVP Buttons */
+.teamEventRsvp {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.teamEventRsvpYes {
+  flex: 1;
+  padding: 12px 16px;
+  min-height: 44px;
+  background: var(--teal);
+  border: none;
+  border-radius: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.teamEventRsvpYes:hover:not(:disabled) {
+  background: var(--teal-dark);
+  transform: translateY(-1px);
+}
+.teamEventRsvpYes:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.teamEventRsvpNo {
+  flex: 1;
+  padding: 12px 16px;
+  min-height: 44px;
+  background: var(--tint);
+  border: none;
+  border-radius: 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.teamEventRsvpNo:hover:not(:disabled) {
+  background: var(--tint-deep);
+  color: var(--ink);
+}
+.teamEventRsvpNo:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* RSVP Status */
+.teamEventRsvpStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.teamEventRsvpStatus.rsvpYes {
+  background: rgba(62, 143, 160, 0.12);
+  color: var(--teal);
+}
+
+.teamEventRsvpStatus.rsvpNo {
+  background: rgba(211, 47, 47, 0.08);
+  color: #c62828;
+}
+
+.teamEventRsvpReason {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-soft);
+}

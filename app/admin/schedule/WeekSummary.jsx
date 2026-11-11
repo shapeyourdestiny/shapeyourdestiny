@@ -2,8 +2,14 @@
 
 import styles from "./WeekSummary.module.css";
 
+const TYPE_LABELS = {
+  meeting: "Team meeting",
+  training: "Team training",
+  social: "Team social",
+};
+
 /**
- * Week summary strip showing class count, instructor count, absences, and needs-sub count
+ * Week summary strip showing class count, instructor count, absences, team events, and needs-sub count
  *
  * @param {Object} props
  * @param {number} props.classCount - Total classes this week
@@ -11,6 +17,8 @@ import styles from "./WeekSummary.module.css";
  * @param {Array} props.absences - Array of { instructor, startDate, endDate, reason, needsSub }
  * @param {number} props.needsSubCount - Number of sessions that need a sub
  * @param {Function} props.onNeedsSubClick - Callback when "needs a sub" chip is clicked
+ * @param {Array} props.teamEvents - Array of team events for the week
+ * @param {Function} props.onTeamEventClick - Callback when a team event chip is clicked
  */
 export default function WeekSummary({
   classCount,
@@ -18,6 +26,8 @@ export default function WeekSummary({
   absences = [],
   needsSubCount = 0,
   onNeedsSubClick,
+  teamEvents = [],
+  onTeamEventClick,
 }) {
   // Format date range for absence display
   const formatAbsenceRange = (absence) => {
@@ -63,6 +73,17 @@ export default function WeekSummary({
               {absence.reason && ` (${absence.reason.toLowerCase()})`}
             </span>
           </div>
+        ))}
+
+        {/* Team event chips */}
+        {teamEvents.map((event) => (
+          <button
+            key={event.id}
+            className={styles.teamEventChip}
+            onClick={() => onTeamEventClick?.(event)}
+          >
+            {TYPE_LABELS[event.type] || "Team event"} {formatDayShort(event.event_date)}
+          </button>
         ))}
 
         {needsSubCount > 0 && (

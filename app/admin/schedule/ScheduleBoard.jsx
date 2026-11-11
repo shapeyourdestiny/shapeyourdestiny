@@ -7,6 +7,9 @@ import AddClassModal from "./AddClassModal";
 import WeekSummary from "./WeekSummary";
 import SlotMenu from "./SlotMenu";
 import MarkOutModal from "./MarkOutModal";
+import TeamEventModal from "./TeamEventModal";
+import TeamEventDetail from "./TeamEventDetail";
+import AttendanceModal from "./AttendanceModal";
 import {
   assignInstructorAction,
 } from "@/lib/schedule/actions";
@@ -25,6 +28,13 @@ const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "S
 const PROGRAM_COLORS = {
   wellness: "#3E8FA0",   // teal
   soccer: "#1F3F91",     // navy
+};
+
+// Team event type colors
+const TEAM_EVENT_COLORS = {
+  meeting: "#1F3F91",   // navy
+  training: "#3E8FA0",  // teal
+  social: "#F2A65E",    // amber
 };
 
 // Avatar colors for initials (consistent hashing from profile ID)
@@ -152,6 +162,34 @@ export default function ScheduleBoard({ initialData }) {
   const [markOutClass, setMarkOutClass] = useState(null);
   const [markOutDate, setMarkOutDate] = useState(null);
   const [markOutSlotType, setMarkOutSlotType] = useState(null);
+
+  // Team event state
+  const [teamEvents, setTeamEvents] = useState([]);
+  const [teamEventModalOpen, setTeamEventModalOpen] = useState(false);
+  const [teamEventDetailOpen, setTeamEventDetailOpen] = useState(null); // event object
+  const [attendanceModalOpen, setAttendanceModalOpen] = useState(null); // event object
+  const [editingTeamEvent, setEditingTeamEvent] = useState(null);
+
+  // Fetch team events when week changes
+  useEffect(() => {
+    async function fetchTeamEvents() {
+      const startDate = formatDateKey(weekStart);
+      const end = new Date(weekStart);
+      end.setDate(end.getDate() + 6);
+      const endDate = formatDateKey(end);
+
+      try {
+        const res = await fetch(`/api/admin/team-events?start=${startDate}&end=${endDate}`);
+        if (res.ok) {
+          const events = await res.json();
+          setTeamEvents(events);
+        }
+      } catch (err) {
+        console.error("Failed to fetch team events:", err);
+      }
+    }
+    fetchTeamEvents();
+  }, [weekStart]);
 
   // Close popover when clicking outside
   useEffect(() => {
@@ -671,6 +709,8 @@ export default function ScheduleBoard({ initialData }) {
               firstNeedsSub.scrollIntoView({ behavior: "smooth", block: "center" });
             }
           }}
+          teamEvents={teamEvents}
+          onTeamEventClick={(event) => setTeamEventDetailOpen(event)}
         />
 
         {/* Day grid (5 or 6 columns) */}
@@ -686,7 +726,10 @@ export default function ScheduleBoard({ initialData }) {
             // Count needs-sub for this day
             const sessionChanges = data.sessionChanges || [];
             const dayNeedsSub = countNeedsSub(sessionChanges, dateStr, dateStr);
-            const hasClasses = dayClasses.length > 0;
+
+            // Get team events for this day
+            const dayTeamEvents = teamEvents.filter((e) => e.event_date === dateStr);
+            const hasClasses = dayClasses.length > 0 || dayTeamEvents.length > 0;
 
             return (
               <div
@@ -704,6 +747,31 @@ export default function ScheduleBoard({ initialData }) {
                   </div>
                 </div>
                 <div className={styles.weekColumnContent}>
+                  {/* Show team events */}
+                  {dayTeamEvents.map((event) => {
+                    const typeColor = TEAM_EVENT_COLORS[event.type] || TEAM_EVENT_COLORS.meeting;
+                    const yesCount = event.people?.filter((p) => p.rsvp === "yes").length || 0;
+                    const pendingCount = event.people?.filter((p) => !p.rsvp).length || 0;
+                    return (
+                      <button
+                        key={event.id}
+                        className={`${styles.teamEventCard} ${event.status === "cancelled" ? styles.cancelled : ""}`}
+                        style={{ "--event-color": typeColor }}
+                        onClick={() => setTeamEventDetailOpen(event)}
+                      >
+                        <div className={styles.teamEventHeader}>
+                          <span className={styles.teamEventType}>{event.type}</span>
+                          <span className={styles.teamEventTime}>
+                            {event.start_time?.slice(0, 5)}
+                          </span>
+                        </div>
+                        <div className={styles.teamEventTitle}>{event.title}</div>
+                        <div className={styles.teamEventRsvp}>
+                          {yesCount} coming{pendingCount > 0 && ` · ${pendingCount} pending`}
+                        </div>
+                      </button>
+                    );
+                  })}
                   {/* Show holidays */}
                   {dayHolidays.length > 0 && (
                     <div className={styles.holidayBanner}>
@@ -1159,6 +1227,12 @@ export default function ScheduleBoard({ initialData }) {
           >
             Mark someone out
           </button>
+          <button
+            className={styles.markOutBtn}
+            onClick={() => setTeamEventModalOpen(true)}
+          >
+            + Team event
+          </button>
           <button className={styles.addClassBtn} onClick={() => setAddClassOpen(true)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -1263,6 +1337,85 @@ export default function ScheduleBoard({ initialData }) {
         onSave={async () => {
           await refreshData();
           handleCloseMarkOutModal();
+        }}
+      />
+
+      {/* Team Event Create/Edit Modal */}
+      <TeamEventModal
+        open={teamEventModalOpen || editingTeamEvent !== null}
+        onClose={() => {
+          setTeamEventModalOpen(false);
+          setEditingTeamEvent(null);
+        }}
+        event={editingTeamEvent}
+        instructors={data.instructors}
+        onSave={async () => {
+          // Refetch team events
+          const startDate = formatDateKey(weekStart);
+          const end = new Date(weekStart);
+          end.setDate(end.getDate() + 6);
+          const endDate = formatDateKey(end);
+          try {
+            const res = await fetch(`/api/admin/team-events?start=${startDate}&end=${endDate}`);
+            if (res.ok) {
+              const events = await res.json();
+              setTeamEvents(events);
+            }
+          } catch (err) {
+            console.error("Failed to refresh team events:", err);
+          }
+        }}
+      />
+
+      {/* Team Event Detail Modal */}
+      <TeamEventDetail
+        open={teamEventDetailOpen !== null}
+        onClose={() => setTeamEventDetailOpen(null)}
+        event={teamEventDetailOpen}
+        onEdit={(event) => {
+          setTeamEventDetailOpen(null);
+          setEditingTeamEvent(event);
+        }}
+        onMarkAttendance={(event) => {
+          setTeamEventDetailOpen(null);
+          setAttendanceModalOpen(event);
+        }}
+        onRefresh={async () => {
+          const startDate = formatDateKey(weekStart);
+          const end = new Date(weekStart);
+          end.setDate(end.getDate() + 6);
+          const endDate = formatDateKey(end);
+          try {
+            const res = await fetch(`/api/admin/team-events?start=${startDate}&end=${endDate}`);
+            if (res.ok) {
+              const events = await res.json();
+              setTeamEvents(events);
+            }
+          } catch (err) {
+            console.error("Failed to refresh team events:", err);
+          }
+        }}
+      />
+
+      {/* Attendance Modal */}
+      <AttendanceModal
+        open={attendanceModalOpen !== null}
+        onClose={() => setAttendanceModalOpen(null)}
+        event={attendanceModalOpen}
+        onSave={async () => {
+          const startDate = formatDateKey(weekStart);
+          const end = new Date(weekStart);
+          end.setDate(end.getDate() + 6);
+          const endDate = formatDateKey(end);
+          try {
+            const res = await fetch(`/api/admin/team-events?start=${startDate}&end=${endDate}`);
+            if (res.ok) {
+              const events = await res.json();
+              setTeamEvents(events);
+            }
+          } catch (err) {
+            console.error("Failed to refresh team events:", err);
+          }
         }}
       />
     </div>

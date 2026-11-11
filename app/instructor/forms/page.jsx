@@ -2,7 +2,7 @@ import Link from "next/link";
 import styles from "./page.module.css";
 
 export const metadata = {
-  title: "Forms & Resources | Shape Your Destiny",
+  title: "Resources | Shape Your Destiny",
 };
 
 const RESOURCES = [
@@ -45,13 +45,34 @@ const ChevronIcon = () => (
   </svg>
 );
 
+const HelpIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
+
 export default function FormsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Forms & resources</h1>
-        <p>Report an incident here. More is on the way.</p>
+        <h1>Resources</h1>
+        <p>Help, forms, and more.</p>
       </div>
+
+      <Link href="/instructor/help" className={styles.helpCard}>
+        <div className={styles.helpTile}>
+          <HelpIcon />
+        </div>
+        <div className={styles.incidentText}>
+          <span className={styles.incidentTitle}>Help & FAQ</span>
+          <span className={styles.incidentSub}>How to use the app</span>
+        </div>
+        <div className={styles.incidentChevron}>
+          <ChevronIcon />
+        </div>
+      </Link>
 
       <Link href="/instructor/incident-report" className={styles.incidentCard}>
         <div className={styles.incidentTile}>

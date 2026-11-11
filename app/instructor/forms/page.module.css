@@ -27,6 +27,53 @@
   margin: 0;
 }
 
+/* Help Card */
+.helpCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  background: linear-gradient(135deg, #2A7B9B 0%, #1D5F7A 100%);
+  color: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(42, 123, 155, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: 16px;
+}
+
+.helpCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(42, 123, 155, 0.4);
+}
+
+.helpCard:active {
+  transform: translateY(0);
+}
+
+.helpCard:focus-visible {
+  outline: 3px solid #2A7B9B;
+  outline-offset: 2px;
+}
+
+.helpTile {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.helpTile svg {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
 /* Incident Report Card */
 .incidentCard {
   display: flex;
@@ -34,7 +81,7 @@
   gap: 14px;
   width: 100%;
   background: var(--navy);
-  color: var(--ink);
+  color: #fff;
   border-radius: 18px;
   padding: 16px;
   text-decoration: none;

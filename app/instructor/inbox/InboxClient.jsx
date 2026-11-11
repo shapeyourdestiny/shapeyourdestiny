@@ -6,7 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./Inbox.module.css";
 import { markNoteViewed, markInboxRead, markAllRead } from "@/lib/instructor/actions";
+import { updateRSVP } from "@/lib/team-events/actions";
 import ComposeShoutOut from "./ComposeShoutOut";
+import RSVPReasonSheet from "../components/RSVPReasonSheet";
 
 const TAG_LABELS = {
   saved_the_day: "Saved the day",
@@ -165,6 +167,8 @@ export default function InboxClient({ inboxData, profile }) {
   const [showCompose, setShowCompose] = useState(false);
   const [composeRecipient, setComposeRecipient] = useState(null);
   const [composeContext, setComposeContext] = useState(null);
+  const [rsvpReasonSheet, setRsvpReasonSheet] = useState(null); // { eventId, required }
+  const [rsvpLoading, setRsvpLoading] = useState(false);
 
   const { updates, shoutOuts, recentSessions = [] } = inboxData;
 
@@ -298,6 +302,37 @@ export default function InboxClient({ inboxData, profile }) {
     }
   };
 
+  // Handle RSVP yes
+  const handleRsvpYes = async (eventId) => {
+    setRsvpLoading(true);
+    try {
+      await updateRSVP(eventId, "yes");
+      router.refresh();
+    } catch (err) {
+      console.error("Error updating RSVP:", err);
+    } finally {
+      setRsvpLoading(false);
+    }
+  };
+
+  // Handle RSVP no - show reason sheet for required events
+  const handleRsvpNo = async (eventId, required, reason = null) => {
+    if (required && !reason) {
+      setRsvpReasonSheet({ eventId, required: true });
+      return;
+    }
+    setRsvpLoading(true);
+    try {
+      await updateRSVP(eventId, "no", reason);
+      setRsvpReasonSheet(null);
+      router.refresh();
+    } catch (err) {
+      console.error("Error updating RSVP:", err);
+    } finally {
+      setRsvpLoading(false);
+    }
+  };
+
   // Get avatar initial
   const getInitial = (name) => {
     if (!name) return "?";
@@ -427,6 +462,89 @@ export default function InboxClient({ inboxData, profile }) {
               {item.isOverdue ? `Overdue` : `Due ${formatDayDate(item.dueDate)}`}
             </span>
           </div>
+        </div>
+      );
+    }
+
+    // Team event card - special card with RSVP buttons
+    if (item.type === "team_event") {
+      const eventTypeLabels = { meeting: "Team Meeting", training: "Team Training", social: "Team Social" };
+      const eventTypeColors = { meeting: "#1F3F91", training: "#3E8FA0", social: "#F2A65E" };
+      const typeLabel = eventTypeLabels[item.eventType] || "Team Event";
+      const typeColor = eventTypeColors[item.eventType] || "#1F3F91";
+
+      const formatTime = (timeStr) => {
+        if (!timeStr) return "";
+        const [hours, minutes] = timeStr.split(":");
+        const h = parseInt(hours);
+        const ampm = h >= 12 ? "PM" : "AM";
+        const displayHour = h > 12 ? h - 12 : h === 0 ? 12 : h;
+        return `${displayHour}:${minutes} ${ampm}`;
+      };
+
+      return (
+        <div key={item.id} className={styles.teamEventCard} style={{ "--event-color": typeColor }}>
+          <div className={styles.teamEventHeader}>
+            <div className={styles.teamEventIcon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </div>
+            <span className={styles.teamEventType}>{typeLabel}</span>
+            {!item.required && <span className={styles.teamEventOptional}>Optional</span>}
+          </div>
+          <h3 className={styles.teamEventTitle}>{item.title}</h3>
+          <div className={styles.teamEventDetails}>
+            <span>{formatDayDate(item.eventDate)}</span>
+            <span className={styles.teamEventDot} />
+            <span>{formatTime(item.startTime)} - {formatTime(item.endTime)}</span>
+          </div>
+          {item.location && (
+            <div className={styles.teamEventLocation}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              {item.location}
+            </div>
+          )}
+          {item.paid && (
+            <div className={styles.teamEventPaid}>
+              Paid ({item.payClasses} {item.payClasses === 1 ? "class" : "classes"})
+            </div>
+          )}
+          {item.details && (
+            <p className={styles.teamEventDescription}>{item.details}</p>
+          )}
+          {/* RSVP Buttons or Status */}
+          {!item.rsvp ? (
+            <div className={styles.teamEventRsvp}>
+              <button
+                className={styles.teamEventRsvpYes}
+                onClick={() => handleRsvpYes(item.eventId)}
+                disabled={rsvpLoading}
+              >
+                I&apos;ll be there
+              </button>
+              <button
+                className={styles.teamEventRsvpNo}
+                onClick={() => handleRsvpNo(item.eventId, item.required)}
+                disabled={rsvpLoading}
+              >
+                Can&apos;t make it
+              </button>
+            </div>
+          ) : (
+            <div className={`${styles.teamEventRsvpStatus} ${item.rsvp === "yes" ? styles.rsvpYes : styles.rsvpNo}`}>
+              {item.rsvp === "yes" ? "You're going" : "You can't make it"}
+              {item.rsvp === "no" && item.rsvpReason && (
+                <span className={styles.teamEventRsvpReason}>{item.rsvpReason}</span>
+              )}
+            </div>
+          )}
         </div>
       );
     }
@@ -940,6 +1058,15 @@ export default function InboxClient({ inboxData, profile }) {
         }}
         preselectedRecipient={composeRecipient}
         contextData={composeContext}
+      />
+
+      {/* RSVP Reason Sheet */}
+      <RSVPReasonSheet
+        open={rsvpReasonSheet !== null}
+        onClose={() => setRsvpReasonSheet(null)}
+        onSubmit={(reason) => handleRsvpNo(rsvpReasonSheet?.eventId, rsvpReasonSheet?.required, reason)}
+        required={rsvpReasonSheet?.required}
+        loading={rsvpLoading}
       />
     </div>
   );

@@ -1,0 +1,355 @@
+.content {
+  padding: 0 20px 20px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.typeIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--type-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.typeIcon svg {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.typeLabel {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--type-color);
+}
+
+.title {
+  margin: 4px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.cancelledBadge {
+  padding: 4px 10px;
+  background: rgba(211, 47, 47, 0.15);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #c62828;
+  text-transform: uppercase;
+}
+
+/* Details */
+.details {
+  background: var(--tint);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 15px;
+  color: var(--ink);
+}
+.detailRow svg {
+  width: 18px;
+  height: 18px;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+.eventDetails {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--tint-deep);
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.badges {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.paidBadge {
+  padding: 4px 10px;
+  background: rgba(62, 143, 160, 0.15);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.optionalBadge {
+  padding: 4px 10px;
+  background: rgba(216, 174, 75, 0.15);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a7a2a;
+}
+
+/* RSVP Summary */
+.rsvpSummary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--paper);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
+}
+
+.rsvpItem {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.rsvpCount {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rsvpDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  opacity: 0.5;
+}
+
+/* People Section */
+.peopleSection {
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+}
+
+.peopleList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--paper);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
+}
+
+.personRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #fff;
+}
+.personRow:not(:last-child) {
+  border-bottom: 1px solid var(--tint);
+}
+
+.personAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.personAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.personInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.personName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.personReason {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.rsvpStatus {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.rsvp_yes {
+  background: rgba(62, 143, 160, 0.15);
+  color: var(--teal);
+}
+.rsvp_no {
+  background: rgba(211, 47, 47, 0.1);
+  color: #c62828;
+}
+.rsvp_pending {
+  background: var(--tint);
+  color: var(--ink-soft);
+}
+
+/* Confirm Overlay */
+.confirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.confirmBox {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+}
+.confirmBox p {
+  margin: 0 0 20px;
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 12px;
+}
+
+.confirmNo {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--tint);
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.confirmNo:hover {
+  background: var(--tint-deep);
+}
+
+.confirmYes {
+  flex: 1;
+  padding: 12px 16px;
+  background: #c62828;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+}
+.confirmYes:hover:not(:disabled) {
+  background: #b71c1c;
+}
+.confirmYes:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--tint);
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.actionBtn:hover {
+  background: var(--tint-deep);
+}
+.actionBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.actionBtn.primary {
+  background: var(--navy);
+  color: #fff;
+}
+.actionBtn.primary:hover {
+  background: var(--orange-dark);
+}
+
+/* Cancel button red */
+.actionBtn:first-child {
+  color: #c62828;
+}
+.actionBtn:first-child:hover {
+  background: rgba(211, 47, 47, 0.1);
+}
