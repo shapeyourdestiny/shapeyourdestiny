@@ -709,6 +709,203 @@
   margin-top: 2px;
 }
 
+/* Session Reviews Tab */
+.reviewsTab {
+  padding: 24px;
+}
+
+.reviewsTab h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  color: var(--ink-dark);
+}
+
+.reviewsSubtitle {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reviewCard {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.reviewMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reviewSchool {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink-dark);
+}
+
+.reviewProgram {
+  padding: 2px 8px;
+  background: #EFF6FF;
+  color: #1A365D;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.reviewDate {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.reviewStars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.reviewStarRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reviewStarLabel {
+  font-size: 12px;
+  color: var(--ink-soft);
+  min-width: 80px;
+}
+
+.reviewStarIcons {
+  display: flex;
+  gap: 2px;
+}
+
+.reviewStarIcons svg {
+  width: 16px;
+  height: 16px;
+}
+
+.starFilled {
+  fill: #F2A93B;
+}
+
+.starEmpty {
+  fill: #DCE3F1;
+}
+
+.reviewField {
+  margin-bottom: 12px;
+}
+
+.reviewFieldLabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.reviewField p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-dark);
+}
+
+.reviewCoworkers {
+  margin-bottom: 12px;
+}
+
+.coworkerList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.coworkerItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.coworkerName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-dark);
+  min-width: 100px;
+}
+
+.coworkerRatingStars {
+  display: flex;
+  gap: 2px;
+}
+
+.coworkerRatingStars svg {
+  width: 14px;
+  height: 14px;
+}
+
+.coworkerComment {
+  width: 100%;
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.reviewPending {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.pendingBadge {
+  padding: 4px 10px;
+  background: #FEF3C7;
+  color: #B45309;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pendingDue {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.reviewFooter {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-100);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .detailsGrid {

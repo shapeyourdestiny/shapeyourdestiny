@@ -377,6 +377,42 @@ export async function GET(request, context) {
     }
   }
 
+  // Get pending session reviews for this instructor
+  const { data: pendingReviews } = await supabase
+    .from("session_reviews")
+    .select(`
+      id,
+      due_date,
+      classes_taught,
+      classes:class_id (
+        id,
+        program,
+        schools:school_id (name)
+      )
+    `)
+    .eq("profile_id", feed.profile_id)
+    .eq("status", "pending")
+    .gte("due_date", rangeStart)
+    .lte("due_date", rangeEnd);
+
+  // Add session review due date events
+  for (const review of pendingReviews || []) {
+    const schoolName = review.classes?.schools?.name || "Session";
+    const program = review.classes?.program === "soccer" ? "Soccer" : "Wellness";
+
+    events.push({
+      uid: `session-review-${review.id}@shapeyourdestiny.co`,
+      dateStr: review.due_date,
+      startTime: null, // All-day event
+      endTime: null,
+      hoursPerDay: null,
+      summary: `Session Review Due: ${schoolName}`,
+      location: null,
+      description: `Your ${program} session review for ${schoolName} is due.\n\nYou taught ${review.classes_taught} classes. Please complete your review in the SYD app.\n\n${SITE_URL}/instructor/review/${review.id}`,
+      isAllDay: true,
+    });
+  }
+
   // Sort events by date
   events.sort((a, b) => a.dateStr.localeCompare(b.dateStr));
 

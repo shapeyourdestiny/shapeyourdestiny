@@ -71,7 +71,7 @@ const CALENDAR_APPS = {
   other: "other app",
 };
 
-export default function InstructorDetail({ instructor, districts = [], notesData, attendanceData, calendarSyncStatus, payRate: initialPayRate, classNotes = [] }) {
+export default function InstructorDetail({ instructor, districts = [], notesData, attendanceData, calendarSyncStatus, payRate: initialPayRate, classNotes = [], sessionReviews = [] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -377,6 +377,15 @@ export default function InstructorDetail({ instructor, districts = [], notesData
         >
           Notes &amp; history
         </button>
+        {sessionReviews.length > 0 && (
+          <button
+            type="button"
+            className={`${styles.tab} ${currentTab === "reviews" ? styles.tabActive : ""}`}
+            onClick={() => handleTabChange("reviews")}
+          >
+            Reviews ({sessionReviews.length})
+          </button>
+        )}
         <div className={styles.lockPill}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="12" height="12">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -727,6 +736,133 @@ export default function InstructorDetail({ instructor, districts = [], notesData
           classNotes={classNotes}
           onRefresh={handleRefreshNotes}
         />
+      )}
+
+      {/* Session Reviews Tab */}
+      {currentTab === "reviews" && sessionReviews.length > 0 && (
+        <div className={styles.reviewsTab}>
+          <h3>Session Reviews</h3>
+          <p className={styles.reviewsSubtitle}>
+            Feedback submitted at the end of teaching sessions.
+          </p>
+
+          <div className={styles.reviewsList}>
+            {sessionReviews.map((review) => {
+              const schoolName = review.classes?.schools?.name || "Unknown School";
+              const program = review.classes?.program === "soccer" ? "Sports" : "Wellness";
+              const isSubmitted = review.status === "submitted";
+
+              return (
+                <div key={review.id} className={styles.reviewCard}>
+                  <div className={styles.reviewHeader}>
+                    <div className={styles.reviewMeta}>
+                      <span className={styles.reviewSchool}>{schoolName}</span>
+                      <span className={styles.reviewProgram}>{program}</span>
+                    </div>
+                    <span className={styles.reviewDate}>
+                      {formatDate(review.session_end)}
+                    </span>
+                  </div>
+
+                  {isSubmitted ? (
+                    <>
+                      <div className={styles.reviewStars}>
+                        <div className={styles.reviewStarRow}>
+                          <span className={styles.reviewStarLabel}>Overall</span>
+                          <span className={styles.reviewStarIcons}>
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <svg key={i} viewBox="0 0 24 24" className={i <= review.overall ? styles.starFilled : styles.starEmpty}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            ))}
+                          </span>
+                        </div>
+                        <div className={styles.reviewStarRow}>
+                          <span className={styles.reviewStarLabel}>Kids growth</span>
+                          <span className={styles.reviewStarIcons}>
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <svg key={i} viewBox="0 0 24 24" className={i <= review.kids_growth ? styles.starFilled : styles.starEmpty}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            ))}
+                          </span>
+                        </div>
+                        <div className={styles.reviewStarRow}>
+                          <span className={styles.reviewStarLabel}>Support</span>
+                          <span className={styles.reviewStarIcons}>
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <svg key={i} viewBox="0 0 24 24" className={i <= review.support ? styles.starFilled : styles.starEmpty}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            ))}
+                          </span>
+                        </div>
+                      </div>
+
+                      {review.went_well && (
+                        <div className={styles.reviewField}>
+                          <span className={styles.reviewFieldLabel}>Went well</span>
+                          <p>{review.went_well}</p>
+                        </div>
+                      )}
+
+                      {review.change_next && (
+                        <div className={styles.reviewField}>
+                          <span className={styles.reviewFieldLabel}>Change next time</span>
+                          <p>{review.change_next}</p>
+                        </div>
+                      )}
+
+                      {review.needs && (
+                        <div className={styles.reviewField}>
+                          <span className={styles.reviewFieldLabel}>Needs</span>
+                          <p>{review.needs}</p>
+                        </div>
+                      )}
+
+                      {review.coworkers?.filter(cw => cw.rating != null).length > 0 && (
+                        <div className={styles.reviewCoworkers}>
+                          <span className={styles.reviewFieldLabel}>Coworker ratings</span>
+                          <div className={styles.coworkerList}>
+                            {review.coworkers.filter(cw => cw.rating != null).map((cw) => (
+                              <div key={cw.id} className={styles.coworkerItem}>
+                                <span className={styles.coworkerName}>{cw.profiles?.full_name}</span>
+                                <span className={styles.coworkerRatingStars}>
+                                  {[1, 2, 3, 4, 5].map((i) => (
+                                    <svg key={i} viewBox="0 0 24 24" className={i <= cw.rating ? styles.starFilled : styles.starEmpty}>
+                                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                    </svg>
+                                  ))}
+                                </span>
+                                {cw.comment && (
+                                  <p className={styles.coworkerComment}>{cw.comment}</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className={styles.reviewPending}>
+                      <span className={styles.pendingBadge}>Pending</span>
+                      <span className={styles.pendingDue}>
+                        Due {formatDate(review.due_date)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className={styles.reviewFooter}>
+                    <span>{review.classes_taught} classes taught</span>
+                    <span>
+                      {formatDate(review.session_start)} – {formatDate(review.session_end)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );

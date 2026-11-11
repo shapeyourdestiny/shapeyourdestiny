@@ -397,6 +397,40 @@ export default function InboxClient({ inboxData, profile }) {
       );
     }
 
+    // Session review card - special gradient card at top of Updates
+    if (item.type === "session_review") {
+      return (
+        <div key={item.id} className={styles.sessionReviewCard}>
+          <div className={styles.sessionReviewTop}>
+            <div className={styles.sessionReviewIcon}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </div>
+            <span className={styles.sessionReviewLabel}>SESSION REVIEW</span>
+          </div>
+          <h3 className={styles.sessionReviewTitle}>{item.schoolName} is a wrap!</h3>
+          <p className={styles.sessionReviewText}>
+            You taught {item.classesTaught} {item.classesTaught === 1 ? "class" : "classes"} this session. Tell us how it went. It takes about 2 minutes.
+          </p>
+          <div className={styles.sessionReviewActions}>
+            <Link
+              href={`/instructor/review/${item.reviewId}`}
+              className={styles.sessionReviewBtn}
+            >
+              Start review
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </Link>
+            <span className={`${styles.sessionReviewDue} ${item.isOverdue ? styles.sessionReviewDueOverdue : ""}`}>
+              {item.isOverdue ? `Overdue` : `Due ${formatDayDate(item.dueDate)}`}
+            </span>
+          </div>
+        </div>
+      );
+    }
+
     // Expandable cards
     const expandId = `expand-${item.id}`;
 

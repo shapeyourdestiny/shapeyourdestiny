@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getInboxBadgeCount } from "@/lib/instructor/inbox";
+import { getMyPendingReviews } from "@/lib/instructor/session-reviews";
 import InstructorShell from "./components/InstructorShell";
 import styles from "./layout.module.css";
 
@@ -74,9 +75,17 @@ export default async function InstructorLayout({ children }) {
     // Ignore errors - badge will just be 0
   }
 
+  // Get pending session reviews for reminder modal
+  let pendingReviews = [];
+  try {
+    pendingReviews = await getMyPendingReviews();
+  } catch {
+    // Ignore errors - no reminder will show
+  }
+
   return (
     <div className={styles.layout}>
-      <InstructorShell profile={profile} inboxBadge={inboxBadge} />
+      <InstructorShell profile={profile} inboxBadge={inboxBadge} pendingReviews={pendingReviews} />
       <main className={styles.main}>
         {children}
       </main>

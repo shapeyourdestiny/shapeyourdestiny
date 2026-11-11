@@ -57,14 +57,14 @@ function groupSessionsByWeek(sessions) {
 // Quick message chips for thank form
 const THANK_CHIPS = {
   normal: [
+    "Great energy with the kids",
+    "You kept them engaged",
     "Great teamwork",
-    "Kids loved your game",
-    "Thanks for the help",
   ],
   sub: [
     "Thanks for covering",
+    "The kids were in good hands",
     "You saved the day",
-    "Kids said you were awesome",
   ],
 };
 
@@ -491,7 +491,7 @@ function CompactNote({ note, onEdit }) {
 // Star row input component
 function StarRow({ label, value, onChange, required }) {
   return (
-    <div className={styles.starRow}>
+    <div className={styles.starRow} role="group" aria-label={label}>
       <span className={styles.starLabel}>
         {label}
         {required && <span className={styles.required}>*</span>}
@@ -503,8 +503,8 @@ function StarRow({ label, value, onChange, required }) {
             type="button"
             className={styles.starBtn}
             onClick={() => onChange(value === i ? null : i)}
-            aria-label={`${i} star${i !== 1 ? "s" : ""}`}
-            aria-pressed={value === i}
+            aria-label={`${label}: ${i} of 5`}
+            aria-pressed={i <= (value || 0)}
           >
             <svg
               viewBox="0 0 24 24"

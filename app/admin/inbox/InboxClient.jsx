@@ -58,7 +58,7 @@ export default function InboxClient({ inboxData }) {
   const [resolvingIssue, setResolvingIssue] = useState(null);
   const [resolutionNote, setResolutionNote] = useState("");
 
-  const { pendingShoutOuts, instructorReplies, payrollIssues, payrollStatus, newApplications, toughClassNotes, totalPending } = inboxData;
+  const { pendingShoutOuts, instructorReplies, payrollIssues, payrollStatus, newApplications, toughClassNotes, flaggedSessionReviews, totalPending } = inboxData;
 
   const handleApproveShoutOut = async (id, message = null) => {
     setLoading((prev) => ({ ...prev, [id]: true }));
@@ -408,66 +408,88 @@ export default function InboxClient({ inboxData }) {
           </h2>
 
           <div className={styles.cardList}>
-            {toughClassNotes.map((note) => (
-              <a
-                key={note.id}
-                href={`/admin/programs?classId=${note.classes?.id}`}
-                className={`${styles.card} ${styles.linkCard}`}
-              >
-                <div className={styles.cardHeader}>
-                  {renderAvatar(note.profile, 36)}
-                  <div className={styles.cardMeta}>
-                    <span className={styles.cardNames}>{note.profile?.full_name?.split(" ")[0]}</span>
-                    <span className={styles.cardTime}>
-                      {note.classes?.schools?.name} - {formatDate(note.session_date)}
+            {toughClassNotes.map((note) => {
+              // Build trigger summary
+              const triggers = [];
+              if (note.overall && note.overall <= 2) {
+                triggers.push(`rated overall ${note.overall} of 5`);
+              }
+              if (note.attention && note.attention <= 2) {
+                triggers.push(`rated attention ${note.attention} of 5`);
+              }
+              if (note.behavior && note.behavior <= 2) {
+                triggers.push(`rated behavior ${note.behavior} of 5`);
+              }
+              if (note.needs_supplies) {
+                triggers.push("needs supplies");
+              }
+              const triggerSummary = triggers.join(" · ");
+
+              return (
+                <a
+                  key={note.id}
+                  href={`/admin/programs?classId=${note.classes?.id}`}
+                  className={`${styles.card} ${styles.linkCard}`}
+                >
+                  <div className={styles.cardHeader}>
+                    {renderAvatar(note.profile, 36)}
+                    <div className={styles.cardMeta}>
+                      <span className={styles.cardNames}>{note.profile?.full_name?.split(" ")[0]}</span>
+                      <span className={styles.cardTime}>
+                        {note.classes?.schools?.name} - {formatDate(note.session_date)}
+                      </span>
+                    </div>
+                    <span className={styles.cardArrow}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
                     </span>
                   </div>
-                  <span className={styles.cardArrow}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M9 5l7 7-7 7" />
-                    </svg>
-                  </span>
-                </div>
 
-                <div className={styles.classNoteStars}>
-                  <span className={styles.starRow}>
-                    <span className={styles.starLabel}>Overall</span>
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <svg key={i} viewBox="0 0 24 24" className={i <= note.overall ? styles.starFilled : styles.starEmpty}>
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                      </svg>
-                    ))}
-                  </span>
-                  {note.attention && (
+                  {triggerSummary && (
+                    <p className={styles.triggerSummary}>{triggerSummary}</p>
+                  )}
+
+                  <div className={styles.classNoteStars}>
                     <span className={styles.starRow}>
-                      <span className={styles.starLabel}>Attention</span>
+                      <span className={styles.starLabel}>Overall</span>
                       {[1, 2, 3, 4, 5].map((i) => (
-                        <svg key={i} viewBox="0 0 24 24" className={i <= note.attention ? styles.starFilled : styles.starEmpty}>
+                        <svg key={i} viewBox="0 0 24 24" className={i <= note.overall ? styles.starFilled : styles.starEmpty}>
                           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                         </svg>
                       ))}
                     </span>
-                  )}
-                  {note.behavior && (
-                    <span className={styles.starRow}>
-                      <span className={styles.starLabel}>Behavior</span>
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <svg key={i} viewBox="0 0 24 24" className={i <= note.behavior ? styles.starFilled : styles.starEmpty}>
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                      ))}
-                    </span>
-                  )}
-                  {note.needs_supplies && (
-                    <span className={styles.needsSuppliesBadge}>Needs supplies</span>
-                  )}
-                </div>
+                    {note.attention && (
+                      <span className={styles.starRow}>
+                        <span className={styles.starLabel}>Attention</span>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <svg key={i} viewBox="0 0 24 24" className={i <= note.attention ? styles.starFilled : styles.starEmpty}>
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                          </svg>
+                        ))}
+                      </span>
+                    )}
+                    {note.behavior && (
+                      <span className={styles.starRow}>
+                        <span className={styles.starLabel}>Behavior</span>
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <svg key={i} viewBox="0 0 24 24" className={i <= note.behavior ? styles.starFilled : styles.starEmpty}>
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                          </svg>
+                        ))}
+                      </span>
+                    )}
+                    {note.needs_supplies && (
+                      <span className={styles.needsSuppliesBadge}>Needs supplies</span>
+                    )}
+                  </div>
 
-                {note.body && (
-                  <p className={styles.cardMessage}>&ldquo;{note.body}&rdquo;</p>
-                )}
-              </a>
-            ))}
+                  {note.body && (
+                    <p className={styles.cardMessage}>&ldquo;{note.body}&rdquo;</p>
+                  )}
+                </a>
+              );
+            })}
           </div>
         </section>
       )}
@@ -560,6 +582,106 @@ export default function InboxClient({ inboxData }) {
                 )}
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* Flagged Session Reviews */}
+      {flaggedSessionReviews?.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </span>
+            Session reviews
+            <span className={styles.sectionCount}>{flaggedSessionReviews.length}</span>
+          </h2>
+
+          <div className={styles.cardList}>
+            {flaggedSessionReviews.map((review) => {
+              // Build trigger summary for low ratings
+              const triggers = [];
+              if (review.overall && review.overall <= 2) {
+                triggers.push(`overall ${review.overall}/5`);
+              }
+              if (review.kids_growth && review.kids_growth <= 2) {
+                triggers.push(`kids growth ${review.kids_growth}/5`);
+              }
+              if (review.support && review.support <= 2) {
+                triggers.push(`support ${review.support}/5`);
+              }
+              if (review.lowCoworkerRating) {
+                triggers.push(`rated ${review.lowCoworkerRating.coworker?.full_name?.split(" ")[0]} ${review.lowCoworkerRating.rating}/5`);
+              }
+              const triggerSummary = triggers.join(" · ");
+
+              const programName = review.classes?.program === "soccer" ? "Soccer" : "Wellness";
+
+              return (
+                <a
+                  key={review.id}
+                  href={`/admin/instructors/${review.profile?.id}?tab=reviews`}
+                  className={`${styles.card} ${styles.linkCard}`}
+                >
+                  <div className={styles.cardHeader}>
+                    {renderAvatar(review.profile, 36)}
+                    <div className={styles.cardMeta}>
+                      <span className={styles.cardNames}>{review.profile?.full_name}</span>
+                      <span className={styles.cardTime}>
+                        {programName} · {review.classes?.schools?.name}
+                      </span>
+                    </div>
+                    <span className={styles.cardArrow}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </div>
+
+                  <p className={styles.triggerSummary}>{triggerSummary}</p>
+
+                  <div className={styles.classNoteStars}>
+                    <span className={styles.starRow}>
+                      <span className={styles.starLabel}>Overall</span>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <svg key={i} viewBox="0 0 24 24" className={i <= review.overall ? styles.starFilled : styles.starEmpty}>
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      ))}
+                    </span>
+                    <span className={styles.starRow}>
+                      <span className={styles.starLabel}>Kids growth</span>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <svg key={i} viewBox="0 0 24 24" className={i <= review.kids_growth ? styles.starFilled : styles.starEmpty}>
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      ))}
+                    </span>
+                    <span className={styles.starRow}>
+                      <span className={styles.starLabel}>Support</span>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <svg key={i} viewBox="0 0 24 24" className={i <= review.support ? styles.starFilled : styles.starEmpty}>
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      ))}
+                    </span>
+                  </div>
+
+                  {review.lowCoworkerRating?.comment && (
+                    <p className={styles.cardMessage}>&ldquo;{review.lowCoworkerRating.comment}&rdquo;</p>
+                  )}
+                  {!review.lowCoworkerRating && review.needs && (
+                    <p className={styles.cardMessage}>&ldquo;{review.needs}&rdquo;</p>
+                  )}
+
+                  <span className={styles.cardDate}>
+                    Session: {formatDate(review.session_start)} – {formatDate(review.session_end)}
+                  </span>
+                </a>
+              );
+            })}
           </div>
         </section>
       )}

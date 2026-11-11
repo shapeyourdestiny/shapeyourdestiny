@@ -9,6 +9,8 @@ import {
   assignInstructorAction,
   unassignInstructorAction,
   fetchClassNotesAction,
+  fetchClassAveragesAction,
+  fetchSessionReviewsAction,
 } from "@/lib/schedule/actions";
 import { computeClassOccurrences } from "@/lib/schedule/occurrences";
 
@@ -199,7 +201,12 @@ export default function ClassPanel({
 
   // Class notes
   const [classNotes, setClassNotes] = useState([]);
+  const [classAverages, setClassAverages] = useState(null);
   const [notesLoading, setNotesLoading] = useState(false);
+
+  // Session reviews
+  const [sessionReviews, setSessionReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   // Get instructors from data
   const instructors = data.instructors || [];
@@ -228,23 +235,31 @@ export default function ClassPanel({
     firstFocusable?.focus();
   }, []);
 
-  // Fetch class notes for existing class
+  // Fetch class notes, averages, and session reviews for existing class
   useEffect(() => {
     if (!classId || mode !== "edit") return;
 
-    async function fetchNotes() {
+    async function fetchNotesAndReviews() {
       setNotesLoading(true);
+      setReviewsLoading(true);
       try {
-        const notes = await fetchClassNotesAction(classId, 10);
+        const [notes, averages, reviews] = await Promise.all([
+          fetchClassNotesAction(classId, 10),
+          fetchClassAveragesAction(classId),
+          fetchSessionReviewsAction(classId, 10),
+        ]);
         setClassNotes(notes || []);
+        setClassAverages(averages);
+        setSessionReviews(reviews || []);
       } catch (err) {
-        console.error("Failed to fetch class notes:", err);
+        console.error("Failed to fetch class data:", err);
       } finally {
         setNotesLoading(false);
+        setReviewsLoading(false);
       }
     }
 
-    fetchNotes();
+    fetchNotesAndReviews();
   }, [classId, mode]);
 
   const handleDayToggle = (day) => {
@@ -668,66 +683,49 @@ export default function ClassPanel({
               ) : (
                 <>
                   {/* 30-day averages */}
-                  {classNotes.length > 0 && (
+                  {classAverages && (
                     <div className={styles.notesAverages}>
                       <span className={styles.averagesLabel}>30-day avg</span>
                       <div className={styles.averagesRow}>
                         <span className={styles.avgLabel}>Overall</span>
                         <span className={styles.avgStars}>
-                          {[1, 2, 3, 4, 5].map((i) => {
-                            const avg = classNotes.reduce((sum, n) => sum + (n.overall || 0), 0) / classNotes.length;
-                            return (
-                              <svg key={i} viewBox="0 0 24 24" className={i <= Math.round(avg) ? styles.starFilled : styles.starEmpty}>
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                              </svg>
-                            );
-                          })}
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <svg key={i} viewBox="0 0 24 24" className={i <= Math.round(classAverages.overall) ? styles.starFilled : styles.starEmpty}>
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                          ))}
                         </span>
                         <span className={styles.avgValue}>
-                          {(classNotes.reduce((sum, n) => sum + (n.overall || 0), 0) / classNotes.length).toFixed(1)}
+                          {classAverages.overall.toFixed(1)}
                         </span>
                       </div>
-                      {classNotes.some(n => n.attention) && (
+                      {classAverages.attention != null && (
                         <div className={styles.averagesRow}>
                           <span className={styles.avgLabel}>Attention</span>
                           <span className={styles.avgStars}>
-                            {[1, 2, 3, 4, 5].map((i) => {
-                              const notes = classNotes.filter(n => n.attention);
-                              const avg = notes.length > 0 ? notes.reduce((sum, n) => sum + n.attention, 0) / notes.length : 0;
-                              return (
-                                <svg key={i} viewBox="0 0 24 24" className={i <= Math.round(avg) ? styles.starFilled : styles.starEmpty}>
-                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                </svg>
-                              );
-                            })}
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <svg key={i} viewBox="0 0 24 24" className={i <= Math.round(classAverages.attention) ? styles.starFilled : styles.starEmpty}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            ))}
                           </span>
                           <span className={styles.avgValue}>
-                            {(() => {
-                              const notes = classNotes.filter(n => n.attention);
-                              return notes.length > 0 ? (notes.reduce((sum, n) => sum + n.attention, 0) / notes.length).toFixed(1) : "-";
-                            })()}
+                            {classAverages.attention.toFixed(1)}
                           </span>
                         </div>
                       )}
-                      {classNotes.some(n => n.behavior) && (
+                      {classAverages.behavior != null && (
                         <div className={styles.averagesRow}>
                           <span className={styles.avgLabel}>Behavior</span>
                           <span className={styles.avgStars}>
-                            {[1, 2, 3, 4, 5].map((i) => {
-                              const notes = classNotes.filter(n => n.behavior);
-                              const avg = notes.length > 0 ? notes.reduce((sum, n) => sum + n.behavior, 0) / notes.length : 0;
-                              return (
-                                <svg key={i} viewBox="0 0 24 24" className={i <= Math.round(avg) ? styles.starFilled : styles.starEmpty}>
-                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                </svg>
-                              );
-                            })}
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <svg key={i} viewBox="0 0 24 24" className={i <= Math.round(classAverages.behavior) ? styles.starFilled : styles.starEmpty}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            ))}
                           </span>
                           <span className={styles.avgValue}>
-                            {(() => {
-                              const notes = classNotes.filter(n => n.behavior);
-                              return notes.length > 0 ? (notes.reduce((sum, n) => sum + n.behavior, 0) / notes.length).toFixed(1) : "-";
-                            })()}
+                            {classAverages.behavior.toFixed(1)}
                           </span>
                         </div>
                       )}
@@ -790,6 +788,87 @@ export default function ClassPanel({
                     ))}
                   </div>
                 </>
+              )}
+            </div>
+          )}
+
+          {/* Session Reviews (edit mode only) */}
+          {existingClass && sessionReviews.length > 0 && (
+            <div className={styles.notesSection}>
+              <h4>Session reviews</h4>
+              {reviewsLoading ? (
+                <p className={styles.notesLoading}>Loading reviews...</p>
+              ) : (
+                <div className={styles.notesList}>
+                  {sessionReviews.map((review) => (
+                    <div key={review.id} className={styles.noteItem}>
+                      <div className={styles.noteHeader}>
+                        <span className={styles.noteInstructor}>
+                          {review.profile?.full_name}
+                        </span>
+                        <span className={styles.noteDate}>
+                          {new Date(review.session_end + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </span>
+                      </div>
+                      <div className={styles.noteStars}>
+                        <div className={styles.noteStarRow}>
+                          <span className={styles.noteStarLabel}>Overall</span>
+                          <span className={styles.noteStarIcons}>
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <svg key={i} viewBox="0 0 24 24" className={i <= review.overall ? styles.starFilled : styles.starEmpty}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            ))}
+                          </span>
+                        </div>
+                        <div className={styles.noteStarRow}>
+                          <span className={styles.noteStarLabel}>Kids</span>
+                          <span className={styles.noteStarIcons}>
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <svg key={i} viewBox="0 0 24 24" className={i <= review.kids_growth ? styles.starFilled : styles.starEmpty}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            ))}
+                          </span>
+                        </div>
+                        <div className={styles.noteStarRow}>
+                          <span className={styles.noteStarLabel}>Support</span>
+                          <span className={styles.noteStarIcons}>
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <svg key={i} viewBox="0 0 24 24" className={i <= review.support ? styles.starFilled : styles.starEmpty}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            ))}
+                          </span>
+                        </div>
+                      </div>
+                      {review.went_well && (
+                        <p className={styles.noteBody}>
+                          <strong>Went well:</strong> {review.went_well}
+                        </p>
+                      )}
+                      {review.change_next && (
+                        <p className={styles.noteBody}>
+                          <strong>Change next time:</strong> {review.change_next}
+                        </p>
+                      )}
+                      {review.needs && (
+                        <p className={styles.noteBody}>
+                          <strong>Needs:</strong> {review.needs}
+                        </p>
+                      )}
+                      {review.coworkers?.length > 0 && (
+                        <div className={styles.coworkerRatings}>
+                          {review.coworkers.filter(cw => cw.rating != null).map((cw) => (
+                            <span key={cw.id} className={styles.coworkerRating}>
+                              {cw.profiles?.full_name?.split(" ")[0]}: {cw.rating}/5
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           )}

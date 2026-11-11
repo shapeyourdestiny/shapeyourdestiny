@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import SessionReviewReminder from "./SessionReviewReminder";
 import styles from "./InstructorShell.module.css";
 
 const CalendarIcon = () => (
@@ -97,7 +98,7 @@ const MOBILE_TABS = [
   },
 ];
 
-export default function InstructorShell({ profile, inboxBadge = 0 }) {
+export default function InstructorShell({ profile, inboxBadge = 0, pendingReviews = [] }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -137,6 +138,9 @@ export default function InstructorShell({ profile, inboxBadge = 0 }) {
 
   return (
     <>
+      {/* Session Review Reminder Modal */}
+      <SessionReviewReminder pendingReviews={pendingReviews} />
+
       {/* Desktop Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.brand}>

@@ -5,6 +5,7 @@ import { getInstructorDetail } from "@/lib/instructors/queries";
 import { getInstructorFile } from "@/lib/instructor-notes/queries";
 import { getAttendance } from "@/lib/instructors/attendance";
 import { getClassNotesForInstructor } from "@/lib/instructor/class-notes";
+import { getSessionReviewsForInstructor } from "@/lib/instructor/session-reviews";
 import InstructorDetail from "./InstructorDetail";
 
 export const dynamic = "force-dynamic";
@@ -120,6 +121,15 @@ export default async function InstructorDetailPage({ params }) {
     // Table may not exist yet
   }
 
+  // Fetch session reviews
+  let sessionReviews = [];
+  try {
+    sessionReviews = await getSessionReviewsForInstructor(id);
+  } catch (err) {
+    console.error("Error fetching session reviews:", err);
+    // Table may not exist yet
+  }
+
   return (
     <Suspense fallback={null}>
       <InstructorDetail
@@ -130,6 +140,7 @@ export default async function InstructorDetailPage({ params }) {
         calendarSyncStatus={calendarSyncStatus}
         payRate={payRate}
         classNotes={classNotes}
+        sessionReviews={sessionReviews}
       />
     </Suspense>
   );
