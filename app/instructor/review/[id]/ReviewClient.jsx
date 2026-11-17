@@ -109,9 +109,13 @@ export default function ReviewClient({ review }) {
   const [overall, setOverall] = useState(review.overall || null);
   const [kidsGrowth, setKidsGrowth] = useState(review.kids_growth || null);
   const [support, setSupport] = useState(review.support || null);
+  const [schoolSupport, setSchoolSupport] = useState(review.school_support || null);
+  const [selfAssessment, setSelfAssessment] = useState(review.self_assessment || null);
   const [wentWell, setWentWell] = useState(review.went_well || "");
   const [changeNext, setChangeNext] = useState(review.change_next || "");
   const [needs, setNeeds] = useState(review.needs || "");
+  const [schoolFeedback, setSchoolFeedback] = useState(review.school_feedback || "");
+  const [teamFeedback, setTeamFeedback] = useState(review.team_feedback || "");
   const [coworkerRatings, setCoworkerRatings] = useState(
     (review.coworkers || []).map((cw) => ({
       coworkerId: cw.coworker_id,
@@ -162,7 +166,7 @@ export default function ReviewClient({ review }) {
     setError(null);
 
     // Validate required fields
-    if (!overall || !kidsGrowth || !support) {
+    if (!overall || !kidsGrowth || !support || !schoolSupport || !selfAssessment) {
       setError("Please complete all star ratings");
       return;
     }
@@ -190,9 +194,13 @@ export default function ReviewClient({ review }) {
         overall,
         kidsGrowth,
         support,
+        schoolSupport,
+        selfAssessment,
         wentWell,
         changeNext,
         needs,
+        schoolFeedback,
+        teamFeedback,
         coworkerRatings,
       });
 
@@ -282,9 +290,28 @@ export default function ReviewClient({ review }) {
               required
             />
             <StarRating
-              label="Support from office"
+              label="Your own performance"
+              value={selfAssessment}
+              onChange={setSelfAssessment}
+              required
+            />
+          </div>
+        </div>
+
+        {/* Support ratings */}
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>How was the support?</h2>
+          <div className={styles.starRows}>
+            <StarRating
+              label="Support from SYD office"
               value={support}
               onChange={setSupport}
+              required
+            />
+            <StarRating
+              label="Support from school staff"
+              value={schoolSupport}
+              onChange={setSchoolSupport}
               required
             />
           </div>
@@ -316,11 +343,11 @@ export default function ReviewClient({ review }) {
 
         {/* Text answers */}
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Tell us more</h2>
+          <h2 className={styles.sectionTitle}>Reflections</h2>
 
           <div className={styles.field}>
             <label htmlFor="went-well">
-              What went well?
+              What went well this session?
               <span className={styles.required}>*</span>
             </label>
             <textarea
@@ -335,7 +362,7 @@ export default function ReviewClient({ review }) {
 
           <div className={styles.field}>
             <label htmlFor="change-next">
-              What would you change?
+              What would you do differently?
               <span className={styles.required}>*</span>
             </label>
             <textarea
@@ -347,6 +374,41 @@ export default function ReviewClient({ review }) {
               rows={3}
             />
           </div>
+        </div>
+
+        {/* School and team feedback */}
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>Feedback</h2>
+
+          <div className={styles.field}>
+            <label htmlFor="school-feedback">
+              How was your experience with this school? (optional)
+            </label>
+            <textarea
+              id="school-feedback"
+              className={styles.textarea}
+              value={schoolFeedback}
+              onChange={(e) => setSchoolFeedback(e.target.value)}
+              placeholder="Communication, facilities, staff support, any challenges..."
+              rows={3}
+            />
+          </div>
+
+          {review.coworkers && review.coworkers.length > 0 && (
+            <div className={styles.field}>
+              <label htmlFor="team-feedback">
+                Any general feedback about your team? (optional)
+              </label>
+              <textarea
+                id="team-feedback"
+                className={styles.textarea}
+                value={teamFeedback}
+                onChange={(e) => setTeamFeedback(e.target.value)}
+                placeholder="Team dynamics, collaboration, anything we should know..."
+                rows={3}
+              />
+            </div>
+          )}
 
           <div className={styles.field}>
             <label htmlFor="needs">

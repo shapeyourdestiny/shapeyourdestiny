@@ -788,7 +788,7 @@ export default function InstructorDetail({ instructor, districts = [], notesData
                           </span>
                         </div>
                         <div className={styles.reviewStarRow}>
-                          <span className={styles.reviewStarLabel}>Support</span>
+                          <span className={styles.reviewStarLabel}>SYD support</span>
                           <span className={styles.reviewStarIcons}>
                             {[1, 2, 3, 4, 5].map((i) => (
                               <svg key={i} viewBox="0 0 24 24" className={i <= review.support ? styles.starFilled : styles.starEmpty}>
@@ -797,6 +797,30 @@ export default function InstructorDetail({ instructor, districts = [], notesData
                             ))}
                           </span>
                         </div>
+                        {review.school_support && (
+                          <div className={styles.reviewStarRow}>
+                            <span className={styles.reviewStarLabel}>School support</span>
+                            <span className={styles.reviewStarIcons}>
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <svg key={i} viewBox="0 0 24 24" className={i <= review.school_support ? styles.starFilled : styles.starEmpty}>
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                              ))}
+                            </span>
+                          </div>
+                        )}
+                        {review.self_assessment && (
+                          <div className={styles.reviewStarRow}>
+                            <span className={styles.reviewStarLabel}>Self-assessment</span>
+                            <span className={styles.reviewStarIcons}>
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <svg key={i} viewBox="0 0 24 24" className={i <= review.self_assessment ? styles.starFilled : styles.starEmpty}>
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                              ))}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       {review.went_well && (
@@ -817,6 +841,20 @@ export default function InstructorDetail({ instructor, districts = [], notesData
                         <div className={styles.reviewField}>
                           <span className={styles.reviewFieldLabel}>Needs</span>
                           <p>{review.needs}</p>
+                        </div>
+                      )}
+
+                      {review.school_feedback && (
+                        <div className={styles.reviewField}>
+                          <span className={styles.reviewFieldLabel}>School feedback</span>
+                          <p>{review.school_feedback}</p>
+                        </div>
+                      )}
+
+                      {review.team_feedback && (
+                        <div className={styles.reviewField}>
+                          <span className={styles.reviewFieldLabel}>Team feedback</span>
+                          <p>{review.team_feedback}</p>
                         </div>
                       )}
 
