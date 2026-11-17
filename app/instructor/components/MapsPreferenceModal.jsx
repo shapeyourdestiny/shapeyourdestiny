@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./MapsPreferenceModal.module.css";
 import { updateMapsPreference } from "@/lib/instructor/actions";
@@ -16,11 +16,11 @@ export default function MapsPreferenceModal({
   const [selected, setSelected] = useState(null);
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [showApple, setShowApple] = useState(false);
 
-  // Check platform on mount
-  useEffect(() => {
-    setShowApple(isApplePlatform());
+  // Check platform (memoized, only runs on client after hydration)
+  const showApple = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return isApplePlatform();
   }, []);
 
   const handleContinue = async () => {

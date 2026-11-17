@@ -1,31 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import styles from "./AttendanceModal.module.css";
 import BottomSheet from "./BottomSheet";
 import { markAttendance } from "@/lib/team-events/actions";
 
+// Compute initial attendance from event people
+function getInitialAttendance(event) {
+  if (!event?.people) return {};
+  const initial = {};
+  event.people.forEach((p) => {
+    // Pre-fill with existing attendance data, or use RSVP as hint
+    if (p.attended !== null) {
+      initial[p.profile_id] = p.attended;
+    } else if (p.rsvp === "yes") {
+      initial[p.profile_id] = true;
+    } else if (p.rsvp === "no") {
+      initial[p.profile_id] = false;
+    }
+  });
+  return initial;
+}
+
 export default function AttendanceModal({ open, onClose, event, onSave }) {
-  const [attendance, setAttendance] = useState({});
+  // Compute initial attendance whenever event changes
+  const initialAttendance = useMemo(() => getInitialAttendance(event), [event]);
+  const [attendance, setAttendance] = useState(initialAttendance);
   const [loading, setLoading] = useState(false);
 
-  // Initialize attendance from event people
-  useEffect(() => {
-    if (open && event?.people) {
-      const initial = {};
-      event.people.forEach((p) => {
-        // Pre-fill with existing attendance data, or use RSVP as hint
-        if (p.attended !== null) {
-          initial[p.profile_id] = p.attended;
-        } else if (p.rsvp === "yes") {
-          initial[p.profile_id] = true;
-        } else if (p.rsvp === "no") {
-          initial[p.profile_id] = false;
-        }
-      });
-      setAttendance(initial);
-    }
-  }, [open, event]);
+  // Reset attendance when event changes
+  const eventId = event?.id;
+  const [lastEventId, setLastEventId] = useState(eventId);
+  if (eventId !== lastEventId) {
+    setLastEventId(eventId);
+    setAttendance(getInitialAttendance(event));
+  }
 
   const handleToggle = (profileId) => {
     setAttendance((prev) => ({

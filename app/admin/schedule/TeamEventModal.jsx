@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from "./TeamEventModal.module.css";
 import BottomSheet from "./BottomSheet";
 import { createTeamEvent, updateTeamEvent } from "@/lib/team-events/actions";
@@ -10,6 +10,42 @@ const EVENT_TYPES = [
   { value: "training", label: "Training", color: "#3E8FA0" },
   { value: "social", label: "Social", color: "#F2A65E" },
 ];
+
+// Get form values from event or defaults
+function getFormValues(event, initialDate) {
+  if (event) {
+    return {
+      type: event.type,
+      title: event.title,
+      eventDate: event.event_date,
+      startTime: event.start_time?.slice(0, 5) || "09:00",
+      endTime: event.end_time?.slice(0, 5) || "10:00",
+      location: event.location || "",
+      details: event.details || "",
+      paid: event.paid || false,
+      payClasses: event.pay_classes?.toString() || "1",
+      required: event.required !== false,
+      audienceType: event.audience?.type || "all",
+      selectedProfiles: event.audience?.profileIds || [],
+      sendEmail: false, // Don't re-send emails on edit
+    };
+  }
+  return {
+    type: "meeting",
+    title: "",
+    eventDate: initialDate || new Date().toISOString().split("T")[0],
+    startTime: "09:00",
+    endTime: "10:00",
+    location: "",
+    details: "",
+    paid: false,
+    payClasses: "1",
+    required: true,
+    audienceType: "all",
+    selectedProfiles: [],
+    sendEmail: true,
+  };
+}
 
 export default function TeamEventModal({
   open,
@@ -21,57 +57,46 @@ export default function TeamEventModal({
 }) {
   const isEdit = !!event;
 
-  const [type, setType] = useState("meeting");
-  const [title, setTitle] = useState("");
-  const [eventDate, setEventDate] = useState("");
-  const [startTime, setStartTime] = useState("09:00");
-  const [endTime, setEndTime] = useState("10:00");
-  const [location, setLocation] = useState("");
-  const [details, setDetails] = useState("");
-  const [paid, setPaid] = useState(false);
-  const [payClasses, setPayClasses] = useState("1");
-  const [required, setRequired] = useState(true);
-  const [audienceType, setAudienceType] = useState("all");
-  const [selectedProfiles, setSelectedProfiles] = useState([]);
-  const [sendEmail, setSendEmail] = useState(true);
+  // Track when to reset form (when event or open state changes)
+  const formKey = `${open}-${event?.id || "new"}-${initialDate}`;
+  const [lastFormKey, setLastFormKey] = useState(formKey);
+
+  const defaults = getFormValues(event, initialDate);
+  const [type, setType] = useState(defaults.type);
+  const [title, setTitle] = useState(defaults.title);
+  const [eventDate, setEventDate] = useState(defaults.eventDate);
+  const [startTime, setStartTime] = useState(defaults.startTime);
+  const [endTime, setEndTime] = useState(defaults.endTime);
+  const [location, setLocation] = useState(defaults.location);
+  const [details, setDetails] = useState(defaults.details);
+  const [paid, setPaid] = useState(defaults.paid);
+  const [payClasses, setPayClasses] = useState(defaults.payClasses);
+  const [required, setRequired] = useState(defaults.required);
+  const [audienceType, setAudienceType] = useState(defaults.audienceType);
+  const [selectedProfiles, setSelectedProfiles] = useState(defaults.selectedProfiles);
+  const [sendEmail, setSendEmail] = useState(defaults.sendEmail);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Reset form when opening
-  useEffect(() => {
-    if (open) {
-      if (event) {
-        setType(event.type);
-        setTitle(event.title);
-        setEventDate(event.event_date);
-        setStartTime(event.start_time?.slice(0, 5) || "09:00");
-        setEndTime(event.end_time?.slice(0, 5) || "10:00");
-        setLocation(event.location || "");
-        setDetails(event.details || "");
-        setPaid(event.paid || false);
-        setPayClasses(event.pay_classes?.toString() || "1");
-        setRequired(event.required !== false);
-        setAudienceType(event.audience?.type || "all");
-        setSelectedProfiles(event.audience?.profileIds || []);
-        setSendEmail(false); // Don't re-send emails on edit
-      } else {
-        setType("meeting");
-        setTitle("");
-        setEventDate(initialDate || new Date().toISOString().split("T")[0]);
-        setStartTime("09:00");
-        setEndTime("10:00");
-        setLocation("");
-        setDetails("");
-        setPaid(false);
-        setPayClasses("1");
-        setRequired(true);
-        setAudienceType("all");
-        setSelectedProfiles([]);
-        setSendEmail(true);
-      }
-      setError(null);
-    }
-  }, [open, event, initialDate]);
+  // Reset form when key changes
+  if (formKey !== lastFormKey) {
+    setLastFormKey(formKey);
+    const vals = getFormValues(event, initialDate);
+    setType(vals.type);
+    setTitle(vals.title);
+    setEventDate(vals.eventDate);
+    setStartTime(vals.startTime);
+    setEndTime(vals.endTime);
+    setLocation(vals.location);
+    setDetails(vals.details);
+    setPaid(vals.paid);
+    setPayClasses(vals.payClasses);
+    setRequired(vals.required);
+    setAudienceType(vals.audienceType);
+    setSelectedProfiles(vals.selectedProfiles);
+    setSendEmail(vals.sendEmail);
+    setError(null);
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
