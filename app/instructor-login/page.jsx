@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./page.module.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-export default function InstructorLoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get("next");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,7 +30,7 @@ export default function InstructorLoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, next: nextUrl }),
       });
 
       const data = await res.json();
@@ -155,5 +159,31 @@ export default function InstructorLoginPage() {
 
       <Footer />
     </>
+  );
+}
+
+export default function InstructorLoginPage() {
+  return (
+    <Suspense fallback={
+      <>
+        <Header />
+        <section className={styles.section}>
+          <div className={styles.card}>
+            <div className={styles.iconBadge}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+            </div>
+            <span className={styles.eyebrow}>Instructor Portal</span>
+            <h1>Sign In</h1>
+            <p style={{ textAlign: "center", color: "#666" }}>Loading...</p>
+          </div>
+        </section>
+        <Footer />
+      </>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

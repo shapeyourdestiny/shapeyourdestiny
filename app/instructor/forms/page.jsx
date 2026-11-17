@@ -1,36 +1,26 @@
 import Link from "next/link";
 import styles from "./page.module.css";
+import { getResource, formatResourceDate } from "@/lib/resources/queries";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Resources | Shape Your Destiny",
 };
 
-const RESOURCES = [
-  {
-    title: "Lesson plans",
-    subtitle: "Youth Wellness",
-    tile: "#E1EEF1",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z" />
-        <path d="M20 4h-6a3 3 0 0 0-3 3M20 4v14h-6" />
-      </svg>
-    ),
-    href: null,
-  },
-  {
-    title: "Instructor handbook",
-    subtitle: "Policies and what to do in an emergency",
-    tile: "#DCE8FB",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z" />
-        <path d="M12 9v6M9 12h6" />
-      </svg>
-    ),
-    href: null,
-  },
-];
+const BookIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z" />
+    <path d="M20 4h-6a3 3 0 0 0-3 3M20 4v14h-6" />
+  </svg>
+);
+
+const ShieldIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z" />
+    <path d="M12 9v6M9 12h6" />
+  </svg>
+);
 
 const WarningIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -53,7 +43,30 @@ const HelpIcon = () => (
   </svg>
 );
 
-export default function FormsPage() {
+export default async function FormsPage() {
+  // Fetch resources
+  let handbook = null;
+  let lessonPlans = null;
+  try {
+    [handbook, lessonPlans] = await Promise.all([
+      getResource("handbook"),
+      getResource("lesson_plans"),
+    ]);
+  } catch (err) {
+    // Table may not exist yet
+    console.error("Error fetching resources:", err);
+  }
+
+  const handbookHasFile = handbook?.file_path != null;
+  const handbookSubtitle = handbookHasFile
+    ? `Policies, attendance and emergencies · ${handbook.version_label || ""}, updated ${formatResourceDate(handbook.updated_at)}`.replace(" · ,", " ·").replace("· ,", "·")
+    : "Coming soon";
+
+  const lessonPlansHasFile = lessonPlans?.file_path != null;
+  const lessonPlansSubtitle = lessonPlansHasFile
+    ? `Youth Wellness · ${lessonPlans.version_label || ""}, updated ${formatResourceDate(lessonPlans.updated_at)}`.replace(" · ,", " ·").replace("· ,", "·")
+    : "Youth Wellness";
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -90,25 +103,67 @@ export default function FormsPage() {
       <div className={styles.resourcesSection}>
         <span className={styles.resourcesLabel}>RESOURCES</span>
         <div className={styles.resourcesCard}>
-          {RESOURCES.map((item) => (
-            <div
-              key={item.title}
-              className={styles.resourceRow}
-              aria-disabled="true"
+          {/* Lesson plans */}
+          {lessonPlansHasFile ? (
+            <Link
+              href="/instructor/resources/lesson_plans"
+              className={styles.resourceRowLink}
+              aria-label="Lesson plans, PDF"
             >
-              <div
-                className={styles.resourceTile}
-                style={{ backgroundColor: item.tile }}
-              >
-                {item.icon}
+              <div className={styles.resourceTile} style={{ backgroundColor: "#E1EEF1" }}>
+                <BookIcon />
               </div>
               <div className={styles.resourceText}>
-                <span className={styles.resourceTitle}>{item.title}</span>
-                <span className={styles.resourceSub}>{item.subtitle}</span>
+                <span className={styles.resourceTitle}>Lesson plans</span>
+                <span className={styles.resourceSub}>{lessonPlansSubtitle}</span>
+              </div>
+              <div className={styles.resourceChevron}>
+                <ChevronIcon />
+              </div>
+            </Link>
+          ) : (
+            <div className={styles.resourceRow} aria-disabled="true">
+              <div className={styles.resourceTile} style={{ backgroundColor: "#E1EEF1" }}>
+                <BookIcon />
+              </div>
+              <div className={styles.resourceText}>
+                <span className={styles.resourceTitle}>Lesson plans</span>
+                <span className={styles.resourceSub}>{lessonPlansSubtitle}</span>
               </div>
               <span className={styles.comingSoon}>Coming soon</span>
             </div>
-          ))}
+          )}
+
+          {/* Employee handbook */}
+          {handbookHasFile ? (
+            <Link
+              href="/instructor/resources/handbook"
+              className={styles.resourceRowLink}
+              aria-label="Employee handbook, PDF"
+            >
+              <div className={styles.resourceTile} style={{ backgroundColor: "#DCE8FB" }}>
+                <ShieldIcon />
+              </div>
+              <div className={styles.resourceText}>
+                <span className={styles.resourceTitle}>Employee handbook</span>
+                <span className={styles.resourceSub}>{handbookSubtitle}</span>
+              </div>
+              <div className={styles.resourceChevron}>
+                <ChevronIcon />
+              </div>
+            </Link>
+          ) : (
+            <div className={styles.resourceRow} aria-disabled="true">
+              <div className={styles.resourceTile} style={{ backgroundColor: "#DCE8FB" }}>
+                <ShieldIcon />
+              </div>
+              <div className={styles.resourceText}>
+                <span className={styles.resourceTitle}>Employee handbook</span>
+                <span className={styles.resourceSub}>{handbookSubtitle}</span>
+              </div>
+              <span className={styles.comingSoon}>Coming soon</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

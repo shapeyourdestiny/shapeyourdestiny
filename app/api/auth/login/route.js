@@ -20,7 +20,7 @@ function hashEmail(email) {
 
 export async function POST(request) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, next } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -95,7 +95,18 @@ export async function POST(request) {
       .maybeSingle();
 
     const role = profile?.role || "instructor";
-    const redirectUrl = role === "admin" ? "/admin/dashboard" : "/instructor/dashboard";
+
+    // Determine redirect URL
+    let redirectUrl = role === "admin" ? "/admin/dashboard" : "/instructor/dashboard";
+
+    // Use next parameter if provided and valid (must be a relative path starting with /)
+    if (next && typeof next === "string" && next.startsWith("/") && !next.startsWith("//")) {
+      // For instructors, only allow instructor paths
+      // For admins, allow any internal path
+      if (role === "admin" || next.startsWith("/instructor")) {
+        redirectUrl = next;
+      }
+    }
 
     return NextResponse.json({
       success: true,

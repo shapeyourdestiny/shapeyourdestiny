@@ -685,6 +685,7 @@ export default function InboxClient({ inboxData }) {
           </div>
         </section>
       )}
+
     </div>
   );
 }
