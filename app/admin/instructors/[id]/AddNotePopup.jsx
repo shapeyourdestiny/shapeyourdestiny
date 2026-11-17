@@ -89,9 +89,9 @@ export default function AddNotePopup({ instructor, note, onClose, onSave, onArch
   const [newFiles, setNewFiles] = useState([]);
   const [filesToRemove, setFilesToRemove] = useState([]);
 
-  // Sharing
+  // Sharing - allow most note types to be shared with instructor
   const [shareAfterSaving, setShareAfterSaving] = useState(false);
-  const isShareable = ["review", "recognition", "disciplinary"].includes(type);
+  const isShareable = ["review", "recognition", "disciplinary", "observations", "communication"].includes(type);
 
   // Type-specific details
   const [details, setDetails] = useState(getInitialDetails);
@@ -148,6 +148,11 @@ export default function AddNotePopup({ instructor, note, onClose, onSave, onArch
   };
 
   const handleKeyDown = useCallback((e) => {
+    // Don't capture keyboard shortcuts when typing in form fields
+    const tag = e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+      return;
+    }
     if (e.key === "Escape") {
       onClose();
     }
