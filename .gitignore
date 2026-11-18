@@ -46,3 +46,6 @@ next-env.d.ts
 
 # Handbook source and drafts (uploaded to Supabase, never committed)
 handbook/
+
+# Design mockups and Claude prompts
+app/design-mockups/
