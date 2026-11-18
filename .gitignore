@@ -49,3 +49,6 @@ handbook/
 
 # Design mockups and Claude prompts
 app/design-mockups/
+
+# Audit reports
+audit/
