@@ -432,7 +432,7 @@ export default function InboxClient({ inboxData, profile }) {
       );
     }
 
-    // Session review card - special gradient card at top of Updates
+    // Semester review card - special gradient card at top of Updates
     if (item.type === "session_review") {
       return (
         <div key={item.id} className={styles.sessionReviewCard}>
@@ -442,11 +442,11 @@ export default function InboxClient({ inboxData, profile }) {
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
             </div>
-            <span className={styles.sessionReviewLabel}>SESSION REVIEW</span>
+            <span className={styles.sessionReviewLabel}>SEMESTER REVIEW</span>
           </div>
           <h3 className={styles.sessionReviewTitle}>{item.schoolName} is a wrap!</h3>
           <p className={styles.sessionReviewText}>
-            You taught {item.classesTaught} {item.classesTaught === 1 ? "class" : "classes"} this session. Tell us how it went. It takes about 2 minutes.
+            You taught {item.classesTaught} {item.classesTaught === 1 ? "class" : "classes"} this semester. Tell us how it went. It takes about 2 minutes.
           </p>
           <div className={styles.sessionReviewActions}>
             <Link

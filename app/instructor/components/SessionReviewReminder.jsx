@@ -4,8 +4,9 @@ import { useState, useSyncExternalStore, useCallback } from "react";
 import Link from "next/link";
 import styles from "./SessionReviewReminder.module.css";
 
-const DISMISS_KEY = "session_review_reminder_dismissed";
+const DISMISS_KEY = "semester_review_reminder_dismissed";
 const DISMISS_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+const CLASS_DURATION_MS = 60 * 60 * 1000; // 1 hour - wait this long after class starts before showing
 
 /**
  * Check if reminder was dismissed recently
@@ -19,8 +20,20 @@ function isDismissed() {
 }
 
 /**
- * Modal reminder for pending session reviews.
+ * Check if class is likely still in session.
+ * Returns true if less than 1 hour has passed since available_at.
+ */
+function isClassInSession(availableAt) {
+  if (!availableAt) return false;
+  const availableTime = new Date(availableAt).getTime();
+  const now = Date.now();
+  return now - availableTime < CLASS_DURATION_MS;
+}
+
+/**
+ * Modal reminder for pending semester reviews.
  * Shows once per 24 hours when instructor has pending reviews.
+ * Does not show during class (waits 1 hour after class starts).
  */
 export default function SessionReviewReminder({ pendingReviews = [] }) {
   const [dismissed, setDismissed] = useState(false);
@@ -37,7 +50,10 @@ export default function SessionReviewReminder({ pendingReviews = [] }) {
     setDismissed(true);
   };
 
-  const shouldShow = pendingReviews.length > 0 && !initiallyDismissed && !dismissed;
+  // Filter out reviews where class is still in session
+  const readyReviews = pendingReviews.filter((r) => !isClassInSession(r.available_at));
+
+  const shouldShow = readyReviews.length > 0 && !initiallyDismissed && !dismissed;
 
   if (!shouldShow) {
     return null;
@@ -56,8 +72,8 @@ export default function SessionReviewReminder({ pendingReviews = [] }) {
     return `Due in ${diffDays} days`;
   };
 
-  const review = pendingReviews[0];
-  const schoolName = review.classes?.schools?.name || "your session";
+  const review = readyReviews[0];
+  const schoolName = review.school_name || "your school";
   const isOverdue = new Date(review.due_date + "T00:00:00") < new Date().setHours(0, 0, 0, 0);
 
   return (
@@ -70,17 +86,17 @@ export default function SessionReviewReminder({ pendingReviews = [] }) {
         </div>
 
         <h2 id="review-reminder-title" className={styles.title}>
-          {isOverdue ? "Session Review Overdue" : "Session Review Due"}
+          {isOverdue ? "Semester Review Overdue" : "Semester Review Due"}
         </h2>
 
         <p className={styles.message}>
-          {pendingReviews.length === 1 ? (
+          {readyReviews.length === 1 ? (
             <>
-              Your session review for <strong>{schoolName}</strong> is {formatDueDate(review.due_date).toLowerCase()}.
+              Your semester review for <strong>{schoolName}</strong> is {formatDueDate(review.due_date).toLowerCase()}.
             </>
           ) : (
             <>
-              You have <strong>{pendingReviews.length} session reviews</strong> waiting for your feedback.
+              You have <strong>{readyReviews.length} semester reviews</strong> waiting for your feedback.
             </>
           )}
         </p>

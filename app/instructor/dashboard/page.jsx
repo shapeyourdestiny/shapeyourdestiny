@@ -3,6 +3,7 @@ import {
   getNextSession,
   getInstructorClasses,
 } from "@/lib/schedule/instructor-queries";
+import { getMyPendingReviews } from "@/lib/instructor/session-reviews";
 import styles from "./page.module.css";
 import InstructorSchedule from "./InstructorSchedule";
 
@@ -66,9 +67,9 @@ export default async function InstructorDashboardPage() {
   }
 
   // Fetch schedule data using the profile ID
-  let nextSession, instructorClasses, calendarFeed;
+  let nextSession, instructorClasses, calendarFeed, pendingReviews;
   try {
-    [nextSession, instructorClasses, { data: calendarFeed }] = await Promise.all([
+    [nextSession, instructorClasses, { data: calendarFeed }, pendingReviews] = await Promise.all([
       getNextSession(profile.id),
       getInstructorClasses(profile.id),
       supabase
@@ -76,12 +77,14 @@ export default async function InstructorDashboardPage() {
         .select("enabled")
         .eq("profile_id", profile.id)
         .single(),
+      getMyPendingReviews(),
     ]);
   } catch (e) {
     console.error("Error fetching dashboard data:", e);
     nextSession = null;
     instructorClasses = [];
     calendarFeed = null;
+    pendingReviews = [];
   }
 
   return (
@@ -92,6 +95,7 @@ export default async function InstructorDashboardPage() {
         nextSession={nextSession}
         classes={instructorClasses}
         calendarEnabled={calendarFeed?.enabled ?? false}
+        pendingReviews={pendingReviews || []}
       />
     </div>
   );

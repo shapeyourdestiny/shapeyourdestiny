@@ -45,11 +45,38 @@ function getTodayLA() {
 }
 
 /**
+ * Get current time in Pacific timezone
+ */
+function getNowLA() {
+  return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+}
+
+/**
+ * Parse a time string like "15:00" or "3:00 PM" to { hours, minutes }
+ */
+function parseTime(timeStr) {
+  if (!timeStr) return { hours: 15, minutes: 0 }; // Default to 3 PM
+  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+  if (!match) return { hours: 15, minutes: 0 };
+
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const ampm = match[3];
+
+  if (ampm) {
+    if (ampm.toUpperCase() === "PM" && hours < 12) hours += 12;
+    if (ampm.toUpperCase() === "AM" && hours === 12) hours = 0;
+  }
+
+  return { hours, minutes };
+}
+
+/**
  * Session Reviews Cron Job
  *
- * Runs daily (evening Pacific time) to:
- * 1. Create reviews for sessions that just ended
- * 2. Send initial emails for new reviews
+ * Runs twice daily (morning and evening Pacific time) to:
+ * 1. Create reviews for final class day (morning run)
+ * 2. Send initial emails for reviews after class ends (evening run)
  * 3. Send reminders for pending reviews
  */
 export async function GET(request) {
@@ -62,6 +89,7 @@ export async function GET(request) {
   const supabase = createAdminClient();
   const today = getTodayLA();
   const lookbackDate = addDays(today, -LOOKBACK_DAYS);
+  const nowLA = getNowLA();
 
   const results = {
     reviewsCreated: 0,
@@ -72,10 +100,12 @@ export async function GET(request) {
 
   try {
     // =========================================================================
-    // STEP 1: Find sessions that just ended and need reviews
+    // STEP 1: Create reviews for classes with final class TODAY or recently ended
     // =========================================================================
 
-    // Get classes with end_date that ended within the lookback window
+    // Get classes where:
+    // 1. Final class is today (end_date = today) - create in morning
+    // 2. Recently ended (for fallback if cron missed it)
     const { data: endedClasses, error: classesError } = await supabase
       .from("classes")
       .select(`
@@ -102,18 +132,21 @@ export async function GET(request) {
       return NextResponse.json(results);
     }
 
-    // For each ended class, determine which instructors qualify for a review
+    // For each class, determine which instructors qualify for a review
     for (const cls of endedClasses || []) {
       try {
-        await processEndedClass(supabase, cls, today, results);
+        await processEndedClass(supabase, cls, today, nowLA, results);
       } catch (error) {
         results.errors.push(`Error processing class ${cls.id}: ${error.message}`);
       }
     }
 
     // =========================================================================
-    // STEP 2: Send initial emails for new reviews (emailed_at is null)
+    // STEP 2: Send initial emails for reviews that are now available
     // =========================================================================
+    // Only send emails for reviews where:
+    // - emailed_at is null (not yet emailed)
+    // - available_at is null OR has passed (class has started/ended)
 
     // Group new reviews by profile to send one email per person
     const { data: newReviews } = await supabase
@@ -126,6 +159,7 @@ export async function GET(request) {
         session_end,
         classes_taught,
         due_date,
+        available_at,
         profiles:profile_id (
           id,
           email,
@@ -135,6 +169,7 @@ export async function GET(request) {
         classes:class_id (
           id,
           program,
+          time,
           schools:school_id (
             id,
             name
@@ -144,9 +179,17 @@ export async function GET(request) {
       .eq("status", "pending")
       .is("emailed_at", null);
 
+    // Filter to only include reviews where available_at has passed
+    // (i.e., class has started and we can email)
+    const nowISO = new Date().toISOString();
+    const availableReviews = (newReviews || []).filter((review) => {
+      if (!review.available_at) return true; // Legacy reviews without available_at
+      return review.available_at <= nowISO;
+    });
+
     // Group by profile_id
     const reviewsByProfile = new Map();
-    for (const review of newReviews || []) {
+    for (const review of availableReviews) {
       if (!review.profiles?.email) continue;
       const key = review.profile_id;
       if (!reviewsByProfile.has(key)) {
@@ -301,11 +344,21 @@ export async function GET(request) {
 }
 
 /**
- * Process a single ended class to create reviews for qualifying instructors.
+ * Process a single class to create reviews for qualifying instructors.
+ * Reviews are created on the final class day morning with available_at set to class start time.
  */
-async function processEndedClass(supabase, cls, today, results) {
+async function processEndedClass(supabase, cls, today, nowLA, results) {
   const sessionStart = cls.start_date;
   const sessionEnd = cls.end_date;
+
+  // Calculate when the review should become available (class start time on final day)
+  const { hours: classHours, minutes: classMinutes } = parseTime(cls.time);
+  // Create a Date object for the class start time in LA timezone
+  // We parse the date in UTC then adjust for the class time
+  const classDateTime = new Date(`${sessionEnd}T12:00:00Z`); // Use noon UTC as a base
+  // Set to the actual class time (approximating LA timezone)
+  classDateTime.setUTCHours(classHours + 8, classMinutes, 0, 0); // +8 hours for PST offset
+  const availableAt = classDateTime.toISOString();
 
   // Get holidays and program off days for the session period
   const [{ data: holidays }, { data: programOffDays }] = await Promise.all([
@@ -444,6 +497,7 @@ async function processEndedClass(supabase, cls, today, results) {
     const dueDate = addDays(stats.lastClassDate, REVIEW_DUE_DAYS);
 
     // Create the review
+    // Set available_at to class start time on final day (review opens when class starts)
     const { data: newReview, error: reviewError } = await supabase
       .from("session_reviews")
       .insert({
@@ -454,6 +508,7 @@ async function processEndedClass(supabase, cls, today, results) {
         classes_taught: stats.classesTaught,
         due_date: dueDate,
         status: "pending",
+        available_at: availableAt,
       })
       .select("id")
       .single();

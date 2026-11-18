@@ -27,6 +27,22 @@
   margin-top: 4px;
 }
 
+.callNote {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  margin-top: 8px;
+}
+
+.callNote a {
+  color: var(--navy);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.callNote a:hover {
+  text-decoration: underline;
+}
+
 .formCard {
   background: var(--paper);
   border-radius: 20px;

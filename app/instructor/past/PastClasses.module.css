@@ -129,6 +129,74 @@
   margin-top: -28px;
 }
 
+/* Semester Review Banner */
+.reviewBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  border-radius: 14px;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: 20px;
+}
+
+.reviewBanner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+}
+
+.reviewBanner:active {
+  transform: translateY(0);
+}
+
+.reviewBannerIcon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reviewBannerIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.reviewBannerText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.reviewBannerTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.reviewBannerSub {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.reviewBannerChevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
 /* =============================================================================
    LAST CLASS CARD - Teal highlight at top
    ============================================================================= */

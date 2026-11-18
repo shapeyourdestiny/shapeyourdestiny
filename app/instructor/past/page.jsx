@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getTodayLA } from "@/lib/payroll/schedule.js";
 import { getPastSessions } from "@/lib/instructor/past-classes.js";
+import { getMyPendingReviews } from "@/lib/instructor/session-reviews";
 import PastClassesClient from "./PastClassesClient";
 
 export const metadata = {
@@ -47,14 +48,18 @@ export default async function PastClassesPage({ searchParams }) {
     today = params.today;
   }
 
-  // Get past sessions (4 weeks back)
-  const { sessions, lastClass } = await getPastSessions(profile.id, 4, today);
+  // Get past sessions (4 weeks back) and pending reviews
+  const [{ sessions, lastClass }, pendingReviews] = await Promise.all([
+    getPastSessions(profile.id, 4, today),
+    getMyPendingReviews(),
+  ]);
 
   return (
     <PastClassesClient
       profile={profile}
       sessions={sessions}
       lastClass={lastClass}
+      pendingReviews={pendingReviews || []}
     />
   );
 }

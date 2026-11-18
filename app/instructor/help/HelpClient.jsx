@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { CONTACTS } from "@/lib/contacts";
 import styles from "./page.module.css";
 
 const StarIcon = () => (
@@ -72,22 +73,63 @@ const HelpIcon = () => (
   </svg>
 );
 
+const WhatsAppIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+);
+
+const SmartphoneIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+    <line x1="12" y1="18" x2="12.01" y2="18" />
+  </svg>
+);
+
+const DownloadIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+);
+
+const BookIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+  </svg>
+);
+
+const CopyIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+  </svg>
+);
+
+const PhoneIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
+  </svg>
+);
+
 const FAQ_SECTIONS = [
   {
     title: "Getting Started",
     icon: RocketIcon,
     items: [
       {
-        q: "How do I see my class schedule?",
-        a: "Your upcoming classes appear on your Dashboard. Each card shows the school, time, and who you're teaching with. Tap a class to see full details including directions to the school.",
+        q: "How do I see my schedule?",
+        a: "Open the Schedule tab to see your upcoming classes. Each card shows the school, time, program, and who you're teaching with. Tap a class for full details and directions.",
       },
       {
         q: "How do I get directions to a school?",
         a: "Tap any class card, then tap the Directions button. The first time, you'll choose your preferred maps app (Apple Maps, Google Maps, or Waze). After that, directions open automatically in your chosen app.",
       },
       {
-        q: "Can I sync my classes to my phone calendar?",
-        a: "Yes! Go to Profile → Calendar sync and tap \"Enable calendar sync.\" You'll get a link to add to Apple Calendar, Google Calendar, or any app that supports calendar subscriptions. Classes, sub requests, and team events will all appear in your calendar.",
+        q: "Can I sync my schedule to my phone calendar?",
+        a: "Yes! Go to Profile, then Calendar sync, and tap \"Enable calendar sync.\" You'll get a link to add to Apple Calendar, Google Calendar, or any app that supports calendar subscriptions. Classes, sub requests, and team events will all appear in your calendar.",
       },
     ],
   },
@@ -97,11 +139,11 @@ const FAQ_SECTIONS = [
     items: [
       {
         q: "How do I know who I'm teaching with?",
-        a: "Each class card on your Dashboard shows your co-teacher's name and photo. If you're teaching alone, it will say \"Teaching alone.\"",
+        a: "Each class card on your Schedule shows your co-teacher's name and photo. If you're teaching alone, it will say \"Teaching alone.\"",
       },
       {
         q: "What if I can't make it to a class?",
-        a: "Contact the office as soon as possible so we can find coverage. Reliable attendance is important for the kids and your co-teachers.",
+        a: "Message the office in WhatsApp as soon as possible so we can find coverage. Reliable attendance is important for the kids and your co-teachers.",
       },
       {
         q: "What does \"Sub\" mean on a class?",
@@ -118,12 +160,12 @@ const FAQ_SECTIONS = [
         a: "After you teach, you can rate how the class went using star ratings for overall experience, student attention, and behavior. You can also note if supplies are needed. This helps us support you and track how classes are going.",
       },
       {
-        q: "Do I have to do a review after every class?",
-        a: "We encourage a quick review after each class while it's fresh in your mind. It only takes a few seconds—just tap the star ratings. Add notes if something notable happened.",
+        q: "Do I have to review every class?",
+        a: "We encourage a quick review after each class while it's fresh in your mind. It only takes a few seconds. Just tap the star ratings. Add notes if something notable happened.",
       },
       {
         q: "What's a shout-out?",
-        a: "A shout-out is a quick way to recognize your co-teacher for something they did well. Pick a tag like \"Great energy\" or \"Handled a tough moment well,\" optionally add a note, and send it. We aim for at least one shout-out every two weeks.",
+        a: "A shout-out is a quick way to recognize your co-teacher for something they did well. Pick a tag like \"Great energy\" or \"Handled a tough moment,\" optionally add a note, and send it. We aim for at least one shout-out every two weeks.",
       },
       {
         q: "Why give shout-outs?",
@@ -145,7 +187,7 @@ const FAQ_SECTIONS = [
       },
       {
         q: "Do I get paid for team events?",
-        a: "Some events are paid—you'll see \"Paid\" on the event card. Attendance is tracked for paid events.",
+        a: "Some events are paid. You'll see \"Paid\" on the event card. Attendance is tracked for paid events.",
       },
     ],
   },
@@ -155,15 +197,15 @@ const FAQ_SECTIONS = [
     items: [
       {
         q: "What shows up in my Inbox?",
-        a: "Your Inbox shows things that need your attention: session reviews to complete, team events to RSVP to, notes from the office, and shout-outs you've received.",
+        a: "Your Inbox shows things that need your attention: semester reviews to complete, team events to RSVP to, notes from the office, and shout-outs you've received.",
       },
       {
-        q: "What's a session review?",
-        a: "At the end of a teaching session (usually after 10-12 classes), you'll complete a fuller review reflecting on the whole experience. This includes overall ratings, what went well, what you'd change, and feedback on your co-teachers.",
+        q: "What's a semester review?",
+        a: "At the end of your semester at a school, you'll complete a quick review reflecting on the whole experience. This includes overall ratings for the semester, what went well, and what you'd change.",
       },
       {
-        q: "When do I need to complete a session review?",
-        a: "Session reviews appear in your Inbox when they're due. Complete them before the deadline shown—usually within a few days of your last class in that session.",
+        q: "When do I complete a semester review?",
+        a: "Semester reviews appear on your last class day at a school and are due within 7 days. You'll see it in your Inbox with a due date.",
       },
     ],
   },
@@ -177,11 +219,11 @@ const FAQ_SECTIONS = [
       },
       {
         q: "I'm not seeing my classes",
-        a: "Classes appear on your Dashboard starting 7 days before the class date. If you should have classes assigned but don't see them, contact the office.",
+        a: "Classes appear on your Schedule starting 7 days before the class date. If you should have classes assigned but don't see them, message the office.",
       },
       {
         q: "The app isn't loading correctly",
-        a: "Try refreshing the page or closing and reopening the app. If issues persist, try clearing your browser cache or using a different browser. Contact us if problems continue.",
+        a: "Try refreshing the page or closing and reopening the app. If issues persist, try clearing your browser cache or using a different browser. Message us if problems continue.",
       },
     ],
   },
@@ -223,13 +265,194 @@ function FAQGroup({ title, icon: Icon, items }) {
   );
 }
 
+function InstallCard() {
+  const [isInstalled, setIsInstalled] = useState(() => {
+    // Check if already installed (runs once on mount)
+    if (typeof window === "undefined") return false;
+    return (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true
+    );
+  });
+  const [platform, setPlatform] = useState(() => {
+    // Detect platform (runs once on mount)
+    if (typeof window === "undefined") return null;
+    const ua = navigator.userAgent;
+    if (/iPhone|iPad|iPod/.test(ua)) return "ios";
+    if (/Android/.test(ua)) return "android";
+    return "desktop";
+  });
+  const [showSteps, setShowSteps] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  useEffect(() => {
+    // Listen for install prompt (Chrome/Android)
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      setDeferredPrompt(null);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.origin + "/instructor/dashboard");
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = window.location.origin + "/instructor/dashboard";
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    }
+  };
+
+  if (isInstalled) return null;
+
+  return (
+    <div className={styles.installCard}>
+      <div className={styles.installHeader}>
+        <div className={styles.installIcon}>
+          <SmartphoneIcon />
+        </div>
+        <h2 className={styles.installTitle}>Add to your phone</h2>
+      </div>
+      <p className={styles.installText}>
+        Add this app to your home screen for quick access and a better experience.
+      </p>
+
+      {platform === "ios" && showSteps && (
+        <>
+          <ol className={styles.installSteps}>
+            <li>Tap the <strong>Share</strong> button at the bottom of Safari</li>
+            <li>Scroll down and tap <strong>Add to Home Screen</strong></li>
+            <li>Tap <strong>Add</strong> in the top right</li>
+          </ol>
+          <button
+            className={styles.installToggle}
+            onClick={() => setShowSteps(false)}
+          >
+            Not using Safari?
+          </button>
+        </>
+      )}
+
+      {platform === "ios" && !showSteps && (
+        <div className={styles.installWarning}>
+          <p className={styles.installWarningText}>
+            To add to your home screen, open this page in Safari.
+          </p>
+          <button className={styles.copyLinkBtn} onClick={handleCopyLink}>
+            <CopyIcon />
+            {linkCopied ? "Copied!" : "Copy link"}
+          </button>
+        </div>
+      )}
+
+      {platform === "android" && deferredPrompt && (
+        <button className={styles.installBtn} onClick={handleInstall}>
+          <DownloadIcon />
+          Add to Home Screen
+        </button>
+      )}
+
+      {platform === "android" && !deferredPrompt && showSteps && (
+        <>
+          <ol className={styles.installSteps}>
+            <li>Tap the <strong>menu</strong> (three dots) in Chrome</li>
+            <li>Tap <strong>Add to Home screen</strong></li>
+            <li>Tap <strong>Add</strong></li>
+          </ol>
+          <button
+            className={styles.installToggle}
+            onClick={() => setShowSteps(false)}
+          >
+            Not using Chrome?
+          </button>
+        </>
+      )}
+
+      {platform === "android" && !deferredPrompt && !showSteps && (
+        <div className={styles.installWarning}>
+          <p className={styles.installWarningText}>
+            To add to your home screen, open this page in Chrome.
+          </p>
+          <button className={styles.copyLinkBtn} onClick={handleCopyLink}>
+            <CopyIcon />
+            {linkCopied ? "Copied!" : "Copy link"}
+          </button>
+        </div>
+      )}
+
+      {platform === "desktop" && (
+        <p className={styles.installText} style={{ marginBottom: 0 }}>
+          Open this page on your phone to add it to your home screen.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function HelpClient() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
         <h1>Help & FAQ</h1>
-        <p>How to use the app and our recommended workflow.</p>
+        <p>
+          How to use the app. See the{" "}
+          <a
+            href="https://docs.google.com/document/d/1ePQnQBhWdoKlxD6BXjnB86P-dVqXFb1jSmjdJgwLpvY"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Employee Handbook
+          </a>{" "}
+          for policies.
+        </p>
       </div>
+
+      {/* WhatsApp Card */}
+      <div className={styles.whatsappCard}>
+        <div className={styles.whatsappHeader}>
+          <div className={styles.whatsappIcon}>
+            <WhatsAppIcon />
+          </div>
+          <h2 className={styles.whatsappTitle}>Keep it in WhatsApp</h2>
+        </div>
+        <p className={styles.whatsappText}>
+          Questions about your schedule, running late, or need to call out? Message us in WhatsApp. We check it throughout the day.
+        </p>
+        <a
+          href={CONTACTS.heather.whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.whatsappBtn}
+        >
+          <WhatsAppIcon />
+          Message the office
+        </a>
+        <p className={styles.whatsappNote}>
+          For serious incidents, call instead. See contacts below.
+        </p>
+      </div>
+
+      {/* Install Card */}
+      <InstallCard />
 
       {/* Workflow Section */}
       <div className={styles.workflowSection}>
@@ -242,9 +465,9 @@ export default function HelpClient() {
             <div className={styles.workflowStep}>
               <div className={styles.stepNumber}>1</div>
               <div className={styles.stepContent}>
-                <h3 className={styles.stepTitle}>Check your schedule</h3>
+                <h3 className={styles.stepTitle}>Before class</h3>
                 <p className={styles.stepDesc}>
-                  Open the app to see your upcoming classes. Tap a class for details and directions to the school.
+                  Check your Schedule for upcoming classes. Tap a class for details and directions to the school.
                 </p>
               </div>
             </div>
@@ -252,9 +475,9 @@ export default function HelpClient() {
             <div className={styles.workflowStep}>
               <div className={styles.stepNumber}>2</div>
               <div className={styles.stepContent}>
-                <h3 className={styles.stepTitle}>After each class</h3>
+                <h3 className={styles.stepTitle}>After class</h3>
                 <p className={styles.stepDesc}>
-                  Do a quick class review—just tap the stars. Then send a shout-out to your co-teacher for something they did well.
+                  Do a quick class review. Just tap the stars. Then send a shout-out to your co-teacher for something they did well.
                 </p>
                 <span className={styles.stepHint}>
                   Aim for at least 1 shout-out every 2 weeks
@@ -265,9 +488,19 @@ export default function HelpClient() {
             <div className={styles.workflowStep}>
               <div className={styles.stepNumber}>3</div>
               <div className={styles.stepContent}>
-                <h3 className={styles.stepTitle}>End of session review</h3>
+                <h3 className={styles.stepTitle}>Final class of the semester</h3>
                 <p className={styles.stepDesc}>
-                  When your session ends, complete the full session review in your Inbox. Reflect on the whole experience and give feedback.
+                  Complete your semester review. It takes about 2 minutes and helps us plan for next semester.
+                </p>
+              </div>
+            </div>
+
+            <div className={styles.workflowStep}>
+              <div className={styles.stepNumber}>4</div>
+              <div className={styles.stepContent}>
+                <h3 className={styles.stepTitle}>Something happened?</h3>
+                <p className={styles.stepDesc}>
+                  For injuries, safety issues, or anything you need to document, tap Report an Incident in your Profile.
                 </p>
               </div>
             </div>
@@ -288,12 +521,60 @@ export default function HelpClient() {
         ))}
       </div>
 
+      {/* Handbook Card */}
+      <div className={styles.handbookCard}>
+        <div className={styles.handbookIcon}>
+          <BookIcon />
+        </div>
+        <div className={styles.handbookContent}>
+          <h3 className={styles.handbookTitle}>Anything else?</h3>
+          <p className={styles.handbookText}>
+            Check the{" "}
+            <a
+              href="https://docs.google.com/document/d/1ePQnQBhWdoKlxD6BXjnB86P-dVqXFb1jSmjdJgwLpvY"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Employee Handbook
+            </a>{" "}
+            for policies, procedures, and more.
+          </p>
+        </div>
+      </div>
+
       {/* Contact Card */}
       <div className={styles.contactCard}>
-        <h3 className={styles.contactTitle}>Still have questions?</h3>
-        <p className={styles.contactText}>
-          Reach out to the office and we&apos;ll help you out.
-        </p>
+        <h3 className={styles.contactTitle}>Contact</h3>
+
+        <div className={styles.contactRow}>
+          <div className={styles.contactInfo}>
+            <span className={styles.contactName}>{CONTACTS.heather.name}</span>
+            <span className={styles.contactRole}>{CONTACTS.heather.responsibilities}</span>
+          </div>
+          <div className={styles.contactActions}>
+            <a href={CONTACTS.heather.whatsappUrl} className={styles.contactBtn} target="_blank" rel="noopener noreferrer">
+              <WhatsAppIcon />
+            </a>
+            <a href={CONTACTS.heather.telUrl} className={styles.contactBtn}>
+              <PhoneIcon />
+            </a>
+          </div>
+        </div>
+
+        <div className={styles.contactRow}>
+          <div className={styles.contactInfo}>
+            <span className={styles.contactName}>{CONTACTS.destiny.name}</span>
+            <span className={styles.contactRole}>{CONTACTS.destiny.responsibilities}</span>
+          </div>
+          <div className={styles.contactActions}>
+            <a href={CONTACTS.destiny.whatsappUrl} className={styles.contactBtn} target="_blank" rel="noopener noreferrer">
+              <WhatsAppIcon />
+            </a>
+            <a href={CONTACTS.destiny.telUrl} className={styles.contactBtn}>
+              <PhoneIcon />
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

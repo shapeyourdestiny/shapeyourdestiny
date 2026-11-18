@@ -120,10 +120,26 @@ function getInitialPromoVisible() {
   }
 }
 
-export default function InstructorSchedule({ nextSession, classes, calendarEnabled }) {
+/**
+ * Get today's date in YYYY-MM-DD format
+ */
+function getTodayStr() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+export default function InstructorSchedule({ nextSession, classes, calendarEnabled, pendingReviews = [] }) {
   const [selectedClass, setSelectedClass] = useState(null);
   const [promoVisible, setPromoVisible] = useState(getInitialPromoVisible);
   const hasClasses = classes && classes.length > 0;
+  const today = getTodayStr();
+
+  // Check if there are pending semester reviews
+  const hasPendingReviews = pendingReviews.length > 0;
+  const pendingReviewClassIds = new Set(pendingReviews.map((r) => r.class_id));
 
   const handleDismissPromo = (e) => {
     e.preventDefault();
@@ -157,6 +173,28 @@ export default function InstructorSchedule({ nextSession, classes, calendarEnabl
 
   return (
     <div className={styles.schedule}>
+      {/* Semester Review Banner */}
+      {hasPendingReviews && (
+        <Link href={`/instructor/review/${pendingReviews[0].id}`} className={styles.reviewBanner}>
+          <div className={styles.reviewBannerIcon}>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </div>
+          <div className={styles.reviewBannerText}>
+            <span className={styles.reviewBannerTitle}>
+              {pendingReviews.length === 1
+                ? `${pendingReviews[0].school_name} is a wrap!`
+                : `${pendingReviews.length} semester reviews waiting`}
+            </span>
+            <span className={styles.reviewBannerSub}>Complete your semester review</span>
+          </div>
+          <svg className={styles.reviewBannerChevron} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </Link>
+      )}
+
       {/* Next Class Card */}
       {nextSession ? (
         <div className={`${styles.nextCard} ${nextSession.isCovering ? styles.coveringCard : ""}`}>
@@ -268,80 +306,107 @@ export default function InstructorSchedule({ nextSession, classes, calendarEnabl
 
         {hasClasses ? (
           <div className={styles.classesList}>
-            {classes.map((cls) => (
-              <button
-                key={cls.id}
-                type="button"
-                className={styles.classCard}
-                onClick={() => handleClassClick(cls)}
-                aria-label={`${cls.school.name}, ${cls.program === "soccer" ? "Soccer" : "Youth Wellness"}, details`}
-              >
-                <div className={styles.classHeader}>
-                  <span
-                    className={styles.classProgram}
-                    data-program={cls.program}
-                  >
-                    {cls.program === "soccer" ? "Soccer" : "Youth Wellness"}
-                  </span>
-                  {cls.school.address && (
-                    <a
-                      href={getDirectionsUrl(cls.school.address)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.classDirections}
-                      aria-label={`Directions to ${cls.school.name}`}
-                      onClick={handleDirectionsClick}
-                    >
-                      Directions
-                    </a>
+            {classes.map((cls) => {
+              // Check if this is the final class day
+              const isFinalClassToday = cls.endDate === today;
+              // Check if this class has a pending review
+              const hasPendingReview = pendingReviewClassIds.has(cls.id);
+
+              return (
+                <button
+                  key={cls.id}
+                  type="button"
+                  className={styles.classCard}
+                  onClick={() => handleClassClick(cls)}
+                  aria-label={`${cls.school.name}, ${cls.program === "soccer" ? "Soccer" : "Youth Wellness"}, details`}
+                >
+                  {/* Last class of semester badge */}
+                  {isFinalClassToday && (
+                    <div className={styles.lastClassBadge}>
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                      Last class of the semester
+                    </div>
                   )}
-                </div>
 
-                <div className={styles.classSchool}>{cls.school.name}</div>
-
-                <div className={styles.classSchedule}>
-                  {cls.daysDisplay} · {formatTime(cls.time)}
-                </div>
-
-                <div className={styles.classDates}>
-                  {formatDateRange(cls.startDate, cls.endDate)}
-                </div>
-
-                {cls.coTeacher && (
-                  <div className={styles.classCoTeacher}>
-                    With {cls.coTeacher.name}
+                  <div className={styles.classHeader}>
+                    <span
+                      className={styles.classProgram}
+                      data-program={cls.program}
+                    >
+                      {cls.program === "soccer" ? "Soccer" : "Youth Wellness"}
+                    </span>
+                    {cls.school.address && (
+                      <a
+                        href={getDirectionsUrl(cls.school.address)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.classDirections}
+                        aria-label={`Directions to ${cls.school.name}`}
+                        onClick={handleDirectionsClick}
+                      >
+                        Directions
+                      </a>
+                    )}
                   </div>
-                )}
 
-                {/* Progress bar for classes with target sessions */}
-                {cls.totalSessions && cls.sessionsDone !== undefined && (
-                  <div className={styles.progressSection}>
-                    <div className={styles.progressBar}>
-                      <div
-                        className={styles.progressFill}
-                        style={{
-                          width: `${Math.min(100, (cls.sessionsDone / cls.totalSessions) * 100)}%`,
-                        }}
-                      />
+                  <div className={styles.classSchool}>{cls.school.name}</div>
+
+                  <div className={styles.classSchedule}>
+                    {cls.daysDisplay} · {formatTime(cls.time)}
+                  </div>
+
+                  <div className={styles.classDates}>
+                    {formatDateRange(cls.startDate, cls.endDate)}
+                  </div>
+
+                  {cls.coTeacher && (
+                    <div className={styles.classCoTeacher}>
+                      With {cls.coTeacher.name}
                     </div>
-                    <div className={styles.progressText}>
-                      {cls.sessionsDone} of {cls.totalSessions} sessions done · {cls.totalSessions - cls.sessionsDone} to go
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Next day off note */}
-                {cls.nextDayOff && (
-                  <div className={styles.dayOffNote}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2" />
-                      <path d="M16 2v4M8 2v4M3 10h18" />
-                    </svg>
-                    {formatDayOffNote(cls.nextDayOff)}
-                  </div>
-                )}
-              </button>
-            ))}
+                  {/* Progress bar for classes with target sessions */}
+                  {cls.totalSessions && cls.sessionsDone !== undefined && (
+                    <div className={styles.progressSection}>
+                      <div className={styles.progressBar}>
+                        <div
+                          className={styles.progressFill}
+                          style={{
+                            width: `${Math.min(100, (cls.sessionsDone / cls.totalSessions) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <div className={styles.progressText}>
+                        {cls.sessionsDone} of {cls.totalSessions} sessions done · {cls.totalSessions - cls.sessionsDone} to go
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Next day off note */}
+                  {cls.nextDayOff && (
+                    <div className={styles.dayOffNote}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <path d="M16 2v4M8 2v4M3 10h18" />
+                      </svg>
+                      {formatDayOffNote(cls.nextDayOff)}
+                    </div>
+                  )}
+
+                  {/* Semester review note */}
+                  {hasPendingReview && !isFinalClassToday && (
+                    <div className={styles.reviewNote}>
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                      Semester review due
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         ) : (
           <div className={styles.emptyClassesCard}>

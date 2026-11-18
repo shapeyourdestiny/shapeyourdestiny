@@ -105,17 +105,12 @@ export default function ReviewClient({ review }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Form state
+  // Form state - simplified to 3 required ratings + 2 text fields
   const [overall, setOverall] = useState(review.overall || null);
   const [kidsGrowth, setKidsGrowth] = useState(review.kids_growth || null);
   const [support, setSupport] = useState(review.support || null);
-  const [schoolSupport, setSchoolSupport] = useState(review.school_support || null);
-  const [selfAssessment, setSelfAssessment] = useState(review.self_assessment || null);
   const [wentWell, setWentWell] = useState(review.went_well || "");
   const [changeNext, setChangeNext] = useState(review.change_next || "");
-  const [needs, setNeeds] = useState(review.needs || "");
-  const [schoolFeedback, setSchoolFeedback] = useState(review.school_feedback || "");
-  const [teamFeedback, setTeamFeedback] = useState(review.team_feedback || "");
   const [coworkerRatings, setCoworkerRatings] = useState(
     (review.coworkers || []).map((cw) => ({
       coworkerId: cw.coworker_id,
@@ -124,11 +119,13 @@ export default function ReviewClient({ review }) {
     }))
   );
 
-  const schoolName = review.classes?.schools?.name || "Session";
-  const program = review.classes?.program === "soccer" ? "Soccer" : "Wellness";
+  const schoolName = review.classes?.schools?.name || "your school";
 
   // Show thank you view if already submitted
   if (review.status === "submitted") {
+    // Show up to 3 shout-outs on thank-you screen
+    const shoutOuts = review.shoutOuts?.slice(0, 3) || [];
+
     return (
       <div className={styles.page}>
         <div className={styles.thankYou}>
@@ -139,8 +136,24 @@ export default function ReviewClient({ review }) {
           </div>
           <h1 className={styles.thankYouTitle}>Review submitted</h1>
           <p className={styles.thankYouText}>
-            Thanks for your feedback on your {schoolName} session. It helps us make the next one even better.
+            Thanks for your feedback on {schoolName}. It helps us make the next semester even better.
           </p>
+
+          {/* Shout-outs on thank-you screen */}
+          {shoutOuts.length > 0 && (
+            <div className={styles.thankYouShoutOuts}>
+              <h2 className={styles.thankYouShoutOutsTitle}>Shout-outs you received</h2>
+              <div className={styles.thankYouShoutOutsList}>
+                {shoutOuts.map((so) => (
+                  <div key={so.id} className={styles.thankYouShoutOutCard}>
+                    <span className={styles.thankYouShoutOutFrom}>From {so.from_first_name}</span>
+                    <p className={styles.thankYouShoutOutMessage}>&ldquo;{so.message}&rdquo;</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <Link href="/instructor/inbox" className={styles.thankYouBtn}>
             Back to Inbox
           </Link>
@@ -165,8 +178,8 @@ export default function ReviewClient({ review }) {
     e.preventDefault();
     setError(null);
 
-    // Validate required fields
-    if (!overall || !kidsGrowth || !support || !schoolSupport || !selfAssessment) {
+    // Validate required fields - only 3 star ratings now
+    if (!overall || !kidsGrowth || !support) {
       setError("Please complete all star ratings");
       return;
     }
@@ -174,8 +187,15 @@ export default function ReviewClient({ review }) {
       setError("Please share what went well");
       return;
     }
-    if (!changeNext.trim()) {
-      setError("Please share what you would change");
+    // Note: changeNext is now optional
+
+    // Validate character limits
+    if (wentWell.length > 500) {
+      setError("What went well must be 500 characters or less");
+      return;
+    }
+    if (changeNext.length > 500) {
+      setError("What to change must be 500 characters or less");
       return;
     }
 
@@ -194,13 +214,8 @@ export default function ReviewClient({ review }) {
         overall,
         kidsGrowth,
         support,
-        schoolSupport,
-        selfAssessment,
         wentWell,
         changeNext,
-        needs,
-        schoolFeedback,
-        teamFeedback,
         coworkerRatings,
       });
 
@@ -228,8 +243,8 @@ export default function ReviewClient({ review }) {
           </svg>
         </Link>
         <div className={styles.headerContent}>
-          <span className={styles.headerLabel}>{program} at</span>
-          <h1 className={styles.headerTitle}>{schoolName}</h1>
+          <span className={styles.headerLabel}>SEMESTER REVIEW · ABOUT 2 MINUTES</span>
+          <h1 className={styles.headerTitle}>How was the semester at {schoolName}?</h1>
         </div>
       </header>
 
@@ -254,64 +269,29 @@ export default function ReviewClient({ review }) {
         {formatDateRange(review.session_start, review.session_end)}
       </p>
 
-      {/* Shout-outs received */}
-      {review.shoutOuts && review.shoutOuts.length > 0 && (
-        <div className={styles.shoutOutsSection}>
-          <h2 className={styles.sectionTitle}>Shout-outs you received</h2>
-          <div className={styles.shoutOutsList}>
-            {review.shoutOuts.map((so) => (
-              <div key={so.id} className={styles.shoutOutCard}>
-                <span className={styles.shoutOutFrom}>From {so.from_first_name}</span>
-                <p className={styles.shoutOutMessage}>&ldquo;{so.message}&rdquo;</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Form */}
       <form onSubmit={handleSubmit} className={styles.form}>
         {error && <div className={styles.error}>{error}</div>}
 
-        {/* Overall ratings */}
+        {/* Star ratings - simplified to 3 */}
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>How was this session?</h2>
           <div className={styles.starRows}>
             <StarRating
-              label="Overall"
+              label="How was the semester overall?"
               value={overall}
               onChange={setOverall}
               required
             />
             <StarRating
-              label="Kids' growth"
+              label="How much did the kids grow?"
               value={kidsGrowth}
               onChange={setKidsGrowth}
               required
             />
             <StarRating
-              label="Your own performance"
-              value={selfAssessment}
-              onChange={setSelfAssessment}
-              required
-            />
-          </div>
-        </div>
-
-        {/* Support ratings */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>How was the support?</h2>
-          <div className={styles.starRows}>
-            <StarRating
-              label="Support from SYD office"
+              label="How supported did you feel?"
               value={support}
               onChange={setSupport}
-              required
-            />
-            <StarRating
-              label="Support from school staff"
-              value={schoolSupport}
-              onChange={setSchoolSupport}
               required
             />
           </div>
@@ -341,13 +321,11 @@ export default function ReviewClient({ review }) {
           </div>
         )}
 
-        {/* Text answers */}
+        {/* Text answers - simplified to 2 */}
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Reflections</h2>
-
           <div className={styles.field}>
             <label htmlFor="went-well">
-              What went well this session?
+              What went well this semester?
               <span className={styles.required}>*</span>
             </label>
             <textarea
@@ -357,71 +335,25 @@ export default function ReviewClient({ review }) {
               onChange={(e) => setWentWell(e.target.value)}
               placeholder="What did you enjoy most? What were your wins?"
               rows={3}
+              maxLength={500}
             />
+            <div className={styles.charCount}>{wentWell.length}/500</div>
           </div>
 
           <div className={styles.field}>
             <label htmlFor="change-next">
-              What would you do differently?
-              <span className={styles.required}>*</span>
+              What should we change next semester? (optional)
             </label>
             <textarea
               id="change-next"
               className={styles.textarea}
               value={changeNext}
               onChange={(e) => setChangeNext(e.target.value)}
-              placeholder="What could be better next time?"
+              placeholder="What could be better?"
               rows={3}
+              maxLength={500}
             />
-          </div>
-        </div>
-
-        {/* School and team feedback */}
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Feedback</h2>
-
-          <div className={styles.field}>
-            <label htmlFor="school-feedback">
-              How was your experience with this school? (optional)
-            </label>
-            <textarea
-              id="school-feedback"
-              className={styles.textarea}
-              value={schoolFeedback}
-              onChange={(e) => setSchoolFeedback(e.target.value)}
-              placeholder="Communication, facilities, staff support, any challenges..."
-              rows={3}
-            />
-          </div>
-
-          {review.coworkers && review.coworkers.length > 0 && (
-            <div className={styles.field}>
-              <label htmlFor="team-feedback">
-                Any general feedback about your team? (optional)
-              </label>
-              <textarea
-                id="team-feedback"
-                className={styles.textarea}
-                value={teamFeedback}
-                onChange={(e) => setTeamFeedback(e.target.value)}
-                placeholder="Team dynamics, collaboration, anything we should know..."
-                rows={3}
-              />
-            </div>
-          )}
-
-          <div className={styles.field}>
-            <label htmlFor="needs">
-              Anything you need from the office? (optional)
-            </label>
-            <textarea
-              id="needs"
-              className={styles.textarea}
-              value={needs}
-              onChange={(e) => setNeeds(e.target.value)}
-              placeholder="Supplies, support, questions..."
-              rows={2}
-            />
+            <div className={styles.charCount}>{changeNext.length}/500</div>
           </div>
         </div>
 

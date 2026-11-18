@@ -4,6 +4,73 @@
   gap: 24px;
 }
 
+/* ===== SEMESTER REVIEW BANNER ===== */
+.reviewBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  border-radius: 14px;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.reviewBanner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+}
+
+.reviewBanner:active {
+  transform: translateY(0);
+}
+
+.reviewBannerIcon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reviewBannerIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.reviewBannerText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.reviewBannerTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.reviewBannerSub {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.reviewBannerChevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
 /* ===== NEXT CLASS CARD (Navy) ===== */
 .nextCard {
   background: var(--navy-deep, #0F1F4D);
@@ -373,6 +440,49 @@
   margin-bottom: 8px;
 }
 
+/* Last class of semester badge */
+.lastClassBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.lastClassBadge svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Semester review note */
+.reviewNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(245, 158, 11, 0.12);
+  border-radius: 8px;
+  border-left: 3px solid #F59E0B;
+  font-size: 12px;
+  font-weight: 600;
+  color: #B45309;
+}
+
+.reviewNote svg {
+  width: 16px;
+  height: 16px;
+  color: #F59E0B;
+  flex-shrink: 0;
+}
+
 /* Progress bar */
 .progressSection {
   margin-top: 12px;
@@ -461,6 +571,10 @@
     grid-template-columns: 340px 1fr;
     gap: 24px;
     align-items: start;
+  }
+
+  .reviewBanner {
+    grid-column: 1 / -1;
   }
 
   .nextCard,

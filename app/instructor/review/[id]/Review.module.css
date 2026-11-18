@@ -372,6 +372,14 @@
   color: var(--ink-soft);
 }
 
+.charCount {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-align: right;
+  margin-top: 4px;
+}
+
 /* =============================================================================
    SUBMIT BUTTON
    ============================================================================= */
@@ -471,6 +479,55 @@
 
 .thankYouBtn:hover {
   background: var(--navy-deep);
+}
+
+/* Thank-you shout-outs */
+.thankYouShoutOuts {
+  width: 100%;
+  max-width: 340px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.thankYouShoutOutsTitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.thankYouShoutOutsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.thankYouShoutOutCard {
+  background: #FFF7EC;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.thankYouShoutOutFrom {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #B45309;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.thankYouShoutOutMessage {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-style: italic;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.5;
 }
 
 /* =============================================================================

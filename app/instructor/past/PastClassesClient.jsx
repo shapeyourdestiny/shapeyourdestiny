@@ -82,6 +82,7 @@ export default function PastClassesClient({
   profile,
   sessions,
   lastClass,
+  pendingReviews = [],
 }) {
   const router = useRouter();
   const [expandedId, setExpandedId] = useState(null); // "note-{id}" or "thank-{id}"
@@ -94,6 +95,9 @@ export default function PastClassesClient({
   const lastClassNoteDone = lastClass?.note !== null;
   const lastClassThankDone = !lastClass?.canThank || lastClass?.thanked;
   const showLastClassCard = lastClass && (!lastClassNoteDone || !lastClassThankDone);
+
+  // Check for pending reviews
+  const hasPendingReviews = pendingReviews.length > 0;
 
   const handleExpand = (type, sessionId) => {
     const newId = `${type}-${sessionId}`;
@@ -163,6 +167,27 @@ export default function PastClassesClient({
       </div>
 
       <div className={styles.content}>
+        {/* Semester Review Banner */}
+        {hasPendingReviews && (
+          <Link href={`/instructor/review/${pendingReviews[0].id}`} className={styles.reviewBanner}>
+            <div className={styles.reviewBannerIcon}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </div>
+            <div className={styles.reviewBannerText}>
+              <span className={styles.reviewBannerTitle}>
+                {pendingReviews.length === 1
+                  ? `${pendingReviews[0].school_name} is a wrap!`
+                  : `${pendingReviews.length} semester reviews waiting`}
+              </span>
+              <span className={styles.reviewBannerSub}>Complete your semester review</span>
+            </div>
+            <svg className={styles.reviewBannerChevron} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </Link>
+        )}
         {/* Last Class Card */}
         {showLastClassCard && (
           <LastClassCard
