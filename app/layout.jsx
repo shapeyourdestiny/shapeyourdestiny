@@ -25,6 +25,7 @@ const nunito = Nunito({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://shapeyourdestiny.co"),
   title: "Shape Your Destiny | Youth Wellness Programs",
   description: "Holistic youth wellness programs combining fitness, mindfulness, and nutrition to help children build confidence and thrive.",
   manifest: "/manifest.json",
