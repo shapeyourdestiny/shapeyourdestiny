@@ -35,17 +35,50 @@ export async function GET(request, { params }) {
     .maybeSingle();
 
   if (!resource) {
-    return new Response("Resource not found", { status: 404 });
+    return notFoundResponse();
   }
 
-  // If no file uploaded yet, show "coming soon" page
+  // Instructors can only see visible, non-archived resources
+  if (profile.role === "instructor") {
+    if (!resource.visible || resource.archived_at) {
+      return notFoundResponse();
+    }
+  }
+
+  // Handle links
+  if (resource.kind === "link") {
+    if (!resource.url) {
+      return notFoundResponse();
+    }
+
+    // Track open for instructors
+    if (profile.role === "instructor") {
+      await adminClient
+        .from("resource_opens")
+        .upsert({
+          resource_key: key,
+          version_label: "link",
+          profile_id: profile.id,
+          opened_at: new Date().toISOString(),
+        }, {
+          onConflict: "resource_key,version_label,profile_id",
+          ignoreDuplicates: true,
+        });
+    }
+
+    // Redirect to URL
+    return redirect(resource.url);
+  }
+
+  // Handle files
   if (!resource.file_path) {
+    // No file uploaded yet
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${resource.title} | Shape Your Destiny</title>
+  <title>${escapeHtml(resource.title)} | Shape Your Destiny</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -86,8 +119,8 @@ export async function GET(request, { params }) {
 </head>
 <body>
   <div class="card">
-    <h1>${resource.title}</h1>
-    <p>The handbook isn't available yet. Check back soon.</p>
+    <h1>${escapeHtml(resource.title)}</h1>
+    <p>This resource isn't available yet. Check back soon.</p>
     <a href="/instructor/forms">&larr; Back to Resources</a>
   </div>
 </body>
@@ -97,9 +130,8 @@ export async function GET(request, { params }) {
     });
   }
 
-  // Track open for instructors (not admins)
+  // Track open for instructors
   if (profile.role === "instructor" && resource.version_label) {
-    // Insert open record (upsert to avoid duplicates)
     await adminClient
       .from("resource_opens")
       .upsert({
@@ -118,7 +150,7 @@ export async function GET(request, { params }) {
     .storage
     .from("resources")
     .createSignedUrl(resource.file_path, 300, {
-      download: false, // inline, not forced download
+      download: false,
     });
 
   if (signedUrlError || !signedUrlData?.signedUrl) {
@@ -128,4 +160,71 @@ export async function GET(request, { params }) {
 
   // Redirect to the signed URL
   return redirect(signedUrlData.signedUrl);
+}
+
+function notFoundResponse() {
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Not Found | Shape Your Destiny</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F4F7FC;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    h1 {
+      font-size: 20px;
+      color: #16193B;
+      margin-bottom: 12px;
+    }
+    p {
+      font-size: 15px;
+      color: #4A5170;
+      line-height: 1.5;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      color: #3E8FA0;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Not Found</h1>
+    <p>We couldn't find that resource.</p>
+    <a href="/instructor/forms">&larr; Back to Resources</a>
+  </div>
+</body>
+</html>`;
+  return new Response(html, {
+    status: 404,
+    headers: { "Content-Type": "text/html" },
+  });
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
