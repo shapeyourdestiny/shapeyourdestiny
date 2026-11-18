@@ -246,8 +246,8 @@ export default function ScheduleBoard({ initialData }) {
     setWeekStart(newStart);
   };
 
-  // Open picker (click on slot)
-  const openPicker = (classId, slotType, event) => {
+  // Open picker (click on slot) - Note: currently unused, slot menu is used instead
+  const _openPicker = (classId, slotType, event) => {
     event.stopPropagation();
     const rect = event.currentTarget.getBoundingClientRect();
     setPickerOpen({ classId, slotType, anchorRect: rect });
@@ -596,40 +596,6 @@ export default function ScheduleBoard({ initialData }) {
     );
   };
 
-  // Legacy renderSlot for month view (without session changes)
-  const renderSlot = (cls, slotType, label) => {
-    const assignment = cls.assignments?.find((a) => a.slotType === slotType);
-    const isThisSlotOpen = pickerOpen?.classId === cls.id && pickerOpen?.slotType === slotType;
-
-    if (assignment?.profile) {
-      const color = assignment.profile.color || cls.district?.color || "#3E8FA0";
-      return (
-        <div className={styles.slotWrapper}>
-          <div
-            className={`${styles.filledSlot} ${isThisSlotOpen ? styles.slotActive : ""}`}
-            style={{ "--slot-color": color }}
-            onClick={(e) => openPicker(cls.id, slotType, e)}
-          >
-            <span className={styles.slotName}>{assignment.profile.full_name}</span>
-          </div>
-        </div>
-      );
-    }
-
-    // Empty slot
-    return (
-      <div className={styles.slotWrapper}>
-        <div
-          className={`${styles.emptySlot} ${isThisSlotOpen ? styles.slotActive : ""}`}
-          onClick={(e) => openPicker(cls.id, slotType, e)}
-        >
-          <span className={styles.slotLabel}>{label}</span>
-          <span className={styles.assignHint}>Click to assign</span>
-        </div>
-      </div>
-    );
-  };
-
   // Render grid class card (for Week view columns) with session state awareness
   const renderGridClassCard = (cls, date) => {
     const program = cls.program || "wellness";
@@ -691,9 +657,6 @@ export default function ScheduleBoard({ initialData }) {
 
   // Render Week View - horizontal day grid with dynamic Saturday
   const renderWeekView = () => {
-    // Check if any day this week needs a sub
-    const weekHasNeedsSub = weekSummary.needsSubCount > 0;
-
     return (
       <div className={styles.weekView}>
         {/* Week Summary Strip */}

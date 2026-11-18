@@ -29,9 +29,9 @@ export default function MarkOutModal({
   open,
   mode = "one_day", // "one_day" or "several_days"
   instructor: initialInstructor,
-  cls: initialClass,
+  cls: _initialClass,
   date: initialDate,
-  slotType: initialSlotType,
+  slotType: _initialSlotType,
   data,
   onClose,
   onSave,
@@ -260,10 +260,8 @@ export default function MarkOutModal({
           const dayOfSession = new Date(session.date + "T00:00:00").toLocaleDateString("en-US", { weekday: "short" });
           if (!cls.days?.includes(dayOfSession)) return;
 
-          // Check time overlap (within 2 hours if no hours_per_day)
-          const sessionHours = session.cls.hours_per_day || 1;
-          const otherHours = cls.hours_per_day || 1;
-
+          // Check time overlap
+          // Note: hours_per_day available but not yet used for sophisticated overlap detection
           // Simple check: if same time, it's an overlap
           if (cls.time === session.cls.time) {
             teachesAt = `Teaching at ${school.name} at ${cls.time}`;
@@ -283,16 +281,6 @@ export default function MarkOutModal({
     if (!dateStr) return "";
     const d = new Date(dateStr + "T00:00:00");
     return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-  }
-
-  // Get initials
-  function getInitials(fullName) {
-    if (!fullName) return "?";
-    const parts = fullName.split(" ").filter(Boolean);
-    if (parts.length >= 2) {
-      return parts[0][0] + parts[parts.length - 1][0];
-    }
-    return parts[0]?.[0] || "?";
   }
 
   // Handle sub assignment change

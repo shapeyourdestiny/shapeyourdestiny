@@ -7,23 +7,12 @@ import Link from "next/link";
 import styles from "./Payroll.module.css";
 import Modal from "@/app/admin/components/Modal";
 import {
-  setLinePay,
-  setLineClasses,
-  addAdjustment,
-  removeAdjustment,
-  changeRate,
   approvePeriod,
   markPaid,
   saveSettings,
   resolveIssue,
   logActivity,
 } from "@/lib/payroll/actions.js";
-
-const ISSUE_KINDS = {
-  missing: "Missing class",
-  wrong: "Wrong info",
-  other: "Other",
-};
 
 function formatMoney(amount) {
   if (amount === null || amount === undefined) return "–";
@@ -599,13 +588,14 @@ export default function PayrollClient({
 /**
  * Instructor Detail Drawer
  */
-function InstructorDrawer({ instructor, period, isOpen, onClose, onRefresh }) {
-  const [loading, setLoading] = useState({});
+function InstructorDrawer({ instructor, period: _period, isOpen, onClose, onRefresh }) {
+  // Note: _period, _loading, and _handleResolveIssue are reserved for issue resolution feature
+  const [_loading, _setLoading] = useState({});
 
-  const handleResolveIssue = async (issueId, note) => {
-    setLoading((prev) => ({ ...prev, [issueId]: true }));
+  const _handleResolveIssue = async (issueId, note) => {
+    _setLoading((prev) => ({ ...prev, [issueId]: true }));
     await resolveIssue(issueId, note);
-    setLoading((prev) => ({ ...prev, [issueId]: false }));
+    _setLoading((prev) => ({ ...prev, [issueId]: false }));
     onRefresh();
   };
 

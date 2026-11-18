@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import styles from "./InstructorsList.module.css";
 import AddInstructorModal from "./AddInstructorModal";
 import { formatPhone } from "@/lib/format";
@@ -191,9 +192,11 @@ export default function InstructorsList({ instructors }) {
                 {/* Instructor column */}
                 <div className={styles.nameCell}>
                   {instructor.headshotUrl ? (
-                    <img
+                    <Image
                       src={instructor.headshotUrl}
                       alt=""
+                      width={36}
+                      height={36}
                       className={styles.avatarImg}
                     />
                   ) : (

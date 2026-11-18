@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import styles from "./TeamEventDetail.module.css";
 import BottomSheet from "../components/BottomSheet";
 import { cancelTeamEvent, duplicateTeamEvent } from "@/lib/team-events/actions";
@@ -197,7 +198,7 @@ export default function TeamEventDetail({
             <div key={person.profile_id} className={styles.personRow}>
               <div className={styles.personAvatar}>
                 {person.profile?.avatar_url ? (
-                  <img src={person.profile.avatar_url} alt="" />
+                  <Image src={person.profile.avatar_url} alt="" width={36} height={36} />
                 ) : (
                   <span>{person.profile?.full_name?.charAt(0) || "?"}</span>
                 )}

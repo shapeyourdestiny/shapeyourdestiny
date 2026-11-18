@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import styles from "./AttendanceModal.module.css";
 import BottomSheet from "../components/BottomSheet";
 import { markAttendance } from "@/lib/team-events/actions";
@@ -118,7 +119,7 @@ export default function AttendanceModal({ open, onClose, event, onSave }) {
               </div>
               <div className={styles.personAvatar}>
                 {person.profile?.avatar_url ? (
-                  <img src={person.profile.avatar_url} alt="" />
+                  <Image src={person.profile.avatar_url} alt="" width={40} height={40} />
                 ) : (
                   <span>{person.profile?.full_name?.charAt(0) || "?"}</span>
                 )}

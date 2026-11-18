@@ -266,7 +266,7 @@ function FAQGroup({ title, icon: Icon, items }) {
 }
 
 function InstallCard() {
-  const [isInstalled, setIsInstalled] = useState(() => {
+  const [isInstalled] = useState(() => {
     // Check if already installed (runs once on mount)
     if (typeof window === "undefined") return false;
     return (
@@ -274,7 +274,7 @@ function InstallCard() {
       window.navigator.standalone === true
     );
   });
-  const [platform, setPlatform] = useState(() => {
+  const [platform] = useState(() => {
     // Detect platform (runs once on mount)
     if (typeof window === "undefined") return null;
     const ua = navigator.userAgent;

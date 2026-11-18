@@ -30,7 +30,7 @@ function getDateParts(dateStr) {
   };
 }
 
-export default function AttendanceTab({ instructor, attendanceData }) {
+export default function AttendanceTab({ instructor: _instructor, attendanceData }) {
   const [showAllCovered, setShowAllCovered] = useState(false);
 
   const { daysOut, stats, monthByMonth, byReason, coveredForOthers } = attendanceData;

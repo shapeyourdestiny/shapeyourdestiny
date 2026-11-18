@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import styles from "./InstructorDetail.module.css";
 import {
   archiveInstructorAction,
@@ -292,9 +293,11 @@ export default function InstructorDetail({ instructor, districts = [], notesData
       <div className={styles.headerCard}>
         <div className={styles.headerMain}>
           {instructor.headshotUrl ? (
-            <img
+            <Image
               src={instructor.headshotUrl}
               alt=""
+              width={80}
+              height={80}
               className={styles.avatar}
             />
           ) : (
