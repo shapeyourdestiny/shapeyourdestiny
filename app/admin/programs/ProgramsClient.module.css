@@ -1222,7 +1222,7 @@
   color: var(--teal-dark);
 }
 
-/* Responsive */
+/* Responsive - Tablet */
 @media (max-width: 768px) {
   .page {
     padding: 20px;
@@ -1250,5 +1250,150 @@
   .searchBox {
     width: 100%;
     margin-left: 0;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .page {
+    padding: 16px;
+  }
+
+  .headerText h1 {
+    font-size: 24px;
+  }
+
+  /* Buttons - tap targets */
+  .ghostBtn,
+  .addClassBtn {
+    min-height: 44px;
+  }
+
+  /* Segmented control */
+  .segment {
+    min-height: 44px;
+  }
+
+  /* Program chips */
+  .programChips {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .programChip {
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  /* Search box */
+  .searchBox {
+    min-height: 44px;
+  }
+
+  .searchBox input {
+    font-size: 16px; /* prevent zoom */
+  }
+
+  /* District heading */
+  .districtHeading {
+    flex-wrap: wrap;
+  }
+
+  .districtName {
+    font-size: 18px;
+  }
+
+  .menuWrapper {
+    opacity: 1; /* Always show on mobile */
+  }
+
+  .menuBtn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* School cards */
+  .schoolCardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .schoolActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .iconBtn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Class rows */
+  .classRow {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    min-height: 44px;
+  }
+
+  .classRight {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #EEF2F9;
+  }
+
+  /* Holidays */
+  .holidaysTitle {
+    font-size: 24px;
+  }
+
+  .addHolidayForm input,
+  .addHolidayForm select {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  .addBtn {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .holidayRow {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .holidayDate {
+    min-width: 100%;
+  }
+
+  .deleteBtn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Manage tab */
+  .manageTitle {
+    font-size: 24px;
+  }
+
+  .manageDistrictHeader {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .manageDistrictMeta {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .manageDeleteBtn,
+  .manageEditBtn,
+  .manageDeleteSmall {
+    min-height: 44px;
   }
 }

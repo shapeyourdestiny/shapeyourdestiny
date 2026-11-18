@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import styles from "./AttendanceModal.module.css";
-import BottomSheet from "./BottomSheet";
+import BottomSheet from "../components/BottomSheet";
 import { markAttendance } from "@/lib/team-events/actions";
 
 // Compute initial attendance from event people

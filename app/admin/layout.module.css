@@ -10,12 +10,22 @@
   overflow-y: auto;
 }
 
-@media (max-width: 800px) {
+/* Tablet: narrower sidebar */
+@media (min-width: 768px) and (max-width: 1099px) {
+  .main {
+    padding: 24px;
+  }
+}
+
+/* Mobile: top bar + bottom tabs */
+@media (max-width: 767px) {
   .layout {
     flex-direction: column;
   }
+
   .main {
-    padding: 24px 20px;
-    min-height: calc(100vh - 60px);
+    padding: 16px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    min-height: calc(100vh - 56px);
   }
 }

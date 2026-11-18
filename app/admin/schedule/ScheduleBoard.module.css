@@ -1319,20 +1319,71 @@
   }
 }
 
-/* Under 760px: single column */
-@media (max-width: 760px) {
+/* Under 768px: Mobile view */
+@media (max-width: 767px) {
+  .page {
+    min-height: calc(100vh - 136px);
+  }
+
   .header {
     flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+  }
+
+  .headerLeft {
+    flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
 
   .headerRight {
     width: 100%;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Hide text on header buttons, show icons only */
+  .addClassBtn,
+  .manageBtn,
+  .markOutBtn {
+    padding: 12px;
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  .addClassBtn span,
+  .manageBtn span {
+    display: none;
   }
 
   .viewToggle {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .viewBtn {
     flex: 1;
+    min-height: 44px;
+  }
+
+  .weekNav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .weekNavBtn {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
     justify-content: center;
   }
 
@@ -1342,6 +1393,26 @@
 
   .weekGrid {
     grid-template-columns: 1fr;
+  }
+
+  /* Cards */
+  .gridCard {
+    padding: 16px;
+  }
+
+  /* Slots - ensure tap targets */
+  .normalSlot,
+  .subSlot,
+  .needsSubSlot,
+  .oneTimeSlot,
+  .emptySlot {
+    min-height: 44px;
+  }
+
+  /* Team events */
+  .teamEventCard {
+    padding: 14px;
+    min-height: 44px;
   }
 }
 

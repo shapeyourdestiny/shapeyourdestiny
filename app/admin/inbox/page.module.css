@@ -593,3 +593,106 @@
   color: var(--ink-soft);
   margin-top: 8px;
 }
+
+/* ===== MOBILE (<768px) ===== */
+@media (max-width: 767px) {
+  .page {
+    padding: 16px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+  }
+
+  /* Status card: stack tiles */
+  .statusGrid {
+    flex-direction: column;
+  }
+
+  .statusTile {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 14px;
+  }
+
+  .statusCount {
+    font-size: 20px;
+    order: 1;
+  }
+
+  .statusDot {
+    order: 0;
+    margin-right: 8px;
+  }
+
+  .statusLabel {
+    order: 0;
+    flex: 1;
+  }
+
+  .statusHeader {
+    flex-wrap: wrap;
+  }
+
+  .statusDeadline {
+    margin-left: 0;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  /* Cards */
+  .card {
+    padding: 16px;
+  }
+
+  .cardNames {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .cardMessage {
+    font-size: 14px;
+    overflow-wrap: break-word;
+  }
+
+  /* Card actions - stack buttons and ensure tap targets */
+  .cardActions {
+    flex-direction: column;
+  }
+
+  .approveBtn,
+  .holdBtn,
+  .declineBtn,
+  .editBtn,
+  .doneBtn,
+  .cancelBtn {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Edit box */
+  .editActions {
+    flex-direction: column;
+  }
+
+  .editActions .cancelBtn,
+  .editActions .approveBtn {
+    width: 100%;
+  }
+
+  /* Time off dates */
+  .timeOffDates {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  /* Issue details */
+  .issueDetails {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

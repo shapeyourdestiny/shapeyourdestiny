@@ -448,3 +448,42 @@
     font-size: 12px;
   }
 }
+
+/* Mobile: 767px */
+@media (max-width: 767px) {
+  /* Search input - prevent zoom */
+  .searchInput {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  /* Filter pills - tap targets */
+  .filterPill {
+    padding: 10px 16px;
+    min-height: 44px;
+  }
+
+  /* Buttons - tap targets */
+  .viewBtn,
+  .addBtn {
+    padding: 12px 18px;
+    min-height: 44px;
+  }
+
+  /* Status filters - allow scroll */
+  .statusFilter {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  /* List rows as cards */
+  .listRow {
+    padding: 16px;
+  }
+
+  /* Contact info - make tappable */
+  .contactRow {
+    padding: 8px 0;
+  }
+}

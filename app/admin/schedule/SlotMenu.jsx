@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import styles from "./SlotMenu.module.css";
-import BottomSheet from "./BottomSheet";
+import BottomSheet from "../components/BottomSheet";
 import { SlotStatus } from "@/lib/schedule/session-staff";
 import { deleteSessionChangeAction } from "@/lib/schedule/actions";
 

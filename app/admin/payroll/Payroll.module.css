@@ -903,20 +903,63 @@
   border-top: 1px solid var(--tint);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Responsive - Tablet */
+@media (max-width: 900px) {
+  .summaryRow {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 767px) {
   .page {
-    padding: 20px;
+    padding: 16px;
   }
 
   .header {
     flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+  }
+
+  .headerLeft {
+    flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 8px;
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .settingsBtn {
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .viewToggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .viewBtn {
+    flex: 1;
+    min-height: 44px;
   }
 
   .periodNav {
-    gap: 12px;
+    gap: 8px;
+  }
+
+  .periodNavBtn {
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .periodInfo h2 {
@@ -924,16 +967,37 @@
   }
 
   .periodMeta {
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    gap: 4px;
   }
 
+  /* Summary cards stack */
   .summaryRow {
-    flex-wrap: wrap;
-    gap: 20px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .summaryItem {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--tint);
+    border-radius: 8px;
+  }
+
+  .summaryCard {
+    padding: 16px;
+  }
+
+  /* Table wrapper for horizontal scroll */
+  .tableCard {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .table {
+    min-width: 500px;
     font-size: 13px;
   }
 
@@ -942,11 +1006,81 @@
     padding: 10px 12px;
   }
 
+  /* Row click targets */
+  .table tbody tr {
+    cursor: pointer;
+  }
+
+  /* Actions */
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primaryBtn,
+  .exportBtn,
+  .cancelBtn {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Drawer - full screen on mobile */
+  .drawerOverlay {
+    padding-top: env(safe-area-inset-top);
+  }
+
   .drawer {
     width: 100%;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .drawerHeader {
+    padding: 16px;
+  }
+
+  .closeBtn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .drawerBody {
+    padding: 16px;
+  }
+
+  .drawerFooter {
+    padding: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+
+  /* Settings modal - full screen */
+  .settingsModal {
+    width: 100%;
+    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 
   .formGrid {
     grid-template-columns: 1fr;
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+
+  .formActions button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  /* Warning modal */
+  .warningActions {
+    flex-direction: column;
+  }
+
+  .warningActions button {
+    width: 100%;
+    min-height: 44px;
   }
 }

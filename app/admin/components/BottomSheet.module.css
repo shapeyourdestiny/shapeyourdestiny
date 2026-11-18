@@ -13,12 +13,13 @@
   border-radius: 20px 20px 0 0;
   width: 100%;
   max-width: 600px;
-  max-height: 70vh;
+  max-height: calc(85vh - env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   box-shadow: 0 -10px 40px rgba(20, 44, 107, 0.2);
   animation: slideUp 0.25s ease-out;
   transition: transform 0.15s ease-out;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 @keyframes slideUp {
@@ -39,11 +40,44 @@
   flex-shrink: 0;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 0;
+  flex-shrink: 0;
+}
+
 .title {
   font-size: 18px;
-  padding: 16px 20px 0;
+  font-weight: 700;
+  color: var(--ink);
   margin: 0;
-  flex-shrink: 0;
+  flex: 1;
+}
+
+.closeBtn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  margin: -8px -8px 0 0;
+  transition: background 0.15s ease;
+}
+
+.closeBtn:hover {
+  background: var(--tint);
+}
+
+.closeBtn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .content {
@@ -51,4 +85,10 @@
   overflow-y: auto;
   padding: 16px 20px 24px;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Full-screen mode for complex sheets */
+.sheet.fullScreen {
+  max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  border-radius: 0;
 }

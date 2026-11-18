@@ -3,11 +3,16 @@
 import { useEffect, useRef } from "react";
 import styles from "./BottomSheet.module.css";
 
+/**
+ * Mobile bottom sheet component with swipe-to-close support.
+ * Used for action menus and mobile modals.
+ */
 export default function BottomSheet({ open, onClose, title, children }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
 
+  // Lock body scroll when open
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -18,6 +23,16 @@ export default function BottomSheet({ open, onClose, title, children }) {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  // Close on escape
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
 
   const handleTouchStart = (e) => {
     startY.current = e.touches[0].clientY;
@@ -56,7 +71,15 @@ export default function BottomSheet({ open, onClose, title, children }) {
         onTouchEnd={handleTouchEnd}
       >
         <div className={styles.handle} />
-        {title && <h3 className={styles.title}>{title}</h3>}
+        <div className={styles.header}>
+          {title && <h3 className={styles.title}>{title}</h3>}
+          <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
         <div className={styles.content}>{children}</div>
       </div>
     </div>

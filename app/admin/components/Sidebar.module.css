@@ -1,3 +1,4 @@
+/* ===== DESKTOP SIDEBAR ===== */
 .sidebar {
   width: 250px;
   background: var(--navy-deep);
@@ -27,7 +28,7 @@
 }
 
 .navLabel {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
   font-weight: 700;
   font-size: 11px;
   letter-spacing: 0.08em;
@@ -76,7 +77,7 @@
   margin-left: auto;
   background: var(--navy);
   color: #fff;
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 11px;
   padding: 2px 7px;
@@ -107,7 +108,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
   font-weight: 700;
   font-size: 16px;
 }
@@ -144,39 +145,42 @@
   color: #fff;
 }
 
-/* Mobile: horizontal strip */
-@media (max-width: 800px) {
+/* ===== MOBILE TOP BAR ===== */
+.mobileTopBar {
+  display: none;
+}
+
+/* ===== MOBILE BOTTOM TAB BAR ===== */
+.mobileTabBar {
+  display: none;
+}
+
+/* ===== MORE MENU OVERLAY ===== */
+.moreOverlay {
+  display: none;
+}
+
+/* ===== TABLET (768-1099px): Slim sidebar ===== */
+@media (min-width: 768px) and (max-width: 1099px) {
   .sidebar {
-    width: 100%;
-    height: 60px;
-    flex-direction: row;
-    align-items: center;
-    padding: 0 16px;
-    gap: 16px;
+    width: 72px;
   }
 
   .brand {
-    padding: 0;
-    border-bottom: none;
-    flex-shrink: 0;
+    justify-content: center;
+    padding: 16px 8px;
   }
 
   .logo {
-    height: 22px;
+    height: 24px;
+    width: 24px;
+    object-fit: contain;
+    object-position: left;
   }
 
   .nav {
-    flex: 1;
-    flex-direction: row;
-    padding: 0;
-    gap: 8px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    margin-bottom: 0;
-  }
-  .nav::-webkit-scrollbar {
-    display: none;
+    padding: 16px 8px;
+    align-items: center;
   }
 
   .navLabel {
@@ -184,12 +188,411 @@
   }
 
   .navItem {
-    padding: 8px 12px;
-    white-space: nowrap;
-    font-size: 13px;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 12px;
+    position: relative;
+  }
+
+  .navIcon {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Hide text, show only icon */
+  .navItem {
+    font-size: 0;
+    gap: 0;
+  }
+
+  .badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    padding: 1px 5px;
+    font-size: 10px;
   }
 
   .user {
+    padding: 12px 8px 16px;
+  }
+
+  .userInfo {
     display: none;
+  }
+
+  .logout {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* ===== MOBILE (<768px): Top bar + bottom tabs ===== */
+@media (max-width: 767px) {
+  /* Hide desktop sidebar */
+  .sidebar {
+    display: none;
+  }
+
+  /* Mobile Top Bar */
+  .mobileTopBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    padding: 0 16px;
+    padding-top: env(safe-area-inset-top);
+    background: var(--navy);
+    z-index: 100;
+  }
+
+  .mobileTopLogo {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .mobileTopTitle {
+    flex: 1;
+    font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobileAvatarWrapper {
+    position: relative;
+  }
+
+  .mobileAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--teal);
+    color: var(--navy-deep);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .avatarMenu {
+    position: absolute;
+    top: 44px;
+    right: 0;
+    background: var(--paper);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(20, 44, 107, 0.2);
+    min-width: 180px;
+    overflow: hidden;
+    z-index: 200;
+  }
+
+  .avatarMenuHeader {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--tint);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .avatarMenuName {
+    font-family: var(--font-nunito), 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  .avatarMenuRole {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .avatarMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 16px;
+    background: none;
+    border: none;
+    font-family: var(--font-nunito), 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .avatarMenuItem:hover {
+    background: var(--tint);
+  }
+
+  .avatarMenuItem svg {
+    width: 18px;
+    height: 18px;
+    color: var(--ink-soft);
+  }
+
+  /* Mobile Bottom Tab Bar */
+  .mobileTabBar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(60px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: #fff;
+    border-top: 1px solid var(--tint-deep);
+    z-index: 100;
+  }
+
+  .mobileTab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 4px;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    min-height: 44px;
+  }
+
+  .mobileTabIcon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: var(--ink-soft);
+    transition: all 0.15s ease;
+  }
+
+  .mobileTabIcon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mobileTabLabel {
+    font-family: var(--font-nunito), 'Nunito', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    transition: color 0.15s ease;
+  }
+
+  .mobileTabActive .mobileTabIcon {
+    background: var(--navy);
+    color: #fff;
+    width: 36px;
+    height: 24px;
+    border-radius: 12px;
+  }
+
+  .mobileTabActive .mobileTabLabel {
+    color: var(--navy);
+  }
+
+  .mobileTabBadge {
+    position: absolute;
+    top: 4px;
+    right: calc(50% - 20px);
+    min-width: 16px;
+    padding: 1px 5px;
+    background: #E0594C;
+    color: #fff;
+    font-family: var(--font-nunito), 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    border-radius: 999px;
+    text-align: center;
+  }
+
+  /* More Menu Overlay */
+  .moreOverlay {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 44, 107, 0.4);
+    z-index: 200;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .moreMenu {
+    width: 100%;
+    height: 100%;
+    background: var(--paper);
+    display: flex;
+    flex-direction: column;
+    animation: slideInRight 0.2s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .moreHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid var(--tint);
+  }
+
+  .moreTitle {
+    font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .moreClose {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    transition: background 0.15s ease;
+  }
+
+  .moreClose:hover {
+    background: var(--tint);
+  }
+
+  .moreClose svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .moreGrid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 20px 16px;
+    overflow-y: auto;
+    align-content: start;
+  }
+
+  .moreTile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 12px;
+    background: var(--tint);
+    border-radius: 16px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    position: relative;
+    min-height: 90px;
+  }
+
+  .moreTile:hover {
+    background: var(--tint-deep);
+  }
+
+  .moreTileActive {
+    background: rgba(31, 63, 145, 0.08);
+    border: 2px solid var(--navy);
+  }
+
+  .moreTileIcon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--navy);
+  }
+
+  .moreTileIcon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .moreTileLabel {
+    font-family: var(--font-nunito), 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: center;
+  }
+
+  .moreTileBadge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    min-width: 18px;
+    padding: 2px 6px;
+    background: #E0594C;
+    color: #fff;
+    font-family: var(--font-nunito), 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    border-radius: 999px;
+    text-align: center;
+  }
+
+  .moreLogout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 16px;
+    padding: 14px;
+    background: none;
+    border: 2px solid var(--tint-deep);
+    border-radius: 12px;
+    font-family: var(--font-nunito), 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .moreLogout:hover {
+    border-color: #E0594C;
+    color: #E0594C;
+  }
+
+  .moreLogout svg {
+    width: 18px;
+    height: 18px;
   }
 }

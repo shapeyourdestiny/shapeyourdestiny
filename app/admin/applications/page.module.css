@@ -799,3 +799,141 @@
     width: 100%;
   }
 }
+
+/* Mobile styles */
+@media (max-width: 767px) {
+  .page {
+    padding: 16px;
+  }
+
+  /* Header */
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .headerLeft h1 {
+    font-size: 24px;
+  }
+
+  .headerRight {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .copyBtn,
+  .gearBtn {
+    min-height: 44px;
+  }
+
+  .gearBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .hiringToggle {
+    padding: 10px 16px;
+    min-height: 44px;
+  }
+
+  /* Settings popover - full width */
+  .settingsPopover {
+    width: calc(100vw - 32px);
+    right: -16px;
+  }
+
+  .closeBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Tabs - horizontal scroll */
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+
+  .tab {
+    white-space: nowrap;
+    min-height: 44px;
+  }
+
+  /* List - reduce height for detail view */
+  .list {
+    max-height: 200px;
+  }
+
+  .listCard {
+    padding: 14px;
+  }
+
+  /* Detail header */
+  .detailHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .detailName {
+    font-size: 22px;
+  }
+
+  .statusSelect {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  /* Detail content */
+  .detailMain {
+    padding: 16px;
+  }
+
+  /* Contact tiles - stack */
+  .contactTiles {
+    flex-direction: column;
+  }
+
+  .contactTile {
+    min-height: 44px;
+  }
+
+  /* Resume row */
+  .resumeRow {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .resumeBtn,
+  .resumeBtnSecondary {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Notes sidebar */
+  .notesSidebar {
+    padding: 16px;
+  }
+
+  .noteInput textarea {
+    font-size: 16px; /* prevent zoom */
+    min-height: 80px;
+  }
+
+  .addNoteBtn {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  /* Action buttons */
+  .primaryBtn,
+  .notAFitBtn,
+  .viewInstructorLink {
+    min-height: 44px;
+  }
+}

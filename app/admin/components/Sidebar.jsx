@@ -1,15 +1,19 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./Sidebar.module.css";
 
-const NAV_OVERVIEW = [
+// All navigation items in one list
+const NAV_ITEMS = [
   {
     href: "/admin/inbox",
     label: "Inbox",
+    shortLabel: "Inbox",
     badgeKey: "inboxCount",
+    showInTabs: true,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
@@ -20,6 +24,7 @@ const NAV_OVERVIEW = [
   {
     href: "/admin/updates",
     label: "Updates",
+    shortLabel: "Updates",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
@@ -29,6 +34,7 @@ const NAV_OVERVIEW = [
   {
     href: "/admin/dashboard",
     label: "Invite Codes",
+    shortLabel: "Invites",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -39,6 +45,8 @@ const NAV_OVERVIEW = [
   {
     href: "/admin/instructors",
     label: "Instructors",
+    shortLabel: "Instructors",
+    showInTabs: true,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
@@ -50,6 +58,7 @@ const NAV_OVERVIEW = [
   {
     href: "/admin/applications",
     label: "Applications",
+    shortLabel: "Apps",
     badgeKey: "applicationsCount",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -61,12 +70,10 @@ const NAV_OVERVIEW = [
       </svg>
     ),
   },
-];
-
-const NAV_OPERATIONS = [
   {
     href: "/admin/programs",
     label: "Programs",
+    shortLabel: "Programs",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 21h18" />
@@ -77,7 +84,9 @@ const NAV_OPERATIONS = [
   },
   {
     href: "/admin/schedule",
-    label: "Schedule Board",
+    label: "Schedule",
+    shortLabel: "Schedule",
+    showInTabs: true,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -90,7 +99,9 @@ const NAV_OPERATIONS = [
   {
     href: "/admin/payroll",
     label: "Payroll",
+    shortLabel: "Payroll",
     badgeKey: "payrollCount",
+    showInTabs: true,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="12" y1="1" x2="12" y2="23" />
@@ -100,7 +111,8 @@ const NAV_OPERATIONS = [
   },
   {
     href: "/admin/incident-reports",
-    label: "Incident Reports",
+    label: "Incidents",
+    shortLabel: "Incidents",
     badgeKey: "incidentCount",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -112,6 +124,7 @@ const NAV_OPERATIONS = [
   {
     href: "/admin/resources",
     label: "Resources",
+    shortLabel: "Resources",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z" />
@@ -121,9 +134,18 @@ const NAV_OPERATIONS = [
   },
 ];
 
+// Get page title from pathname
+function getPageTitle(pathname) {
+  const item = NAV_ITEMS.find((i) => pathname.startsWith(i.href));
+  return item?.label || "Admin";
+}
+
 export default function Sidebar({ profile, incidentCount = 0, inboxCount = 0, payrollCount = 0, applicationsCount = 0 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const avatarMenuRef = useRef(null);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -134,83 +156,241 @@ export default function Sidebar({ profile, incidentCount = 0, inboxCount = 0, pa
   const initial = profile?.full_name?.charAt(0)?.toUpperCase() || "A";
 
   const getBadgeCount = (item) => {
-    if (item.badgeKey === "incidentCount") {
-      return incidentCount;
-    }
-    if (item.badgeKey === "inboxCount") {
-      return inboxCount;
-    }
-    if (item.badgeKey === "payrollCount") {
-      return payrollCount;
-    }
-    if (item.badgeKey === "applicationsCount") {
-      return applicationsCount;
-    }
+    if (item.badgeKey === "incidentCount") return incidentCount;
+    if (item.badgeKey === "inboxCount") return inboxCount;
+    if (item.badgeKey === "payrollCount") return payrollCount;
+    if (item.badgeKey === "applicationsCount") return applicationsCount;
     return 0;
   };
 
+  // Close avatar menu on click outside
+  useEffect(() => {
+    if (!avatarMenuOpen) return;
+    const handleClick = (e) => {
+      if (avatarMenuRef.current && !avatarMenuRef.current.contains(e.target)) {
+        setAvatarMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [avatarMenuOpen]);
+
+  // Close more menu on escape
+  useEffect(() => {
+    if (!moreOpen) return;
+    const handleKey = (e) => {
+      if (e.key === "Escape") setMoreOpen(false);
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [moreOpen]);
+
+  // Lock body scroll when more menu is open
+  useEffect(() => {
+    if (moreOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [moreOpen]);
+
+  // Items for bottom tabs (5: Inbox, Schedule, Instructors, Payroll, More)
+  const tabItems = NAV_ITEMS.filter((i) => i.showInTabs);
+
+  // Check if current path matches a tab (or is in More menu)
+  const isInMoreMenu = !tabItems.some((i) => pathname.startsWith(i.href));
+
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.brand}>
+    <>
+      {/* Desktop Sidebar */}
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}>
+          <Image
+            src="/Images/footer_logo_gold.png"
+            alt="Shape Your Destiny"
+            width={120}
+            height={28}
+            className={styles.logo}
+            priority
+          />
+        </div>
+
+        <nav className={styles.nav}>
+          <span className={styles.navLabel}>Overview</span>
+          {NAV_ITEMS.slice(0, 5).map((item) => {
+            const isActive = pathname === item.href || (item.href !== "/admin/inbox" && pathname.startsWith(item.href));
+            const badgeCount = getBadgeCount(item);
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                {item.label}
+                {badgeCount > 0 && (
+                  <span className={styles.badge}>{badgeCount}</span>
+                )}
+              </a>
+            );
+          })}
+          <span className={styles.navLabel} style={{ marginTop: 16 }}>Operations</span>
+          {NAV_ITEMS.slice(5).map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href);
+            const badgeCount = getBadgeCount(item);
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                {item.label}
+                {badgeCount > 0 && (
+                  <span className={styles.badge}>{badgeCount}</span>
+                )}
+              </a>
+            );
+          })}
+        </nav>
+
+        <div className={styles.user}>
+          <div className={styles.avatar}>{initial}</div>
+          <div className={styles.userInfo}>
+            <span className={styles.userName}>{profile?.full_name || "Admin"}</span>
+            <span className={styles.userRole}>Admin</span>
+          </div>
+          <button onClick={handleLogout} className={styles.logout}>
+            Log Out
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile Top Bar */}
+      <header className={styles.mobileTopBar}>
         <Image
           src="/Images/footer_logo_gold.png"
-          alt="Shape Your Destiny"
-          width={120}
-          height={28}
-          className={styles.logo}
+          alt="SYD"
+          width={32}
+          height={32}
+          className={styles.mobileTopLogo}
           priority
         />
-      </div>
+        <h1 className={styles.mobileTopTitle}>{getPageTitle(pathname)}</h1>
+        <div className={styles.mobileAvatarWrapper} ref={avatarMenuRef}>
+          <button
+            className={styles.mobileAvatar}
+            onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}
+            aria-label="Account menu"
+          >
+            {initial}
+          </button>
+          {avatarMenuOpen && (
+            <div className={styles.avatarMenu}>
+              <div className={styles.avatarMenuHeader}>
+                <span className={styles.avatarMenuName}>{profile?.full_name || "Admin"}</span>
+                <span className={styles.avatarMenuRole}>Admin</span>
+              </div>
+              <button onClick={handleLogout} className={styles.avatarMenuItem}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Log Out
+              </button>
+            </div>
+          )}
+        </div>
+      </header>
 
-      <nav className={styles.nav}>
-        <span className={styles.navLabel}>Overview</span>
-        {NAV_OVERVIEW.map((item) => {
-          const isActive = pathname === item.href;
+      {/* Mobile Bottom Tab Bar */}
+      <nav className={styles.mobileTabBar}>
+        {tabItems.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(item.href);
           const badgeCount = getBadgeCount(item);
           return (
             <a
               key={item.href}
               href={item.href}
-              className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+              className={`${styles.mobileTab} ${isActive ? styles.mobileTabActive : ""}`}
             >
-              <span className={styles.navIcon}>{item.icon}</span>
-              {item.label}
+              <span className={styles.mobileTabIcon}>{item.icon}</span>
+              <span className={styles.mobileTabLabel}>{item.shortLabel}</span>
               {badgeCount > 0 && (
-                <span className={styles.badge}>{badgeCount}</span>
+                <span className={styles.mobileTabBadge}>{badgeCount}</span>
               )}
             </a>
           );
         })}
-        <span className={styles.navLabel} style={{ marginTop: 16 }}>Operations</span>
-        {NAV_OPERATIONS.map((item) => {
-          const isActive = pathname === item.href;
-          const badgeCount = getBadgeCount(item);
-          return (
-            <a
-              key={item.href}
-              href={item.href}
-              className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
-            >
-              <span className={styles.navIcon}>{item.icon}</span>
-              {item.label}
-              {badgeCount > 0 && (
-                <span className={styles.badge}>{badgeCount}</span>
-              )}
-            </a>
-          );
-        })}
+        <button
+          className={`${styles.mobileTab} ${isInMoreMenu || moreOpen ? styles.mobileTabActive : ""}`}
+          onClick={() => setMoreOpen(true)}
+        >
+          <span className={styles.mobileTabIcon}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="1" />
+              <circle cx="12" cy="5" r="1" />
+              <circle cx="12" cy="19" r="1" />
+            </svg>
+          </span>
+          <span className={styles.mobileTabLabel}>More</span>
+        </button>
       </nav>
 
-      <div className={styles.user}>
-        <div className={styles.avatar}>{initial}</div>
-        <div className={styles.userInfo}>
-          <span className={styles.userName}>{profile?.full_name || "Admin"}</span>
-          <span className={styles.userRole}>Admin</span>
+      {/* More Menu (Full Screen) */}
+      {moreOpen && (
+        <div className={styles.moreOverlay}>
+          <div className={styles.moreMenu}>
+            <div className={styles.moreHeader}>
+              <h2 className={styles.moreTitle}>Menu</h2>
+              <button
+                className={styles.moreClose}
+                onClick={() => setMoreOpen(false)}
+                aria-label="Close menu"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className={styles.moreGrid}>
+              {NAV_ITEMS.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href);
+                const badgeCount = getBadgeCount(item);
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className={`${styles.moreTile} ${isActive ? styles.moreTileActive : ""}`}
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    <span className={styles.moreTileIcon}>{item.icon}</span>
+                    <span className={styles.moreTileLabel}>{item.label}</span>
+                    {badgeCount > 0 && (
+                      <span className={styles.moreTileBadge}>{badgeCount}</span>
+                    )}
+                  </a>
+                );
+              })}
+            </div>
+
+            <button onClick={handleLogout} className={styles.moreLogout}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              Log Out
+            </button>
+          </div>
         </div>
-        <button onClick={handleLogout} className={styles.logout}>
-          Log Out
-        </button>
-      </div>
-    </aside>
+      )}
+    </>
   );
 }

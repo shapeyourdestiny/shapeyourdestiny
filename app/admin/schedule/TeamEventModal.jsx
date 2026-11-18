@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import styles from "./TeamEventModal.module.css";
-import BottomSheet from "./BottomSheet";
+import BottomSheet from "../components/BottomSheet";
 import { createTeamEvent, updateTeamEvent } from "@/lib/team-events/actions";
 
 const EVENT_TYPES = [

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import styles from "./TeamEventDetail.module.css";
-import BottomSheet from "./BottomSheet";
+import BottomSheet from "../components/BottomSheet";
 import { cancelTeamEvent, duplicateTeamEvent } from "@/lib/team-events/actions";
 
 const TYPE_LABELS = {

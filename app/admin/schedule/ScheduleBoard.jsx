@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import styles from "./ScheduleBoard.module.css";
-import BottomSheet from "./BottomSheet";
+import BottomSheet from "../components/BottomSheet";
 import AddClassModal from "./AddClassModal";
 import WeekSummary from "./WeekSummary";
 import SlotMenu from "./SlotMenu";
