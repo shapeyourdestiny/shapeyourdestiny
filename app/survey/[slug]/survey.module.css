@@ -1,0 +1,720 @@
+/* =============================================================================
+   SURVEY PAGE STYLES
+   ============================================================================= */
+
+/* Brand tokens:
+   royal: #1D3786, navy: #1F3168, orange: #F09C53, teal: #007B93,
+   gold: #D1B05C, light: #E7EFFC, ink: #141C3A, ink-soft: #46506E
+*/
+
+/* =============================================================================
+   HERO SECTION
+   ============================================================================= */
+
+.hero {
+  position: relative;
+  background: #1D3786;
+  padding: 72px 0 80px;
+  text-align: center;
+}
+
+.heroInner {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #1D3786;
+  background: #D1B05C;
+  padding: 6px 16px;
+  border-radius: 999px;
+  margin-bottom: 20px;
+}
+
+.heroHeading {
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fff;
+  margin: 0 0 16px;
+}
+
+.heroIntro {
+  font-size: 17px;
+  line-height: 1.6;
+  color: #DCE4F7;
+  margin: 0;
+}
+
+/* =============================================================================
+   FORM SECTION
+   ============================================================================= */
+
+.formSection {
+  padding: 40px 20px 80px;
+  background: #E7EFFC;
+  min-height: 60vh;
+}
+
+@media (max-width: 480px) {
+  .formSection {
+    padding: 24px 16px 60px;
+  }
+}
+
+/* =============================================================================
+   PROGRESS BAR
+   ============================================================================= */
+
+.progressWrapper {
+  max-width: 600px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 8px;
+  background: #C5D4F1;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #007B93;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  font-size: 14px;
+  font-weight: 600;
+  color: #46506E;
+  white-space: nowrap;
+}
+
+/* =============================================================================
+   SECTION CARDS
+   ============================================================================= */
+
+.sectionCard {
+  max-width: 600px;
+  margin: 0 auto 24px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.08);
+}
+
+@media (max-width: 480px) {
+  .sectionCard {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+}
+
+.sectionTitle {
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #141C3A;
+  margin: 0 0 4px;
+}
+
+.sectionHelp {
+  font-size: 14px;
+  color: #8B93A8;
+  margin: 0 0 20px;
+}
+
+.questions {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.question {
+  padding-top: 20px;
+  border-top: 1px solid #E7EFFC;
+}
+
+.question:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.questionError {
+  background: #FFF5F5;
+  margin: -12px -16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+
+/* =============================================================================
+   FIELD WRAPPER
+   ============================================================================= */
+
+.fieldWrapper {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.label {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #141C3A;
+  margin-bottom: 10px;
+}
+
+.required {
+  color: #E53E3E;
+  margin-left: 2px;
+}
+
+.fieldHelp {
+  font-size: 13px;
+  color: #8B93A8;
+  margin: 6px 0 0;
+}
+
+.fieldError {
+  display: block;
+  font-size: 13px;
+  color: #E53E3E;
+  margin-top: 8px;
+}
+
+/* =============================================================================
+   TEXT INPUTS
+   ============================================================================= */
+
+.textInput,
+.textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #DCE8FB;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 16px;
+  color: #141C3A;
+  background: #fff;
+  transition: border-color 0.15s ease;
+}
+
+.textInput:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #1D3786;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.charCount {
+  display: block;
+  font-size: 12px;
+  color: #8B93A8;
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* =============================================================================
+   CHOICE BUTTONS (pick one)
+   ============================================================================= */
+
+.choiceGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.choiceBtn {
+  min-height: 48px;
+  padding: 12px 20px;
+  background: #F8FAFD;
+  border: 2px solid #DCE8FB;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: #46506E;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.choiceBtn:hover {
+  border-color: #1D3786;
+  color: #1D3786;
+}
+
+.choiceBtnActive {
+  background: #1D3786;
+  border-color: #1D3786;
+  color: #fff;
+}
+
+.choiceBtnActive:hover {
+  background: #152a6a;
+  border-color: #152a6a;
+  color: #fff;
+}
+
+/* =============================================================================
+   CHIPS (checkboxes)
+   ============================================================================= */
+
+.chipGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 10px 18px;
+  background: #F8FAFD;
+  border: 2px solid #DCE8FB;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #46506E;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip:hover {
+  border-color: #007B93;
+  color: #007B93;
+}
+
+.chipActive {
+  background: #007B93;
+  border-color: #007B93;
+  color: #fff;
+}
+
+.chipActive:hover {
+  background: #006778;
+  border-color: #006778;
+  color: #fff;
+}
+
+/* =============================================================================
+   STAR RATING
+   ============================================================================= */
+
+.starRow {
+  display: flex;
+  gap: 8px;
+}
+
+.starRow[data-size="small"] {
+  gap: 4px;
+}
+
+.starBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: transform 0.1s ease;
+}
+
+.starBtn:hover {
+  transform: scale(1.1);
+}
+
+.starBtn svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* =============================================================================
+   GRID RATING
+   ============================================================================= */
+
+.gridWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.gridRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #F8FAFD;
+  border-radius: 12px;
+}
+
+@media (max-width: 480px) {
+  .gridRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+.gridRowLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #46506E;
+}
+
+/* =============================================================================
+   SCALE (0-10)
+   ============================================================================= */
+
+.scaleWrapper {
+  margin-top: 8px;
+}
+
+.scaleLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #8B93A8;
+  margin-bottom: 8px;
+}
+
+.scaleGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scaleBtn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8FAFD;
+  border: 2px solid #DCE8FB;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: #46506E;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.scaleBtn:hover {
+  border-color: #007B93;
+  color: #007B93;
+}
+
+.scaleBtnActive {
+  background: #007B93;
+  border-color: #007B93;
+  color: #fff;
+}
+
+.scaleBtnActive:hover {
+  background: #006778;
+  border-color: #006778;
+  color: #fff;
+}
+
+/* =============================================================================
+   DROPDOWN
+   ============================================================================= */
+
+.dropdown {
+  position: relative;
+}
+
+.dropdownTrigger {
+  width: 100%;
+  padding: 14px 16px;
+  background: #fff;
+  border: 2px solid #DCE8FB;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: border-color 0.15s ease;
+}
+
+.dropdownTrigger:hover,
+.dropdownTrigger:focus {
+  border-color: #1D3786;
+  outline: none;
+}
+
+.dropdownValue {
+  color: #141C3A;
+}
+
+.dropdownPlaceholder {
+  color: #8B93A8;
+}
+
+.dropdownArrow {
+  width: 20px;
+  height: 20px;
+  color: #8B93A8;
+  flex-shrink: 0;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 2px solid #DCE8FB;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(20, 44, 107, 0.15);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.dropdownSearch {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid #E7EFFC;
+  font-family: inherit;
+  font-size: 15px;
+  color: #141C3A;
+}
+
+.dropdownSearch:focus {
+  outline: none;
+}
+
+.dropdownOptions {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdownOption {
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  color: #141C3A;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.dropdownOption:hover {
+  background: #F8FAFD;
+}
+
+.dropdownOptionActive {
+  background: #E7EFFC;
+  font-weight: 600;
+}
+
+.dropdownEmpty {
+  padding: 16px;
+  text-align: center;
+  color: #8B93A8;
+  font-size: 14px;
+}
+
+/* =============================================================================
+   CONSENT CHECKBOX
+   ============================================================================= */
+
+.consentLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #46506E;
+  line-height: 1.5;
+}
+
+.consentLabel input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  accent-color: #007B93;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* =============================================================================
+   SUBMIT SECTION
+   ============================================================================= */
+
+.submitSection {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 16px;
+}
+
+.submitBtn {
+  width: 100%;
+  max-width: 320px;
+  padding: 18px 32px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 999px;
+  background: #1D3786;
+  color: #fff;
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #152a6a;
+  transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submitNote {
+  font-size: 14px;
+  color: #8B93A8;
+  margin: 12px 0 0;
+}
+
+/* =============================================================================
+   FORM ERROR
+   ============================================================================= */
+
+.formError {
+  max-width: 600px;
+  margin: 0 auto 20px;
+  background: #FDE8E6;
+  color: #C53030;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 15px;
+  text-align: center;
+}
+
+/* =============================================================================
+   HONEYPOT
+   ============================================================================= */
+
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* =============================================================================
+   THANK YOU STATE
+   ============================================================================= */
+
+.thankYouCard {
+  max-width: 500px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: 48px 32px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.08);
+}
+
+.checkIcon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 24px;
+  background: #D4EDDA;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkIcon svg {
+  width: 36px;
+  height: 36px;
+  color: #28A745;
+}
+
+.thankYouHeading {
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #141C3A;
+  margin: 0 0 12px;
+}
+
+.thankYouText {
+  font-size: 16px;
+  color: #46506E;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* =============================================================================
+   CLOSED STATE
+   ============================================================================= */
+
+.closedCard {
+  max-width: 500px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: 48px 32px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(20, 44, 107, 0.08);
+}
+
+.closedIcon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 24px;
+  background: #FEF3E2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closedIcon svg {
+  width: 36px;
+  height: 36px;
+  color: #E08A3C;
+}
+
+.closedCard p {
+  font-size: 18px;
+  color: #46506E;
+  margin: 0;
+}
