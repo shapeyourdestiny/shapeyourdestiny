@@ -2,16 +2,11 @@ import { notFound } from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import SurveyClient from "./SurveyClient";
-import soccerFeedbackSurvey from "@/lib/surveys/soccer-feedback";
-
-// Map of available surveys
-const SURVEYS = {
-  "soccer-feedback": soccerFeedbackSurvey,
-};
+import { getSurvey, getSurveyStatus } from "@/lib/surveys";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const survey = SURVEYS[slug];
+  const survey = getSurvey(slug);
 
   if (!survey) {
     return { title: "Survey Not Found" };
@@ -26,20 +21,21 @@ export async function generateMetadata({ params }) {
 
 export default async function SurveyPage({ params }) {
   const { slug } = await params;
-  const survey = SURVEYS[slug];
+  const survey = getSurvey(slug);
 
   if (!survey) {
     notFound();
   }
 
-  // Check if survey is closed
-  const isClosed = survey.closesAt && new Date() > new Date(survey.closesAt);
+  const status = getSurveyStatus(survey);
+  const isDraft = status === "draft";
+  const isClosed = status === "closed";
 
   return (
     <>
       <Header />
       <main>
-        <SurveyClient survey={survey} isClosed={isClosed} />
+        <SurveyClient survey={survey} isClosed={isClosed} isDraft={isDraft} />
       </main>
       <Footer />
     </>

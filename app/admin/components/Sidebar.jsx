@@ -133,7 +133,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: "/admin/surveys/soccer-feedback",
+    href: "/admin/surveys",
     label: "Surveys",
     shortLabel: "Surveys",
     icon: (

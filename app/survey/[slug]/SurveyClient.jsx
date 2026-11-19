@@ -2,10 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import Turnstile from "@/components/Turnstile";
-import { countRequiredQuestions } from "@/lib/surveys/soccer-feedback";
+import { countRequiredQuestions } from "@/lib/surveys";
 import styles from "./survey.module.css";
 
-export default function SurveyClient({ survey, isClosed }) {
+export default function SurveyClient({ survey, isClosed, isDraft }) {
   const [answers, setAnswers] = useState({});
   const [otherText, setOtherText] = useState({}); // Store "Other" text values
   const [errors, setErrors] = useState({});
@@ -165,6 +165,30 @@ export default function SurveyClient({ survey, isClosed }) {
 
     return finalAnswers;
   };
+
+  if (isDraft) {
+    return (
+      <>
+        <section className={styles.hero}>
+          <div className={styles.heroInner}>
+            <span className={styles.pill}>{survey.pill}</span>
+            <h1 className={styles.heroHeading}>{survey.title}</h1>
+          </div>
+        </section>
+        <section className={styles.formSection}>
+          <div className={styles.closedCard}>
+            <div className={styles.closedIcon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4M12 16h.01" />
+              </svg>
+            </div>
+            <p>This survey isn&apos;t open yet.</p>
+          </div>
+        </section>
+      </>
+    );
+  }
 
   if (isClosed) {
     return (

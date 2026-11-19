@@ -3,28 +3,23 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { hashIP, getClientIP, checkRateLimit } from "@/lib/security/rate-limit";
 import { sendSurveyFeedbackNotification } from "@/lib/email";
-import soccerFeedbackSurvey, { getQuestionMap, getRequiredQuestionIds } from "@/lib/surveys/soccer-feedback";
+import { getSurvey, isSurveyOpen, getQuestionMap, getRequiredQuestionIds } from "@/lib/surveys";
 
 const MIN_SUBMIT_TIME_MS = 3000; // 3 seconds
 const RATE_LIMIT_COUNT = 5;
 const RATE_LIMIT_WINDOW_MINUTES = 60;
 
-// Map of available surveys
-const SURVEYS = {
-  "soccer-feedback": soccerFeedbackSurvey,
-};
-
 export async function POST(request, { params }) {
   const { slug } = await params;
-  const survey = SURVEYS[slug];
+  const survey = getSurvey(slug);
 
   if (!survey) {
     return NextResponse.json({ error: "Survey not found" }, { status: 404 });
   }
 
-  // Check if survey is closed
-  if (survey.closesAt && new Date() > new Date(survey.closesAt)) {
-    return NextResponse.json({ error: "This survey is closed" }, { status: 400 });
+  // Check if survey accepts responses
+  if (!isSurveyOpen(survey)) {
+    return NextResponse.json({ error: "This survey is not accepting responses" }, { status: 400 });
   }
 
   try {
