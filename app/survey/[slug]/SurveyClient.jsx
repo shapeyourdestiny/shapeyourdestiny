@@ -7,6 +7,7 @@ import styles from "./survey.module.css";
 
 export default function SurveyClient({ survey, isClosed }) {
   const [answers, setAnswers] = useState({});
+  const [otherText, setOtherText] = useState({}); // Store "Other" text values
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -70,7 +71,7 @@ export default function SurveyClient({ survey, isClosed }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          answers,
+          answers: buildFinalAnswers(),
           _plt: pageLoadTime,
           _hp: "", // honeypot
           "cf-turnstile-response": turnstileToken,
@@ -139,6 +140,30 @@ export default function SurveyClient({ survey, isClosed }) {
       }
       return { ...prev, [questionId]: [...current, option] };
     });
+  };
+
+  const updateOtherText = (questionId, text) => {
+    setOtherText((prev) => ({ ...prev, [questionId]: text }));
+  };
+
+  // Build final answers with "Other" text included
+  const buildFinalAnswers = () => {
+    const finalAnswers = { ...answers };
+
+    // For each question with hasOtherText, append the other text if "Other" is selected
+    for (const section of survey.sections) {
+      for (const q of section.questions) {
+        if (q.hasOtherText && otherText[q.id]) {
+          if (q.type === "choice" && answers[q.id] === "Other") {
+            finalAnswers[q.id] = `Other: ${otherText[q.id]}`;
+          } else if (q.type === "checkboxes" && Array.isArray(answers[q.id]) && answers[q.id].includes("Other")) {
+            finalAnswers[`${q.id}_other`] = otherText[q.id];
+          }
+        }
+      }
+    }
+
+    return finalAnswers;
   };
 
   if (isClosed) {
@@ -253,6 +278,8 @@ export default function SurveyClient({ survey, isClosed }) {
                       onChange={(v) => updateAnswer(q.id, v)}
                       onGridChange={(row, v) => updateGridAnswer(q.id, row, v)}
                       onToggleCheckbox={(opt) => toggleCheckbox(q.id, opt)}
+                      otherText={otherText[q.id] || ""}
+                      onOtherTextChange={(text) => updateOtherText(q.id, text)}
                       error={errors[q.id]}
                     />
                   </div>
@@ -282,7 +309,7 @@ export default function SurveyClient({ survey, isClosed }) {
   );
 }
 
-function QuestionField({ question, value, onChange, onGridChange, onToggleCheckbox, error }) {
+function QuestionField({ question, value, onChange, onGridChange, onToggleCheckbox, otherText, onOtherTextChange, error }) {
   const q = question;
 
   const renderLabel = () => (
@@ -328,11 +355,22 @@ function QuestionField({ question, value, onChange, onGridChange, onToggleCheckb
               </button>
             ))}
           </div>
+          {q.hasOtherText && value === "Other" && (
+            <input
+              type="text"
+              className={styles.otherInput}
+              placeholder="Please specify..."
+              value={otherText}
+              onChange={(e) => onOtherTextChange(e.target.value)}
+              maxLength={100}
+            />
+          )}
           {error && <span className={styles.fieldError}>{error}</span>}
         </fieldset>
       );
 
     case "checkboxes":
+      const hasOtherChecked = (value || []).includes("Other");
       return (
         <fieldset className={styles.fieldWrapper}>
           <legend className={styles.label}>
@@ -355,6 +393,16 @@ function QuestionField({ question, value, onChange, onGridChange, onToggleCheckb
               );
             })}
           </div>
+          {q.hasOtherText && hasOtherChecked && (
+            <input
+              type="text"
+              className={styles.otherInput}
+              placeholder="Please specify..."
+              value={otherText}
+              onChange={(e) => onOtherTextChange(e.target.value)}
+              maxLength={100}
+            />
+          )}
           {error && <span className={styles.fieldError}>{error}</span>}
         </fieldset>
       );

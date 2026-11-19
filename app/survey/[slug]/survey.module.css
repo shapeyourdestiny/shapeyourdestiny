@@ -314,6 +314,32 @@
 }
 
 /* =============================================================================
+   OTHER TEXT INPUT
+   ============================================================================= */
+
+.otherInput {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 2px solid #DCE8FB;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 15px;
+  color: #141C3A;
+  background: #fff;
+  transition: border-color 0.15s ease;
+}
+
+.otherInput:focus {
+  outline: none;
+  border-color: #1D3786;
+}
+
+.otherInput::placeholder {
+  color: #8B93A8;
+}
+
+/* =============================================================================
    STAR RATING
    ============================================================================= */
 
