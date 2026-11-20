@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Turnstile from "@/components/Turnstile";
 import styles from "./survey.module.css";
 
@@ -689,13 +690,15 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
           <div className={styles.photoOverlay} />
         </div>
         <div className={styles.leftContent}>
-          <Image
-            src="/Images/footer_logo_gold.png"
-            alt="Shape Your Destiny"
-            width={120}
-            height={28}
-            className={styles.logo}
-          />
+          <Link href="/" className={styles.logoLink}>
+            <Image
+              src="/Images/footer_logo_gold.png"
+              alt="Shape Your Destiny"
+              width={120}
+              height={28}
+              className={styles.logo}
+            />
+          </Link>
           <div className={styles.leftBottom}>
             <span className={styles.glassPill}>INTRAMURAL SOCCER</span>
             <h2 className={styles.bigLine}>{getBigLineText()}</h2>
@@ -802,13 +805,15 @@ function WelcomeScreen({ totalQuestions, onStart, getBigLineText }) {
           <div className={styles.photoOverlay} />
         </div>
         <div className={styles.leftContent}>
-          <Image
-            src="/Images/footer_logo_gold.png"
-            alt="Shape Your Destiny"
-            width={120}
-            height={28}
-            className={styles.logo}
-          />
+          <Link href="/" className={styles.logoLink}>
+            <Image
+              src="/Images/footer_logo_gold.png"
+              alt="Shape Your Destiny"
+              width={120}
+              height={28}
+              className={styles.logo}
+            />
+          </Link>
           <div className={styles.leftBottom}>
             <span className={styles.glassPill}>INTRAMURAL SOCCER</span>
             <h2 className={styles.bigLine}>{getBigLineText()}</h2>
@@ -909,13 +914,15 @@ function ThankYouScreen({ getBigLineText }) {
           <div className={styles.photoOverlay} />
         </div>
         <div className={styles.leftContent}>
-          <Image
-            src="/Images/footer_logo_gold.png"
-            alt="Shape Your Destiny"
-            width={120}
-            height={28}
-            className={styles.logo}
-          />
+          <Link href="/" className={styles.logoLink}>
+            <Image
+              src="/Images/footer_logo_gold.png"
+              alt="Shape Your Destiny"
+              width={120}
+              height={28}
+              className={styles.logo}
+            />
+          </Link>
           <div className={styles.leftBottom}>
             <span className={styles.glassPill}>INTRAMURAL SOCCER</span>
             <h2 className={styles.bigLine}>{getBigLineText()}</h2>
@@ -1035,7 +1042,6 @@ function QuestionStep({
         tabIndex={-1}
       >
         {q.label}
-        {q.required && <span className={styles.required}>*</span>}
       </h2>
 
       {q.help && <p className={styles.questionHelp}>{q.help}</p>}
@@ -1161,7 +1167,6 @@ function GroupedStep({ step, answers, otherText, errors, updateAnswer, toggleChe
             tabIndex={idx === 0 ? -1 : undefined}
           >
             {q.label}
-            {q.required && <span className={styles.required}>*</span>}
           </h2>
 
           {q.help && <p className={styles.questionHelp}>{q.help}</p>}
@@ -1211,7 +1216,7 @@ function FinalStep({ answers, consentQuestion, updateAnswer, errors, submitting,
             {overall ? (
               <span className={styles.recapStars}>
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <svg key={s} viewBox="0 0 24 24" fill={s <= overall ? "#F2A93B" : "#DCE3F1"}>
+                  <svg key={s} viewBox="0 0 24 24" fill={s <= overall ? "#F2A93B" : "#C9D4EE"}>
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
                 ))}
@@ -1309,14 +1314,14 @@ function QuestionField({ question, value, otherText, updateAnswer, updateGridAns
                 aria-label={`${star} star${star > 1 ? "s" : ""}`}
                 aria-pressed={value === star}
               >
-                <svg viewBox="0 0 24 24" fill={star <= (value || 0) ? "#F2A93B" : "#DCE3F1"}>
+                <svg viewBox="0 0 24 24" fill={star <= (value || 0) ? "#F2A93B" : "#C9D4EE"}>
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
               </button>
             ))}
           </div>
           <span className={styles.starLabel}>
-            {value ? STAR_LABELS[value - 1] : "Select a rating"}
+            {value ? STAR_LABELS[value - 1] : "Tap a star"}
           </span>
         </div>
       );
@@ -1344,7 +1349,7 @@ function QuestionField({ question, value, otherText, updateAnswer, updateGridAns
                       onClick={() => updateGridAnswer(q.id, row, star)}
                       aria-label={`${star} star${star > 1 ? "s" : ""} for ${row}`}
                     >
-                      <svg viewBox="0 0 24 24" fill={star <= (rowValue || 0) ? "#F2A93B" : "#DCE3F1"}>
+                      <svg viewBox="0 0 24 24" fill={star <= (rowValue || 0) ? "#F2A93B" : "#C9D4EE"}>
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                       </svg>
                     </button>

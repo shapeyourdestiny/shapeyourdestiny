@@ -1,6 +1,4 @@
 import { notFound } from "next/navigation";
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
 import SurveyClient from "./SurveyClient";
 import { getSurvey, getSurveyStatus } from "@/lib/surveys";
 
@@ -31,13 +29,5 @@ export default async function SurveyPage({ params }) {
   const isDraft = status === "draft";
   const isClosed = status === "closed";
 
-  return (
-    <>
-      <Header />
-      <main>
-        <SurveyClient survey={survey} isClosed={isClosed} isDraft={isDraft} />
-      </main>
-      <Footer />
-    </>
-  );
+  return <SurveyClient survey={survey} isClosed={isClosed} isDraft={isDraft} />;
 }
