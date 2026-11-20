@@ -12,6 +12,17 @@ const AUTO_ADVANCE_DELAY = 350;
 // Star labels for display
 const STAR_LABELS = ["Not great", "Okay", "Good", "Great", "Amazing!"];
 
+// Haptic feedback helper - Android only
+const hapticFeedback = () => {
+  if (typeof navigator !== "undefined" && navigator.vibrate) {
+    try {
+      navigator.vibrate(8);
+    } catch {
+      // Ignore if not supported
+    }
+  }
+};
+
 // Build steps from survey config
 function buildSteps(survey) {
   const steps = [];
@@ -147,9 +158,19 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = back
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Animation states
+  const [selectedChoice, setSelectedChoice] = useState(null);
+  const [tappedStar, setTappedStar] = useState(null);
+  const [tappedGridStar, setTappedGridStar] = useState(null);
+  const [tappedScale, setTappedScale] = useState(null);
+  const [nextBtnReady, setNextBtnReady] = useState(false);
+  const [shakeField, setShakeField] = useState(null);
+  const [wasAnswered, setWasAnswered] = useState(false);
+
   // Refs
   const questionTitleRef = useRef(null);
   const honeypotRef = useRef(null);
+  const prevAnsweredRef = useRef(false);
 
   // Build steps from config
   const steps = useMemo(() => buildSteps(survey), [survey]);
@@ -180,7 +201,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   useEffect(() => {
     const handlePopState = (e) => {
       const step = e.state?.step;
-      if (typeof step === "number") {
+      if (typeof step === "number" && !isAnimating) {
         setDirection(-1);
         setCurrentStep(step);
       }
@@ -194,7 +215,58 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
     }
 
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [currentStep]);
+  }, [currentStep, isAnimating]);
+
+  // Check if current step is answered (for Next button state)
+  const isCurrentStepAnswered = useCallback(() => {
+    if (currentStep === 0) return true;
+    const step = steps[currentStep - 1];
+    if (!step) return true;
+
+    if (step.type === "about") return true;
+    if (step.type === "grouped") {
+      return step.questions.some((q) => q.required && answers[q.id] !== undefined && answers[q.id] !== null && answers[q.id] !== "") ||
+        step.questions.every((q) => !q.required);
+    }
+    if (step.type === "final") {
+      // Check all required
+      for (const section of survey.sections) {
+        for (const q of section.questions) {
+          if (q.required) {
+            const val = answers[q.id];
+            if (val === undefined || val === null || val === "") return false;
+            if (q.type === "grid") {
+              if (typeof val !== "object") return false;
+              if (!q.rows.every((row) => val[row] !== undefined && val[row] !== null)) return false;
+            }
+          }
+        }
+      }
+      return true;
+    }
+    if (step.question) {
+      if (!step.question.required) return true;
+      const val = answers[step.question.id];
+      if (val === undefined || val === null || val === "") return false;
+      if (step.question.type === "grid") {
+        if (typeof val !== "object") return false;
+        return step.question.rows.every((row) => val[row] !== undefined && val[row] !== null);
+      }
+      return true;
+    }
+    return true;
+  }, [currentStep, steps, answers, survey.sections]);
+
+  // Track when answer state changes from unanswered to answered
+  useEffect(() => {
+    const isAnswered = isCurrentStepAnswered();
+    if (isAnswered && !prevAnsweredRef.current && currentStep > 0) {
+      setNextBtnReady(true);
+      setWasAnswered(true);
+      setTimeout(() => setNextBtnReady(false), 250);
+    }
+    prevAnsweredRef.current = isAnswered;
+  }, [isCurrentStepAnswered, currentStep]);
 
   // Navigate to a step
   const goToStep = useCallback(
@@ -211,6 +283,12 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
         setCurrentStep(newStep);
         setIsAnimating(false);
         setErrors({});
+        setSelectedChoice(null);
+        setTappedStar(null);
+        setTappedGridStar(null);
+        setTappedScale(null);
+        setWasAnswered(false);
+        prevAnsweredRef.current = false;
 
         // Focus on question title for accessibility
         setTimeout(() => {
@@ -230,10 +308,10 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
 
   // Go to previous step
   const goBack = useCallback(() => {
-    if (currentStep > 0) {
+    if (currentStep > 0 && !isAnimating) {
       goToStep(currentStep - 1);
     }
-  }, [currentStep, goToStep]);
+  }, [currentStep, goToStep, isAnimating]);
 
   // Check if a question is answered
   const isQuestionAnswered = useCallback((q, value) => {
@@ -284,6 +362,10 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      // Trigger shake animation
+      const firstErrorId = Object.keys(newErrors)[0];
+      setShakeField(firstErrorId);
+      setTimeout(() => setShakeField(null), 300);
       return false;
     }
 
@@ -292,10 +374,11 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
 
   // Handle next button click
   const handleNext = useCallback(() => {
+    if (isAnimating) return;
     if (validateCurrentStep()) {
       goNext();
     }
-  }, [validateCurrentStep, goNext]);
+  }, [validateCurrentStep, goNext, isAnimating]);
 
   // Check if current step can be skipped
   const canSkip = useCallback(() => {
@@ -312,37 +395,12 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
     return false;
   }, [currentStep, steps]);
 
-  // Check if current step is answered (for Next button state)
-  const isCurrentStepAnswered = useCallback(() => {
-    if (currentStep === 0) return true;
-    const step = steps[currentStep - 1];
-    if (!step) return true;
-
-    if (step.type === "about") return true;
-    if (step.type === "grouped") {
-      return step.questions.some((q) => q.required && isQuestionAnswered(q, answers[q.id])) ||
-        step.questions.every((q) => !q.required);
-    }
-    if (step.type === "final") {
-      // Check all required
-      for (const section of survey.sections) {
-        for (const q of section.questions) {
-          if (q.required && !isQuestionAnswered(q, answers[q.id])) {
-            return false;
-          }
-        }
-      }
-      return true;
-    }
-    if (step.question) {
-      return !step.question.required || isQuestionAnswered(step.question, answers[step.question.id]);
-    }
-    return true;
-  }, [currentStep, steps, answers, isQuestionAnswered, survey.sections]);
-
   // Update an answer
   const updateAnswer = useCallback(
     (questionId, value, autoAdvance = false) => {
+      if (isAnimating) return;
+
+      hapticFeedback();
       setAnswers((prev) => ({ ...prev, [questionId]: value }));
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -352,17 +410,23 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
 
       if (autoAdvance) {
         setTimeout(() => {
-          if (validateCurrentStep()) {
+          if (!isAnimating) {
             goNext();
           }
         }, AUTO_ADVANCE_DELAY);
       }
     },
-    [goNext, validateCurrentStep]
+    [goNext, isAnimating]
   );
 
   // Update grid answer
   const updateGridAnswer = useCallback((questionId, row, value) => {
+    if (isAnimating) return;
+
+    hapticFeedback();
+    setTappedGridStar(`${row}-${value}`);
+    setTimeout(() => setTappedGridStar(null), 250);
+
     setAnswers((prev) => ({
       ...prev,
       [questionId]: {
@@ -375,10 +439,13 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
       delete newErrors[questionId];
       return newErrors;
     });
-  }, []);
+  }, [isAnimating]);
 
   // Toggle checkbox
   const toggleCheckbox = useCallback((questionId, option) => {
+    if (isAnimating) return;
+
+    hapticFeedback();
     setAnswers((prev) => {
       const current = prev[questionId] || [];
       if (current.includes(option)) {
@@ -386,7 +453,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
       }
       return { ...prev, [questionId]: [...current, option] };
     });
-  }, []);
+  }, [isAnimating]);
 
   // Update other text
   const updateOtherText = useCallback((questionId, text) => {
@@ -455,6 +522,8 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (isAnimating) return;
+
       // Don't handle keys when in text inputs
       const target = e.target;
       const isTextInput =
@@ -510,6 +579,8 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
             const options = step.question.options;
             if (idx < options.length) {
               e.preventDefault();
+              hapticFeedback();
+              setSelectedChoice(options[idx]);
               updateAnswer(step.question.id, options[idx], true);
             }
           }
@@ -522,7 +593,11 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
         case "5":
           if (step?.type === "stars" && step.question) {
             e.preventDefault();
-            updateAnswer(step.question.id, parseInt(e.key), true);
+            hapticFeedback();
+            const starVal = parseInt(e.key);
+            setTappedStar(starVal);
+            setTimeout(() => setTappedStar(null), 250);
+            updateAnswer(step.question.id, starVal, true);
           }
           break;
 
@@ -533,7 +608,11 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
         case "9":
           if (step?.type === "scale" && step.question) {
             e.preventDefault();
-            updateAnswer(step.question.id, parseInt(e.key), true);
+            hapticFeedback();
+            const scaleVal = parseInt(e.key);
+            setTappedScale(scaleVal);
+            setTimeout(() => setTappedScale(null), 250);
+            updateAnswer(step.question.id, scaleVal, true);
           }
           break;
 
@@ -544,7 +623,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentStep, steps, goNext, goBack, handleNext, handleSubmit, updateAnswer]);
+  }, [currentStep, steps, goNext, goBack, handleNext, handleSubmit, updateAnswer, isAnimating]);
 
   // Determine current screen type
   const screenType = useMemo(() => {
@@ -716,6 +795,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
             className={styles.backBtn}
             onClick={goBack}
             aria-label="Go back"
+            disabled={isAnimating}
           >
             ‹
           </button>
@@ -732,7 +812,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
 
         {/* Step Content */}
         <div
-          className={`${styles.stepContent} ${direction > 0 ? styles.slideInRight : styles.slideInLeft}`}
+          className={`${styles.stepContent} ${direction > 0 ? styles.slideUp : styles.slideDown}`}
           key={currentStep}
         >
           {stepData && (
@@ -750,6 +830,15 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
               submitting={submitting}
               onSubmit={handleSubmit}
               setTurnstileToken={setTurnstileToken}
+              selectedChoice={selectedChoice}
+              setSelectedChoice={setSelectedChoice}
+              tappedStar={tappedStar}
+              setTappedStar={setTappedStar}
+              tappedGridStar={tappedGridStar}
+              tappedScale={tappedScale}
+              setTappedScale={setTappedScale}
+              shakeField={shakeField}
+              isAnimating={isAnimating}
             />
           )}
         </div>
@@ -769,17 +858,23 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
                   type="button"
                   className={styles.skipBtn}
                   onClick={goNext}
+                  disabled={isAnimating}
                 >
                   Skip
                 </button>
               )}
               <button
                 type="button"
-                className={`${styles.nextBtn} ${!isCurrentStepAnswered() ? styles.nextBtnFaded : ""}`}
+                className={`${styles.nextBtn} ${!isCurrentStepAnswered() ? styles.nextBtnFaded : ""} ${nextBtnReady ? styles.nextBtnReady : ""}`}
                 onClick={handleNext}
+                disabled={isAnimating}
               >
-                Next →
+                <span>Next</span>
+                <span className={styles.nextBtnArrow}>→</span>
               </button>
+              {wasAnswered && isCurrentStepAnswered() && (
+                <span className={styles.enterPill}>Enter ↵</span>
+              )}
             </div>
           </div>
         )}
@@ -864,6 +959,84 @@ function WelcomeScreen({ totalQuestions, onStart, getBigLineText }) {
 // Thank You Screen Component
 function ThankYouScreen({ getBigLineText }) {
   const [copied, setCopied] = useState(false);
+  const canvasRef = useRef(null);
+
+  // Confetti effect
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Check for reduced motion preference
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width = canvas.offsetWidth * 2;
+    const height = canvas.height = canvas.offsetHeight * 2;
+    ctx.scale(2, 2);
+
+    const colors = ["#1F3168", "#007B93", "#D1B05C"]; // navy, teal, gold
+    const confetti = [];
+    const confettiCount = 50;
+
+    // Create confetti particles
+    for (let i = 0; i < confettiCount; i++) {
+      confetti.push({
+        x: width / 4 + Math.random() * width / 2,
+        y: -20,
+        w: 6 + Math.random() * 6,
+        h: 4 + Math.random() * 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 4,
+        vy: 2 + Math.random() * 3,
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 10,
+        opacity: 1,
+      });
+    }
+
+    let frame = 0;
+    const maxFrames = 60; // ~1 second at 60fps
+
+    const animate = () => {
+      ctx.clearRect(0, 0, width / 2, height / 2);
+
+      let stillActive = false;
+
+      for (const p of confetti) {
+        if (p.opacity <= 0) continue;
+        stillActive = true;
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.1; // gravity
+        p.rotation += p.rotationSpeed;
+
+        // Fade out near the end
+        if (frame > maxFrames * 0.6) {
+          p.opacity -= 0.03;
+        }
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+
+      frame++;
+      if (stillActive && frame < maxFrames * 1.5) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    // Start animation after a small delay
+    const timer = setTimeout(animate, 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleShare = async () => {
     const url = "https://www.shapeyourdestiny.co";
@@ -933,6 +1106,7 @@ function ThankYouScreen({ getBigLineText }) {
 
       <div className={styles.rightPanel}>
         <div className={styles.thankYouContent}>
+          <canvas ref={canvasRef} className={styles.confettiCanvas} />
           <div className={styles.checkCircle}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
@@ -979,6 +1153,15 @@ function QuestionStep({
   submitting,
   onSubmit,
   setTurnstileToken,
+  selectedChoice,
+  setSelectedChoice,
+  tappedStar,
+  setTappedStar,
+  tappedGridStar,
+  tappedScale,
+  setTappedScale,
+  shakeField,
+  isAnimating,
 }) {
   // Final step - recap and submit
   if (step.type === "final") {
@@ -1022,6 +1205,7 @@ function QuestionStep({
         toggleCheckbox={toggleCheckbox}
         updateOtherText={updateOtherText}
         questionTitleRef={questionTitleRef}
+        shakeField={shakeField}
       />
     );
   }
@@ -1031,22 +1215,22 @@ function QuestionStep({
 
   return (
     <div className={styles.questionWrapper}>
-      <div className={styles.sectionTag}>
+      <div className={`${styles.sectionTag} ${styles.staggerSection}`}>
         <span className={styles.stepTile}>{step.stepNumber}</span>
         <span className={styles.sectionName}>{step.sectionTitle}</span>
       </div>
 
       <h2
         ref={questionTitleRef}
-        className={styles.questionTitle}
+        className={`${styles.questionTitle} ${styles.staggerTitle}`}
         tabIndex={-1}
       >
         {q.label}
       </h2>
 
-      {q.help && <p className={styles.questionHelp}>{q.help}</p>}
+      {q.help && <p className={`${styles.questionHelp} ${styles.staggerTitle}`}>{q.help}</p>}
 
-      <div className={styles.questionField}>
+      <div className={`${styles.questionField} ${styles.staggerContent} ${shakeField === q.id ? styles.shake : ""}`}>
         <QuestionField
           question={q}
           value={answers[q.id]}
@@ -1055,6 +1239,14 @@ function QuestionStep({
           updateGridAnswer={updateGridAnswer}
           toggleCheckbox={toggleCheckbox}
           updateOtherText={updateOtherText}
+          selectedChoice={selectedChoice}
+          setSelectedChoice={setSelectedChoice}
+          tappedStar={tappedStar}
+          setTappedStar={setTappedStar}
+          tappedGridStar={tappedGridStar}
+          tappedScale={tappedScale}
+          setTappedScale={setTappedScale}
+          isAnimating={isAnimating}
         />
       </div>
 
@@ -1073,24 +1265,24 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
 
   return (
     <div className={styles.questionWrapper}>
-      <div className={styles.sectionTag}>
+      <div className={`${styles.sectionTag} ${styles.staggerSection}`}>
         <span className={styles.stepTile}>{step.stepNumber}</span>
         <span className={styles.sectionName}>{step.sectionTitle}</span>
       </div>
 
       <h2
         ref={questionTitleRef}
-        className={styles.questionTitle}
+        className={`${styles.questionTitle} ${styles.staggerTitle}`}
         tabIndex={-1}
       >
         First, a little about you
       </h2>
 
       {step.sectionHelp && (
-        <p className={styles.questionHelp}>{step.sectionHelp}</p>
+        <p className={`${styles.questionHelp} ${styles.staggerTitle}`}>{step.sectionHelp}</p>
       )}
 
-      <div className={styles.aboutFields}>
+      <div className={`${styles.aboutFields} ${styles.staggerContent}`}>
         {schoolQ && (
           <div className={styles.aboutField}>
             <label className={styles.aboutLabel}>{schoolQ.label}</label>
@@ -1112,7 +1304,10 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
                   key={opt}
                   type="button"
                   className={`${styles.roleChip} ${answers[roleQ.id] === opt ? styles.roleChipActive : ""}`}
-                  onClick={() => updateAnswer(roleQ.id, opt)}
+                  onClick={() => {
+                    hapticFeedback();
+                    updateAnswer(roleQ.id, opt);
+                  }}
                 >
                   {opt}
                 </button>
@@ -1151,10 +1346,10 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
 }
 
 // Grouped Step Component (parent_requests + bring_next)
-function GroupedStep({ step, answers, otherText, errors, updateAnswer, toggleCheckbox, updateOtherText, questionTitleRef }) {
+function GroupedStep({ step, answers, otherText, errors, updateAnswer, toggleCheckbox, updateOtherText, questionTitleRef, shakeField }) {
   return (
     <div className={styles.questionWrapper}>
-      <div className={styles.sectionTag}>
+      <div className={`${styles.sectionTag} ${styles.staggerSection}`}>
         <span className={styles.stepTile}>{step.stepNumber}</span>
         <span className={styles.sectionName}>{step.sectionTitle}</span>
       </div>
@@ -1163,7 +1358,7 @@ function GroupedStep({ step, answers, otherText, errors, updateAnswer, toggleChe
         <div key={q.id} className={styles.groupedQuestion}>
           <h2
             ref={idx === 0 ? questionTitleRef : null}
-            className={styles.questionTitle}
+            className={`${styles.questionTitle} ${idx === 0 ? styles.staggerTitle : ""}`}
             tabIndex={idx === 0 ? -1 : undefined}
           >
             {q.label}
@@ -1171,7 +1366,7 @@ function GroupedStep({ step, answers, otherText, errors, updateAnswer, toggleChe
 
           {q.help && <p className={styles.questionHelp}>{q.help}</p>}
 
-          <div className={styles.questionField}>
+          <div className={`${styles.questionField} ${shakeField === q.id ? styles.shake : ""}`}>
             <QuestionField
               question={q}
               value={answers[q.id]}
@@ -1203,13 +1398,13 @@ function FinalStep({ answers, consentQuestion, updateAnswer, errors, submitting,
     <div className={styles.questionWrapper}>
       <h2
         ref={questionTitleRef}
-        className={styles.questionTitle}
+        className={`${styles.questionTitle} ${styles.staggerTitle}`}
         tabIndex={-1}
       >
         Looks great. Ready to send?
       </h2>
 
-      <div className={styles.recapGrid}>
+      <div className={`${styles.recapGrid} ${styles.staggerContent}`}>
         <div className={styles.recapItem}>
           <span className={styles.recapLabel}>Overall</span>
           <span className={styles.recapValue}>
@@ -1276,7 +1471,23 @@ function FinalStep({ answers, consentQuestion, updateAnswer, errors, submitting,
 }
 
 // Question Field Component
-function QuestionField({ question, value, otherText, updateAnswer, updateGridAnswer, toggleCheckbox, updateOtherText }) {
+function QuestionField({
+  question,
+  value,
+  otherText,
+  updateAnswer,
+  updateGridAnswer,
+  toggleCheckbox,
+  updateOtherText,
+  selectedChoice,
+  setSelectedChoice,
+  tappedStar,
+  setTappedStar,
+  tappedGridStar,
+  tappedScale,
+  setTappedScale,
+  isAnimating,
+}) {
   const q = question;
 
   switch (q.type) {
@@ -1285,15 +1496,27 @@ function QuestionField({ question, value, otherText, updateAnswer, updateGridAns
         <div className={styles.choiceGrid}>
           {q.options.map((opt, idx) => {
             const letter = String.fromCharCode(65 + idx); // A, B, C, D...
+            const isSelected = value === opt;
+            const isBlinking = selectedChoice === opt;
+            const isFaded = selectedChoice && selectedChoice !== opt;
+
             return (
               <button
                 key={opt}
                 type="button"
-                className={`${styles.choiceTile} ${value === opt ? styles.choiceTileActive : ""}`}
-                onClick={() => updateAnswer(q.id, opt, true)}
-                aria-pressed={value === opt}
+                className={`${styles.choiceTile} ${isSelected ? styles.choiceTileActive : ""} ${isBlinking ? styles.choiceTileBlink : ""} ${isFaded ? styles.choiceTileFaded : ""}`}
+                onClick={() => {
+                  if (isAnimating) return;
+                  hapticFeedback();
+                  setSelectedChoice?.(opt);
+                  updateAnswer(q.id, opt, true);
+                }}
+                aria-pressed={isSelected}
+                disabled={isAnimating}
               >
-                <span className={styles.choiceLetter}>{letter}</span>
+                <span className={styles.choiceLetter}>
+                  {isSelected ? "✓" : letter}
+                </span>
                 <span className={styles.choiceText}>{opt}</span>
               </button>
             );
@@ -1305,22 +1528,34 @@ function QuestionField({ question, value, otherText, updateAnswer, updateGridAns
       return (
         <div className={styles.starsWrapper}>
           <div className={styles.starsRow}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                className={`${styles.starTile} ${value === star ? styles.starTileActive : ""} ${star <= (value || 0) ? styles.starTileFilled : ""}`}
-                onClick={() => updateAnswer(q.id, star, true)}
-                aria-label={`${star} star${star > 1 ? "s" : ""}`}
-                aria-pressed={value === star}
-              >
-                <svg viewBox="0 0 24 24" fill={star <= (value || 0) ? "#F2A93B" : "#C9D4EE"}>
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-              </button>
-            ))}
+            {[1, 2, 3, 4, 5].map((star) => {
+              const isFilled = star <= (value || 0);
+              const isPop = tappedStar === star;
+
+              return (
+                <button
+                  key={star}
+                  type="button"
+                  className={`${styles.starTile} ${isFilled ? styles.starTileFilled : ""} ${isPop ? styles.starPop : ""}`}
+                  onClick={() => {
+                    if (isAnimating) return;
+                    hapticFeedback();
+                    setTappedStar?.(star);
+                    setTimeout(() => setTappedStar?.(null), 250);
+                    updateAnswer(q.id, star, true);
+                  }}
+                  aria-label={`${star} star${star > 1 ? "s" : ""}`}
+                  aria-pressed={value === star}
+                  disabled={isAnimating}
+                >
+                  <svg viewBox="0 0 24 24" fill={isFilled ? "#F2A93B" : "#C9D4EE"}>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                </button>
+              );
+            })}
           </div>
-          <span className={styles.starLabel}>
+          <span className={`${styles.starLabel} ${value ? styles.starLabelAnim : ""}`} key={value}>
             {value ? STAR_LABELS[value - 1] : "Tap a star"}
           </span>
         </div>
@@ -1341,19 +1576,24 @@ function QuestionField({ question, value, otherText, updateAnswer, updateGridAns
                   )}
                 </div>
                 <div className={styles.gridStars}>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      className={`${styles.gridStarBtn} ${star <= (rowValue || 0) ? styles.gridStarBtnFilled : ""}`}
-                      onClick={() => updateGridAnswer(q.id, row, star)}
-                      aria-label={`${star} star${star > 1 ? "s" : ""} for ${row}`}
-                    >
-                      <svg viewBox="0 0 24 24" fill={star <= (rowValue || 0) ? "#F2A93B" : "#9BA8C4"}>
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
-                    </button>
-                  ))}
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const isFilled = star <= (rowValue || 0);
+                    const isPop = tappedGridStar === `${row}-${star}`;
+
+                    return (
+                      <button
+                        key={star}
+                        type="button"
+                        className={`${styles.gridStarBtn} ${isFilled ? styles.gridStarBtnFilled : ""} ${isPop ? styles.gridStarPop : ""}`}
+                        onClick={() => updateGridAnswer(q.id, row, star)}
+                        aria-label={`${star} star${star > 1 ? "s" : ""} for ${row}`}
+                      >
+                        <svg viewBox="0 0 24 24" fill={isFilled ? "#F2A93B" : "#9BA8C4"}>
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -1365,17 +1605,29 @@ function QuestionField({ question, value, otherText, updateAnswer, updateGridAns
       return (
         <div className={styles.scaleWrapper}>
           <div className={styles.scaleGrid}>
-            {Array.from({ length: q.max - q.min + 1 }, (_, i) => q.min + i).map((num) => (
-              <button
-                key={num}
-                type="button"
-                className={`${styles.scaleBtn} ${value === num ? styles.scaleBtnActive : ""}`}
-                onClick={() => updateAnswer(q.id, num, true)}
-                aria-pressed={value === num}
-              >
-                {num}
-              </button>
-            ))}
+            {Array.from({ length: q.max - q.min + 1 }, (_, i) => q.min + i).map((num) => {
+              const isActive = value === num;
+              const isPop = tappedScale === num;
+
+              return (
+                <button
+                  key={num}
+                  type="button"
+                  className={`${styles.scaleBtn} ${isActive ? styles.scaleBtnActive : ""} ${isPop ? styles.scaleBtnPop : ""}`}
+                  onClick={() => {
+                    if (isAnimating) return;
+                    hapticFeedback();
+                    setTappedScale?.(num);
+                    setTimeout(() => setTappedScale?.(null), 250);
+                    updateAnswer(q.id, num, true);
+                  }}
+                  aria-pressed={isActive}
+                  disabled={isAnimating}
+                >
+                  {num}
+                </button>
+              );
+            })}
           </div>
           <div className={styles.scaleLabels}>
             <span>{q.min} · {q.minLabel}</span>
@@ -1399,7 +1651,7 @@ function QuestionField({ question, value, otherText, updateAnswer, updateGridAns
                   onClick={() => toggleCheckbox(q.id, opt)}
                   aria-pressed={isChecked}
                 >
-                  <span className={styles.checkboxIcon}>
+                  <span className={`${styles.checkboxIcon} ${isChecked ? styles.checkboxIconRotate : ""}`}>
                     {isChecked ? "✓" : "+"}
                   </span>
                   <span>{opt}</span>
@@ -1421,6 +1673,10 @@ function QuestionField({ question, value, otherText, updateAnswer, updateGridAns
       );
 
     case "long":
+      const charCount = (value || "").length;
+      const maxLength = q.maxLength || 1000;
+      const showCharCount = charCount >= 800;
+
       return (
         <div className={styles.longWrapper}>
           <textarea
@@ -1428,14 +1684,14 @@ function QuestionField({ question, value, otherText, updateAnswer, updateGridAns
             value={value || ""}
             onChange={(e) => updateAnswer(q.id, e.target.value)}
             placeholder={q.placeholder || ""}
-            maxLength={q.maxLength || 1000}
+            maxLength={maxLength}
             rows={5}
           />
           {q.id === "story" && (
             <p className={styles.storyHint}>Please leave out names and personal details.</p>
           )}
-          <span className={styles.charCount}>
-            {(value || "").length} / {q.maxLength || 1000}
+          <span className={`${styles.charCount} ${!showCharCount ? styles.charCountHidden : ""}`}>
+            {charCount} / {maxLength}
           </span>
         </div>
       );
@@ -1468,6 +1724,7 @@ function SearchableDropdown({ options, value, onChange, placeholder }) {
   );
 
   const handleSelect = (opt) => {
+    hapticFeedback();
     onChange(opt);
     setIsOpen(false);
     setSearch("");

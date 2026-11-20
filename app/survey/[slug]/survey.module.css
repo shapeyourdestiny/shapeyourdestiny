@@ -8,10 +8,34 @@
 */
 
 /* =============================================================================
+   GLOBAL RESETS FOR SURVEY
+   ============================================================================= */
+
+.surveyContainer *,
+.surveyContainer *::before,
+.surveyContainer *::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =============================================================================
    CONTAINER LAYOUT
    ============================================================================= */
 
 .surveyContainer {
+  /* Animation tokens */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --dur-press: 100ms;
+  --dur-fade: 150ms;
+  --dur-step-out: 220ms;
+  --dur-step-in: 320ms;
+  --dur-pop: 250ms;
+  --dur-blink: 120ms;
+  --dur-progress: 400ms;
+  --dur-shake: 300ms;
+  --dur-check: 500ms;
+
   display: flex;
   height: 100vh;
   height: 100dvh;
@@ -42,7 +66,7 @@
   .leftPanel {
     width: 100%;
     height: 330px;
-    transition: height 0.3s ease;
+    transition: height var(--dur-step-in) var(--ease-out);
   }
 
   .leftPanel[data-screen="question"] {
@@ -283,12 +307,16 @@
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: background var(--dur-fade) var(--ease-out), transform var(--dur-fade) var(--ease-out);
 }
 
 .startBtn:hover {
   background: #152a6a;
   transform: translateY(-1px);
+}
+
+.startBtn:active {
+  transform: scale(0.97);
 }
 
 .enterHint {
@@ -337,12 +365,16 @@
   font-weight: 300;
   color: #46506E;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--dur-fade) var(--ease-out), transform var(--dur-press) var(--ease-out);
   flex-shrink: 0;
 }
 
 .backBtn:hover {
   background: #E7EFFC;
+}
+
+.backBtn:active {
+  transform: scale(0.95);
 }
 
 .progressBar {
@@ -357,12 +389,12 @@
   height: 100%;
   background: linear-gradient(90deg, #007B93 0%, #1F3168 100%);
   border-radius: 999px;
-  transition: width 0.3s ease;
+  transition: width var(--dur-progress) var(--ease-out);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .progressFill {
-    transition: none;
+    transition: width var(--dur-fade) ease;
   }
 }
 
@@ -375,7 +407,7 @@
 }
 
 /* =============================================================================
-   STEP CONTENT
+   STEP CONTENT - SLIDE UP/DOWN ANIMATIONS
    ============================================================================= */
 
 .stepContent {
@@ -386,7 +418,6 @@
   padding: 40px 48px;
   min-height: 0;
   overflow-y: auto;
-  animation: fadeSlideIn 0.25s ease;
 }
 
 /* Center content wrapper on wide screens */
@@ -411,52 +442,100 @@
   }
 }
 
-@keyframes fadeSlideIn {
+/* Forward animation: slide up */
+.slideUp {
+  animation: slideUpIn var(--dur-step-in) var(--ease-out) forwards;
+}
+
+@keyframes slideUpIn {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 
+/* Backward animation: slide down */
+.slideDown {
+  animation: slideDownIn var(--dur-step-in) var(--ease-out) forwards;
+}
+
+@keyframes slideDownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Legacy classes for compatibility */
 .slideInRight {
-  animation: fadeSlideInRight 0.25s ease;
+  animation: slideUpIn var(--dur-step-in) var(--ease-out) forwards;
 }
 
 .slideInLeft {
-  animation: fadeSlideInLeft 0.25s ease;
-}
-
-@keyframes fadeSlideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeSlideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  animation: slideDownIn var(--dur-step-in) var(--ease-out) forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .stepContent,
+  .slideUp,
+  .slideDown,
   .slideInRight,
   .slideInLeft {
-    animation: none;
+    animation: fadeOnly var(--dur-fade) ease forwards;
+  }
+
+  @keyframes fadeOnly {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+/* =============================================================================
+   STAGGERED ENTRY ANIMATIONS
+   ============================================================================= */
+
+.staggerSection {
+  animation: staggerFadeUp var(--dur-step-in) var(--ease-out) forwards;
+  animation-delay: 0ms;
+}
+
+.staggerTitle {
+  animation: staggerFadeUp var(--dur-step-in) var(--ease-out) forwards;
+  animation-delay: 40ms;
+  opacity: 0;
+}
+
+.staggerContent {
+  animation: staggerFadeUp var(--dur-step-in) var(--ease-out) forwards;
+  animation-delay: 80ms;
+  opacity: 0;
+}
+
+@keyframes staggerFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .staggerSection,
+  .staggerTitle,
+  .staggerContent {
+    animation: fadeOnly var(--dur-fade) ease forwards;
+    animation-delay: 0ms;
   }
 }
 
@@ -527,10 +606,36 @@
   margin-left: 4px;
 }
 
+/* Error with shake animation */
 .fieldError {
   font-size: 14px;
   color: #E53E3E;
   margin-top: 12px;
+  animation: fadeIn var(--dur-fade) var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Shake animation for error state */
+.shake {
+  animation: shake var(--dur-shake) var(--ease-out);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shake {
+    animation: none;
+  }
 }
 
 /* =============================================================================
@@ -559,7 +664,7 @@
   border: 2px solid #DCE3F1;
   border-radius: 16px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--dur-fade) var(--ease-out);
   text-align: left;
   box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
 }
@@ -569,10 +674,32 @@
   transform: translateY(-1px);
 }
 
+.choiceTile:active {
+  transform: scale(0.97);
+}
+
 .choiceTileActive {
   background: #1F3168;
   border-color: #1F3168;
   box-shadow: 0 4px 16px rgba(31, 49, 104, 0.25);
+}
+
+/* Blink animation for selected choice */
+.choiceTileBlink {
+  animation: choiceBlink calc(var(--dur-blink) * 2) var(--ease-out);
+}
+
+@keyframes choiceBlink {
+  0%, 100% { opacity: 1; }
+  25% { opacity: 0.7; }
+  50% { opacity: 1; }
+  75% { opacity: 0.7; }
+}
+
+/* Fade non-selected tiles during selection */
+.choiceTileFaded {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .choiceLetter {
@@ -588,6 +715,7 @@
   font-weight: 700;
   color: #1F3168;
   flex-shrink: 0;
+  transition: all var(--dur-fade) var(--ease-out);
 }
 
 .choiceTileActive .choiceLetter {
@@ -603,6 +731,12 @@
 
 .choiceTileActive .choiceText {
   color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choiceTileBlink {
+    animation: none;
+  }
 }
 
 /* =============================================================================
@@ -637,7 +771,7 @@
   border: 2px solid #DCE3F1;
   border-radius: 16px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--dur-fade) var(--ease-out);
   padding: 0;
 }
 
@@ -654,9 +788,14 @@
   transform: translateY(-1px);
 }
 
+.starTile:active {
+  transform: scale(0.97);
+}
+
 .starTile svg {
   width: 40px;
   height: 40px;
+  transition: transform var(--dur-pop) var(--ease-out-back);
 }
 
 @media (max-width: 540px) {
@@ -671,11 +810,52 @@
   border-color: #F2A93B;
 }
 
+/* Star pop animation */
+.starPop svg {
+  animation: starPop var(--dur-pop) var(--ease-out-back);
+}
+
+@keyframes starPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+/* Sequential fill animation delay */
+.starTile:nth-child(1).starFillAnim { animation-delay: 0ms; }
+.starTile:nth-child(2).starFillAnim { animation-delay: 30ms; }
+.starTile:nth-child(3).starFillAnim { animation-delay: 60ms; }
+.starTile:nth-child(4).starFillAnim { animation-delay: 90ms; }
+.starTile:nth-child(5).starFillAnim { animation-delay: 120ms; }
+
 .starLabel {
   font-size: 16px;
   font-weight: 600;
   color: #46506E;
   min-height: 24px;
+  transition: opacity var(--dur-fade) var(--ease-out);
+}
+
+.starLabelAnim {
+  animation: fadeSlideUp var(--dur-fade) var(--ease-out);
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starPop svg,
+  .starLabelAnim {
+    animation: none;
+  }
 }
 
 /* =============================================================================
@@ -699,7 +879,7 @@
   border: 2px solid #DCE3F1;
   border-radius: 16px;
   padding: 20px;
-  transition: all 0.15s ease;
+  transition: all var(--dur-fade) var(--ease-out);
   box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
 }
 
@@ -737,6 +917,18 @@
   color: #fff;
   font-size: 14px;
   font-weight: 700;
+  animation: scaleIn var(--dur-fade) var(--ease-out-back);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .gridStars {
@@ -755,7 +947,7 @@
   padding: 0;
   cursor: pointer;
   border-radius: 10px;
-  transition: all 0.15s ease;
+  transition: all var(--dur-fade) var(--ease-out);
 }
 
 .gridStarBtn:hover {
@@ -763,14 +955,30 @@
   transform: translateY(-1px);
 }
 
+.gridStarBtn:active {
+  transform: scale(0.95);
+}
+
 .gridStarBtn svg {
   width: 28px;
   height: 28px;
+  transition: transform var(--dur-pop) var(--ease-out-back);
 }
 
 .gridStarBtnFilled {
   background: #FFF5E6;
   border-color: #F2A93B;
+}
+
+.gridStarPop svg {
+  animation: starPop var(--dur-pop) var(--ease-out-back);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gridCardCheck,
+  .gridStarPop svg {
+    animation: none;
+  }
 }
 
 /* =============================================================================
@@ -809,12 +1017,16 @@
   font-weight: 700;
   color: #46506E;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--dur-fade) var(--ease-out);
 }
 
 .scaleBtn:hover {
   border-color: #007B93;
   color: #007B93;
+}
+
+.scaleBtn:active {
+  transform: scale(0.95);
 }
 
 .scaleBtnActive {
@@ -823,11 +1035,27 @@
   color: #fff;
 }
 
+.scaleBtnPop {
+  animation: scalePop var(--dur-pop) var(--ease-out-back);
+}
+
+@keyframes scalePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
 .scaleLabels {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
   color: #8B93A8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scaleBtnPop {
+    animation: none;
+  }
 }
 
 /* =============================================================================
@@ -858,13 +1086,17 @@
   font-weight: 600;
   color: #46506E;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--dur-fade) var(--ease-out);
   box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
 }
 
 .checkboxChip:hover {
   border-color: #1F3168;
   transform: translateY(-1px);
+}
+
+.checkboxChip:active {
+  transform: scale(0.97);
 }
 
 .checkboxChipActive {
@@ -876,6 +1108,29 @@
 .checkboxIcon {
   font-size: 16px;
   font-weight: 700;
+  display: inline-block;
+  transition: transform var(--dur-fade) var(--ease-out);
+}
+
+.checkboxIconRotate {
+  animation: rotateIn var(--dur-fade) var(--ease-out);
+}
+
+@keyframes rotateIn {
+  from {
+    transform: rotate(-90deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkboxIconRotate {
+    animation: none;
+  }
 }
 
 /* =============================================================================
@@ -897,9 +1152,11 @@
   font-family: inherit;
   font-size: 16px;
   color: #141C3A;
-  resize: vertical;
+  resize: none;
   min-height: 140px;
-  transition: border-color 0.15s ease;
+  max-height: 300px;
+  transition: border-color var(--dur-fade) var(--ease-out), height var(--dur-fade) var(--ease-out);
+  overflow-y: auto;
 }
 
 .longTextarea:focus {
@@ -917,6 +1174,11 @@
   font-size: 13px;
   color: #8B93A8;
   text-align: right;
+  transition: opacity var(--dur-fade) var(--ease-out);
+}
+
+.charCountHidden {
+  opacity: 0;
 }
 
 /* =============================================================================
@@ -957,13 +1219,17 @@
   font-weight: 600;
   color: #46506E;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--dur-fade) var(--ease-out);
   box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
 }
 
 .roleChip:hover {
   border-color: #1F3168;
   transform: translateY(-1px);
+}
+
+.roleChip:active {
+  transform: scale(0.97);
 }
 
 .roleChipActive {
@@ -981,7 +1247,7 @@
   font-family: inherit;
   font-size: 18px;
   color: #141C3A;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--dur-fade) var(--ease-out);
 }
 
 .nameInput:focus {
@@ -1004,7 +1270,7 @@
   font-family: inherit;
   font-size: 16px;
   color: #141C3A;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--dur-fade) var(--ease-out);
 }
 
 .otherInput:focus {
@@ -1094,7 +1360,7 @@
   border-radius: 16px;
   cursor: pointer;
   margin-bottom: 24px;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--dur-fade) var(--ease-out);
 }
 
 .consentCard:hover {
@@ -1131,12 +1397,16 @@
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: background var(--dur-fade) var(--ease-out), transform var(--dur-fade) var(--ease-out);
 }
 
 .submitBtn:hover:not(:disabled) {
   background: #152a6a;
   transform: translateY(-1px);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .submitBtn:disabled {
@@ -1192,14 +1462,21 @@
   font-weight: 600;
   color: #8B93A8;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: color var(--dur-fade) var(--ease-out);
 }
 
 .skipBtn:hover {
   color: #46506E;
 }
 
+.skipBtn:active {
+  transform: scale(0.97);
+}
+
 .nextBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 14px 28px;
   background: #1F3168;
   color: #fff;
@@ -1209,15 +1486,67 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease, opacity 0.15s ease;
+  transition: background var(--dur-fade) var(--ease-out),
+              opacity var(--dur-fade) var(--ease-out),
+              transform var(--dur-fade) var(--ease-out);
 }
 
 .nextBtn:hover {
   background: #152a6a;
 }
 
+.nextBtn:active {
+  transform: scale(0.97);
+}
+
 .nextBtnFaded {
   opacity: 0.5;
+}
+
+/* Next button ready animation */
+.nextBtnReady {
+  animation: nextBtnNudge var(--dur-pop) var(--ease-out-back);
+}
+
+@keyframes nextBtnNudge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+.nextBtnArrow {
+  transition: transform var(--dur-fade) var(--ease-out);
+}
+
+.nextBtn:hover .nextBtnArrow {
+  transform: translateX(3px);
+}
+
+/* Enter hint pill */
+.enterPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #E7EFFC;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #46506E;
+  margin-left: 8px;
+  animation: fadeIn var(--dur-fade) var(--ease-out);
+}
+
+@media (max-width: 899px) {
+  .enterPill {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nextBtnReady {
+    animation: none;
+  }
 }
 
 /* =============================================================================
@@ -1234,6 +1563,7 @@
   text-align: center;
   max-width: 500px;
   margin: 0 auto;
+  position: relative;
 }
 
 @media (max-width: 899px) {
@@ -1242,6 +1572,19 @@
     padding-bottom: max(32px, env(safe-area-inset-bottom));
     justify-content: flex-start;
   }
+}
+
+/* Confetti canvas */
+.confettiCanvas {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 400px;
+  height: 300px;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .checkCircle {
@@ -1253,7 +1596,7 @@
   background: linear-gradient(135deg, #007B93 0%, #1F3168 100%);
   border-radius: 50%;
   margin-bottom: 24px;
-  animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: popIn 0.4s var(--ease-out-back);
 }
 
 @keyframes popIn {
@@ -1267,16 +1610,33 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .checkCircle {
-    animation: none;
-  }
-}
-
 .checkCircle svg {
   width: 44px;
   height: 44px;
   color: #fff;
+}
+
+/* Check draw animation */
+.checkCircle svg polyline {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: drawCheck var(--dur-check) var(--ease-out) 0.3s forwards;
+}
+
+@keyframes drawCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkCircle {
+    animation: fadeIn var(--dur-fade) ease;
+  }
+  .checkCircle svg polyline {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
 }
 
 .thankYouTitle {
@@ -1285,6 +1645,7 @@
   font-weight: 700;
   color: #141C3A;
   margin: 0 0 12px;
+  animation: fadeSlideUp var(--dur-step-in) var(--ease-out) 0.5s backwards;
 }
 
 .thankYouText {
@@ -1292,6 +1653,7 @@
   color: #46506E;
   line-height: 1.6;
   margin: 0 0 32px;
+  animation: fadeSlideUp var(--dur-step-in) var(--ease-out) 0.6s backwards;
 }
 
 .shareCard {
@@ -1300,6 +1662,7 @@
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 24px;
+  animation: fadeSlideUp var(--dur-step-in) var(--ease-out) 0.7s backwards;
 }
 
 .shareTitle {
@@ -1326,11 +1689,15 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--dur-fade) var(--ease-out), transform var(--dur-fade) var(--ease-out);
 }
 
 .shareBtn:hover {
   background: #152a6a;
+}
+
+.shareBtn:active {
+  transform: scale(0.98);
 }
 
 .visitLink {
@@ -1338,10 +1705,20 @@
   font-weight: 600;
   color: #007B93;
   text-decoration: none;
+  animation: fadeSlideUp var(--dur-step-in) var(--ease-out) 0.8s backwards;
 }
 
 .visitLink:hover {
   text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thankYouTitle,
+  .thankYouText,
+  .shareCard,
+  .visitLink {
+    animation: fadeIn var(--dur-fade) ease forwards;
+  }
 }
 
 /* =============================================================================
@@ -1393,6 +1770,7 @@
   font-size: 15px;
   text-align: center;
   margin-bottom: 20px;
+  animation: fadeIn var(--dur-fade) var(--ease-out);
 }
 
 /* =============================================================================
@@ -1417,13 +1795,17 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--dur-fade) var(--ease-out);
 }
 
 .dropdownTrigger:hover,
 .dropdownTrigger:focus {
   border-color: #1F3168;
   outline: none;
+}
+
+.dropdownTrigger:active {
+  transform: scale(0.99);
 }
 
 .dropdownValue {
@@ -1453,6 +1835,18 @@
   box-shadow: 0 8px 32px rgba(20, 44, 107, 0.15);
   z-index: 100;
   overflow: hidden;
+  animation: dropdownIn var(--dur-fade) var(--ease-out);
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdownSearch {
@@ -1484,11 +1878,15 @@
   color: #141C3A;
   text-align: left;
   cursor: pointer;
-  transition: background 0.1s ease;
+  transition: background var(--dur-press) ease;
 }
 
 .dropdownOption:hover {
   background: #F8FAFD;
+}
+
+.dropdownOption:active {
+  background: #E7EFFC;
 }
 
 .dropdownOptionActive {
