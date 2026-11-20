@@ -741,30 +741,36 @@
 
 .gridStars {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .gridStarBtn {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  border: none;
+  background: #F4F7FC;
+  border: 2px solid #DCE3F1;
   padding: 0;
   cursor: pointer;
-  border-radius: 8px;
-  transition: transform 0.1s ease;
+  border-radius: 10px;
+  transition: all 0.15s ease;
 }
 
 .gridStarBtn:hover {
-  transform: scale(1.15);
+  border-color: #1F3168;
+  transform: translateY(-1px);
 }
 
 .gridStarBtn svg {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
+}
+
+.gridStarBtnFilled {
+  background: #FFF5E6;
+  border-color: #F2A93B;
 }
 
 /* =============================================================================

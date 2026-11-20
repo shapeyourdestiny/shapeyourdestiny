@@ -1345,11 +1345,11 @@ function QuestionField({ question, value, otherText, updateAnswer, updateGridAns
                     <button
                       key={star}
                       type="button"
-                      className={styles.gridStarBtn}
+                      className={`${styles.gridStarBtn} ${star <= (rowValue || 0) ? styles.gridStarBtnFilled : ""}`}
                       onClick={() => updateGridAnswer(q.id, row, star)}
                       aria-label={`${star} star${star > 1 ? "s" : ""} for ${row}`}
                     >
-                      <svg viewBox="0 0 24 24" fill={star <= (rowValue || 0) ? "#F2A93B" : "#C9D4EE"}>
+                      <svg viewBox="0 0 24 24" fill={star <= (rowValue || 0) ? "#F2A93B" : "#9BA8C4"}>
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                       </svg>
                     </button>
