@@ -163,7 +163,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   const [tappedStar, setTappedStar] = useState(null);
   const [tappedGridStar, setTappedGridStar] = useState(null);
   const [tappedScale, setTappedScale] = useState(null);
-  const [nextBtnReady, setNextBtnReady] = useState(false);
+  const [okBtnReady, setOkBtnReady] = useState(false);
   const [shakeField, setShakeField] = useState(null);
   const [wasAnswered, setWasAnswered] = useState(false);
 
@@ -176,6 +176,25 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   const steps = useMemo(() => buildSteps(survey), [survey]);
   const totalQuestions = useMemo(() => countTotalQuestions(survey), [survey]);
   const consentQuestion = useMemo(() => findConsentQuestion(survey), [survey]);
+
+  // Set theme-color meta tag for this route
+  useEffect(() => {
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    const originalColor = themeColor?.content;
+    if (themeColor) {
+      themeColor.content = "#142C6B";
+    } else {
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      meta.content = "#142C6B";
+      document.head.appendChild(meta);
+    }
+    return () => {
+      if (themeColor && originalColor) {
+        themeColor.content = originalColor;
+      }
+    };
+  }, []);
 
   // Save state to sessionStorage
   useEffect(() => {
@@ -217,7 +236,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
     return () => window.removeEventListener("popstate", handlePopState);
   }, [currentStep, isAnimating]);
 
-  // Check if current step is answered (for Next button state)
+  // Check if current step is answered (for OK button state)
   const isCurrentStepAnswered = useCallback(() => {
     if (currentStep === 0) return true;
     const step = steps[currentStep - 1];
@@ -261,9 +280,9 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   useEffect(() => {
     const isAnswered = isCurrentStepAnswered();
     if (isAnswered && !prevAnsweredRef.current && currentStep > 0) {
-      setNextBtnReady(true);
+      setOkBtnReady(true);
       setWasAnswered(true);
-      setTimeout(() => setNextBtnReady(false), 250);
+      setTimeout(() => setOkBtnReady(false), 250);
     }
     prevAnsweredRef.current = isAnswered;
   }, [isCurrentStepAnswered, currentStep]);
@@ -625,59 +644,39 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentStep, steps, goNext, goBack, handleNext, handleSubmit, updateAnswer, isAnimating]);
 
-  // Determine current screen type
-  const screenType = useMemo(() => {
-    if (currentStep === 0) return "welcome";
-    if (submitted) return "thankyou";
-    return "question";
-  }, [currentStep, submitted]);
-
   // Get current step data
   const stepData = currentStep > 0 && currentStep <= steps.length ? steps[currentStep - 1] : null;
 
-  // Get the big line text for left panel
-  const getBigLineText = () => {
-    if (screenType === "welcome") return "Help us make next season even better";
-    if (screenType === "thankyou") return "You just made next season better.";
-    return "Every answer helps our coaches grow.";
-  };
+  // Calculate progress
+  const progress = currentStep === 0 ? 0 : (currentStep / steps.length) * 100;
 
   // Render closed/draft states
   if (isDraft) {
     return (
       <div className={styles.surveyContainer}>
-        <div className={styles.leftPanel}>
-          <div className={styles.photoWrapper}>
+        <div className={styles.progressBarTop}>
+          <div className={styles.progressFillTop} style={{ width: "0%" }} />
+        </div>
+        <header className={styles.header}>
+          <Link href="/" className={styles.logoLink}>
             <Image
-              src="/Images/soccer-manykids.JPG.webp"
-              alt="Kids playing soccer at school"
-              fill
-              sizes="(min-width: 900px) 46vw, 100vw"
-              className={styles.photo}
+              src="/Images/footer_logo_gold.webp"
+              alt="Shape Your Destiny"
+              width={160}
+              height={40}
+              className={styles.logo}
               priority
             />
-            <div className={styles.photoOverlay} />
+          </Link>
+        </header>
+        <div className={styles.closedScreen}>
+          <div className={styles.closedIcon}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v4M12 16h.01" />
+            </svg>
           </div>
-          <div className={styles.leftContent}>
-            <Image
-              src="/Images/footer_logo_gold.png"
-              alt="Shape Your Destiny"
-              width={120}
-              height={28}
-              className={styles.logo}
-            />
-          </div>
-        </div>
-        <div className={styles.rightPanel}>
-          <div className={styles.closedCard}>
-            <div className={styles.closedIcon}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 8v4M12 16h.01" />
-              </svg>
-            </div>
-            <p>This survey isn&apos;t open yet.</p>
-          </div>
+          <p className={styles.closedText}>This survey isn&apos;t open yet.</p>
         </div>
       </div>
     );
@@ -686,38 +685,29 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   if (isClosed) {
     return (
       <div className={styles.surveyContainer}>
-        <div className={styles.leftPanel}>
-          <div className={styles.photoWrapper}>
+        <div className={styles.progressBarTop}>
+          <div className={styles.progressFillTop} style={{ width: "100%" }} />
+        </div>
+        <header className={styles.header}>
+          <Link href="/" className={styles.logoLink}>
             <Image
-              src="/Images/soccer-manykids.JPG.webp"
-              alt="Kids playing soccer at school"
-              fill
-              sizes="(min-width: 900px) 46vw, 100vw"
-              className={styles.photo}
+              src="/Images/footer_logo_gold.webp"
+              alt="Shape Your Destiny"
+              width={160}
+              height={40}
+              className={styles.logo}
               priority
             />
-            <div className={styles.photoOverlay} />
+          </Link>
+        </header>
+        <div className={styles.closedScreen}>
+          <div className={styles.closedIcon}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v4M12 16h.01" />
+            </svg>
           </div>
-          <div className={styles.leftContent}>
-            <Image
-              src="/Images/footer_logo_gold.png"
-              alt="Shape Your Destiny"
-              width={120}
-              height={28}
-              className={styles.logo}
-            />
-          </div>
-        </div>
-        <div className={styles.rightPanel}>
-          <div className={styles.closedCard}>
-            <div className={styles.closedIcon}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 8v4M12 16h.01" />
-              </svg>
-            </div>
-            <p>This survey is closed. Thank you!</p>
-          </div>
+          <p className={styles.closedText}>This survey is closed. Thank you!</p>
         </div>
       </div>
     );
@@ -726,9 +716,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   // Thank you screen
   if (submitted) {
     return (
-      <ThankYouScreen
-        getBigLineText={getBigLineText}
-      />
+      <ThankYouScreen />
     );
   }
 
@@ -738,7 +726,6 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
       <WelcomeScreen
         totalQuestions={totalQuestions}
         onStart={() => goToStep(1)}
-        getBigLineText={getBigLineText}
       />
     );
   }
@@ -756,103 +743,67 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
         className={styles.honeypot}
       />
 
-      {/* Left Panel */}
-      <div className={styles.leftPanel} data-screen="question">
-        <div className={styles.photoWrapper}>
-          <Image
-            src="/Images/soccer-two-kids-upright.webp"
-            alt="Kids playing soccer at school"
-            fill
-            sizes="(min-width: 900px) 46vw, 100vw"
-            className={styles.photo}
-          />
-          <div className={styles.photoOverlay} />
-        </div>
-        <div className={styles.leftContent}>
-          <Link href="/" className={styles.logoLink}>
-            <Image
-              src="/Images/footer_logo_gold.png"
-              alt="Shape Your Destiny"
-              width={120}
-              height={28}
-              className={styles.logo}
-            />
-          </Link>
-          <div className={styles.leftBottom}>
-            <span className={styles.glassPill}>INTRAMURAL SOCCER</span>
-            <h2 className={styles.bigLine}>{getBigLineText()}</h2>
-            <p className={styles.subLine}>Your answers go straight to the Shape Your Destiny team.</p>
-          </div>
-        </div>
+      {/* Progress bar */}
+      <div className={styles.progressBarTop}>
+        <div className={styles.progressFillTop} style={{ width: `${progress}%` }} />
       </div>
 
-      {/* Right Panel */}
-      <div className={styles.rightPanel}>
-        {/* Top Bar */}
-        <div className={styles.topBar}>
-          <button
-            type="button"
-            className={styles.backBtn}
-            onClick={goBack}
-            aria-label="Go back"
-            disabled={isAnimating}
+      {/* Header */}
+      <header className={styles.header}>
+        <Link href="/" className={styles.logoLink}>
+          <Image
+            src="/Images/footer_logo_gold.webp"
+            alt="Shape Your Destiny"
+            width={160}
+            height={40}
+            className={styles.logo}
+          />
+        </Link>
+        <span className={styles.stepCounter}>
+          {currentStep} / {steps.length}
+        </span>
+      </header>
+
+      {/* Main content */}
+      <main className={styles.mainContent}>
+        <div className={styles.questionScreen}>
+          <div
+            className={`${styles.questionContent} ${direction > 0 ? styles.slideUp : styles.slideDown}`}
+            key={currentStep}
           >
-            ‹
-          </button>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{ width: `${(currentStep / steps.length) * 100}%` }}
-            />
+            {stepData && (
+              <QuestionStep
+                step={stepData}
+                answers={answers}
+                otherText={otherText}
+                errors={errors}
+                updateAnswer={updateAnswer}
+                updateGridAnswer={updateGridAnswer}
+                toggleCheckbox={toggleCheckbox}
+                updateOtherText={updateOtherText}
+                questionTitleRef={questionTitleRef}
+                consentQuestion={consentQuestion}
+                submitting={submitting}
+                onSubmit={handleSubmit}
+                setTurnstileToken={setTurnstileToken}
+                selectedChoice={selectedChoice}
+                setSelectedChoice={setSelectedChoice}
+                tappedStar={tappedStar}
+                setTappedStar={setTappedStar}
+                tappedGridStar={tappedGridStar}
+                tappedScale={tappedScale}
+                setTappedScale={setTappedScale}
+                shakeField={shakeField}
+                isAnimating={isAnimating}
+              />
+            )}
           </div>
-          <span className={styles.stepCounter}>
-            {currentStep} of {steps.length}
-          </span>
         </div>
 
-        {/* Step Content */}
-        <div
-          className={`${styles.stepContent} ${direction > 0 ? styles.slideUp : styles.slideDown}`}
-          key={currentStep}
-        >
-          {stepData && (
-            <QuestionStep
-              step={stepData}
-              answers={answers}
-              otherText={otherText}
-              errors={errors}
-              updateAnswer={updateAnswer}
-              updateGridAnswer={updateGridAnswer}
-              toggleCheckbox={toggleCheckbox}
-              updateOtherText={updateOtherText}
-              questionTitleRef={questionTitleRef}
-              consentQuestion={consentQuestion}
-              submitting={submitting}
-              onSubmit={handleSubmit}
-              setTurnstileToken={setTurnstileToken}
-              selectedChoice={selectedChoice}
-              setSelectedChoice={setSelectedChoice}
-              tappedStar={tappedStar}
-              setTappedStar={setTappedStar}
-              tappedGridStar={tappedGridStar}
-              tappedScale={tappedScale}
-              setTappedScale={setTappedScale}
-              shakeField={shakeField}
-              isAnimating={isAnimating}
-            />
-          )}
-        </div>
-
-        {/* Bottom Bar */}
+        {/* Bottom actions - OK button */}
         {stepData?.type !== "final" && (
-          <div className={styles.bottomBar}>
-            <div className={styles.bottomHint}>
-              {stepData?.type === "choice" && "Press A, B, C or D"}
-              {stepData?.type === "stars" && "Press 1 to 5"}
-              {stepData?.type === "scale" && "Press 0 to 9"}
-              {!["choice", "stars", "scale"].includes(stepData?.type) && "Press Enter ↵ to continue"}
-            </div>
-            <div className={styles.bottomActions}>
+          <div className={styles.bottomActions}>
+            <div className={styles.bottomActionsInner}>
               {canSkip() && (
                 <button
                   type="button"
@@ -865,99 +816,136 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
               )}
               <button
                 type="button"
-                className={`${styles.nextBtn} ${!isCurrentStepAnswered() ? styles.nextBtnFaded : ""} ${nextBtnReady ? styles.nextBtnReady : ""}`}
+                className={`${styles.okBtn} ${isCurrentStepAnswered() ? styles.okBtnReady : ""} ${okBtnReady ? styles.okBtnNudge : ""}`}
                 onClick={handleNext}
                 disabled={isAnimating}
               >
-                <span>Next</span>
-                <span className={styles.nextBtnArrow}>→</span>
+                <span>OK</span>
+                {isCurrentStepAnswered() && <span>✓</span>}
               </button>
               {wasAnswered && isCurrentStepAnswered() && (
-                <span className={styles.enterPill}>Enter ↵</span>
+                <span className={styles.enterPill}>press Enter ↵</span>
               )}
             </div>
           </div>
         )}
-      </div>
+
+        {/* Navigation arrows */}
+        <div className={styles.navArrows}>
+          <button
+            type="button"
+            className={styles.navArrowBtn}
+            onClick={goBack}
+            disabled={currentStep <= 1 || isAnimating}
+            aria-label="Previous question"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            className={styles.navArrowBtn}
+            onClick={handleNext}
+            disabled={isAnimating}
+            aria-label="Next question"
+          >
+            ↓
+          </button>
+        </div>
+      </main>
     </div>
   );
 }
 
 // Welcome Screen Component
-function WelcomeScreen({ totalQuestions, onStart, getBigLineText }) {
+function WelcomeScreen({ totalQuestions, onStart }) {
   return (
     <div className={styles.surveyContainer}>
-      <div className={styles.leftPanel} data-screen="welcome">
-        <div className={styles.photoWrapper}>
+      <div className={styles.progressBarTop}>
+        <div className={styles.progressFillTop} style={{ width: "0%" }} />
+      </div>
+
+      <header className={styles.header}>
+        <Link href="/" className={styles.logoLink}>
           <Image
-            src="/Images/soccer-manykids.JPG.webp"
-            alt="Kids playing soccer at school"
-            fill
-            sizes="(min-width: 900px) 46vw, 100vw"
-            className={styles.photo}
+            src="/Images/footer_logo_gold.webp"
+            alt="Shape Your Destiny"
+            width={160}
+            height={40}
+            className={styles.logo}
             priority
           />
-          <div className={styles.photoOverlay} />
-        </div>
-        <div className={styles.leftContent}>
-          <Link href="/" className={styles.logoLink}>
-            <Image
-              src="/Images/footer_logo_gold.png"
-              alt="Shape Your Destiny"
-              width={120}
-              height={28}
-              className={styles.logo}
-            />
-          </Link>
-          <div className={styles.leftBottom}>
-            <span className={styles.glassPill}>INTRAMURAL SOCCER</span>
-            <h2 className={styles.bigLine}>{getBigLineText()}</h2>
-            <p className={styles.subLine}>Your answers go straight to the Shape Your Destiny team.</p>
+        </Link>
+      </header>
+
+      <main className={styles.mainContent}>
+        <div className={styles.welcomeScreen}>
+          {/* Text side */}
+          <div className={styles.welcomeText}>
+            <span className={styles.welcomeLabel}>FOR OUR PARTNER SCHOOLS</span>
+            <h1 className={styles.welcomeTitle}>
+              Thanks for an <span className="gold" style={{ color: "#F2C14E" }}>amazing</span> season!
+            </h1>
+            <p className={styles.welcomeIntro}>
+              You see our program every week. Tell us how it&apos;s going for your students, and help us make next season even better.
+            </p>
+
+            <div className={styles.welcomePromises}>
+              <div className={styles.promiseItem}>
+                <span className={styles.promiseIcon}>⏱</span>
+                <span>About 3 minutes</span>
+              </div>
+              <div className={styles.promiseItem}>
+                <span className={styles.promiseIcon}>📋</span>
+                <span>{totalQuestions} quick questions</span>
+              </div>
+              <div className={styles.promiseItem}>
+                <span className={styles.promiseIcon}>🔒</span>
+                <span>Anonymous is fine</span>
+              </div>
+            </div>
+
+            <div className={styles.welcomeActions}>
+              <button
+                type="button"
+                className={styles.startBtn}
+                onClick={onStart}
+              >
+                Let&apos;s go →
+              </button>
+              <span className={styles.enterHint}>or press Enter ↵</span>
+            </div>
+          </div>
+
+          {/* Photos side */}
+          <div className={styles.welcomePhotos}>
+            <div className={styles.photoCardMain}>
+              <Image
+                src="/Images/soccer-manykids.JPG.webp"
+                alt="Kids playing soccer at school"
+                fill
+                sizes="(min-width: 900px) 420px, 340px"
+                priority
+              />
+              <div className={styles.stickerBadge}>⚽ Intramural Soccer</div>
+            </div>
+            <div className={styles.photoCardSecondary}>
+              <Image
+                src="/Images/soccer-two-kids-upright.webp"
+                alt="Two kids playing soccer"
+                fill
+                sizes="180px"
+                priority
+              />
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className={styles.rightPanel}>
-        <div className={styles.welcomeContent}>
-          <span className={styles.tealLabel}>FOR OUR PARTNER SCHOOLS</span>
-          <h1 className={styles.welcomeTitle}>Thanks for an amazing season!</h1>
-          <p className={styles.welcomeText}>
-            You see our program every week. Tell us how it&apos;s going for your students, and help us make next season even better.
-          </p>
-
-          <div className={styles.infoPills}>
-            <div className={styles.infoPill}>
-              <span className={styles.infoPillIcon}>⏱</span>
-              <span>About 3 minutes</span>
-            </div>
-            <div className={styles.infoPill}>
-              <span className={styles.infoPillIcon}>📋</span>
-              <span>{totalQuestions} quick questions</span>
-            </div>
-            <div className={styles.infoPill}>
-              <span className={styles.infoPillIcon}>🔒</span>
-              <span>Anonymous is fine</span>
-            </div>
-          </div>
-
-          <div className={styles.welcomeActions}>
-            <button
-              type="button"
-              className={styles.startBtn}
-              onClick={onStart}
-            >
-              Let&apos;s go →
-            </button>
-            <span className={styles.enterHint}>or press Enter ↵</span>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
 
 // Thank You Screen Component
-function ThankYouScreen({ getBigLineText }) {
+function ThankYouScreen() {
   const [copied, setCopied] = useState(false);
   const canvasRef = useRef(null);
 
@@ -976,9 +964,10 @@ function ThankYouScreen({ getBigLineText }) {
     const height = canvas.height = canvas.offsetHeight * 2;
     ctx.scale(2, 2);
 
-    const colors = ["#1F3168", "#007B93", "#D1B05C"]; // navy, teal, gold
+    // Gold, light teal, white, and teal pieces
+    const colors = ["#F2C14E", "#7FC7D3", "#FFFFFF", "#007B93"];
     const confetti = [];
-    const confettiCount = 50;
+    const confettiCount = 60;
 
     // Create confetti particles
     for (let i = 0; i < confettiCount; i++) {
@@ -997,7 +986,7 @@ function ThankYouScreen({ getBigLineText }) {
     }
 
     let frame = 0;
-    const maxFrames = 60; // ~1 second at 60fps
+    const maxFrames = 90;
 
     const animate = () => {
       ctx.clearRect(0, 0, width / 2, height / 2);
@@ -1075,37 +1064,24 @@ function ThankYouScreen({ getBigLineText }) {
 
   return (
     <div className={styles.surveyContainer}>
-      <div className={styles.leftPanel} data-screen="thankyou">
-        <div className={styles.photoWrapper}>
-          <Image
-            src="/Images/soccer-manykids.JPG.webp"
-            alt="Kids playing soccer at school"
-            fill
-            sizes="(min-width: 900px) 46vw, 100vw"
-            className={styles.photo}
-          />
-          <div className={styles.photoOverlay} />
-        </div>
-        <div className={styles.leftContent}>
-          <Link href="/" className={styles.logoLink}>
-            <Image
-              src="/Images/footer_logo_gold.png"
-              alt="Shape Your Destiny"
-              width={120}
-              height={28}
-              className={styles.logo}
-            />
-          </Link>
-          <div className={styles.leftBottom}>
-            <span className={styles.glassPill}>INTRAMURAL SOCCER</span>
-            <h2 className={styles.bigLine}>{getBigLineText()}</h2>
-            <p className={styles.subLine}>Your answers go straight to the Shape Your Destiny team.</p>
-          </div>
-        </div>
+      <div className={styles.progressBarTop}>
+        <div className={styles.progressFillTop} style={{ width: "100%" }} />
       </div>
 
-      <div className={styles.rightPanel}>
-        <div className={styles.thankYouContent}>
+      <header className={styles.header}>
+        <Link href="/" className={styles.logoLink}>
+          <Image
+            src="/Images/footer_logo_gold.webp"
+            alt="Shape Your Destiny"
+            width={160}
+            height={40}
+            className={styles.logo}
+          />
+        </Link>
+      </header>
+
+      <main className={styles.mainContent}>
+        <div className={styles.thankYouScreen}>
           <canvas ref={canvasRef} className={styles.confettiCanvas} />
           <div className={styles.checkCircle}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1117,9 +1093,7 @@ function ThankYouScreen({ getBigLineText }) {
             Your feedback is on its way to our team. It helps us plan next season for your students.
           </p>
 
-          <div className={styles.shareCard}>
-            <p className={styles.shareTitle}>Know another school that would love this?</p>
-            <p className={styles.shareText}>We&apos;d be honored if you passed our name along.</p>
+          <div className={styles.thankYouButtons}>
             <button
               type="button"
               className={styles.shareBtn}
@@ -1127,13 +1101,16 @@ function ThankYouScreen({ getBigLineText }) {
             >
               {copied ? "Link copied!" : "Share Shape Your Destiny"}
             </button>
+            <a href="https://www.shapeyourdestiny.co" className={styles.visitBtn}>
+              Visit our website
+            </a>
           </div>
 
-          <a href="https://www.shapeyourdestiny.co" className={styles.visitLink}>
-            Visit our website ›
-          </a>
+          <p className={styles.thankYouFooter}>
+            Know another school that would love this? We&apos;d be honored if you passed our name along.
+          </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
@@ -1216,8 +1193,8 @@ function QuestionStep({
   return (
     <div className={styles.questionWrapper}>
       <div className={`${styles.sectionTag} ${styles.staggerSection}`}>
-        <span className={styles.stepTile}>{step.stepNumber}</span>
-        <span className={styles.sectionName}>{step.sectionTitle}</span>
+        <span>{step.stepNumber}</span>
+        <span>{step.sectionTitle}</span>
       </div>
 
       <h2
@@ -1266,8 +1243,8 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
   return (
     <div className={styles.questionWrapper}>
       <div className={`${styles.sectionTag} ${styles.staggerSection}`}>
-        <span className={styles.stepTile}>{step.stepNumber}</span>
-        <span className={styles.sectionName}>{step.sectionTitle}</span>
+        <span>{step.stepNumber}</span>
+        <span>{step.sectionTitle}</span>
       </div>
 
       <h2
@@ -1285,7 +1262,7 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
       <div className={`${styles.aboutFields} ${styles.staggerContent}`}>
         {schoolQ && (
           <div className={styles.aboutField}>
-            <label className={styles.aboutLabel}>{schoolQ.label}</label>
+            <label className={styles.aboutLabel}>YOUR SCHOOL</label>
             <SearchableDropdown
               options={schoolQ.options}
               value={answers[schoolQ.id] || ""}
@@ -1297,7 +1274,7 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
 
         {roleQ && (
           <div className={styles.aboutField}>
-            <label className={styles.aboutLabel}>{roleQ.label}</label>
+            <label className={styles.aboutLabel}>YOUR ROLE</label>
             <div className={styles.roleChips}>
               {roleQ.options.map((opt) => (
                 <button
@@ -1328,7 +1305,7 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
 
         {nameQ && (
           <div className={styles.aboutField}>
-            <label className={styles.aboutLabel}>{nameQ.label}</label>
+            <label className={styles.aboutLabel}>YOUR NAME · OPTIONAL</label>
             <input
               type="text"
               className={styles.nameInput}
@@ -1337,7 +1314,7 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
               placeholder=""
               maxLength={nameQ.maxLength || 100}
             />
-            <span className={styles.nameHint}>Optional. Leave blank to stay anonymous.</span>
+            <span className={styles.nameHint}>Leave blank to stay anonymous.</span>
           </div>
         )}
       </div>
@@ -1350,8 +1327,8 @@ function GroupedStep({ step, answers, otherText, errors, updateAnswer, toggleChe
   return (
     <div className={styles.questionWrapper}>
       <div className={`${styles.sectionTag} ${styles.staggerSection}`}>
-        <span className={styles.stepTile}>{step.stepNumber}</span>
-        <span className={styles.sectionName}>{step.sectionTitle}</span>
+        <span>{step.stepNumber}</span>
+        <span>{step.sectionTitle}</span>
       </div>
 
       {step.questions.map((q, idx) => (
@@ -1411,7 +1388,7 @@ function FinalStep({ answers, consentQuestion, updateAnswer, errors, submitting,
             {overall ? (
               <span className={styles.recapStars}>
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <svg key={s} viewBox="0 0 24 24" fill={s <= overall ? "#F2A93B" : "#C9D4EE"}>
+                  <svg key={s} viewBox="0 0 24 24" fill={s <= overall ? "#F2C14E" : "rgba(255,255,255,0.22)"}>
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
                 ))}
@@ -1518,6 +1495,7 @@ function QuestionField({
                   {isSelected ? "✓" : letter}
                 </span>
                 <span className={styles.choiceText}>{opt}</span>
+                <span className={styles.choiceCheck}>✓</span>
               </button>
             );
           })}
@@ -1548,14 +1526,14 @@ function QuestionField({
                   aria-pressed={value === star}
                   disabled={isAnimating}
                 >
-                  <svg viewBox="0 0 24 24" fill={isFilled ? "#F2A93B" : "#C9D4EE"}>
+                  <svg viewBox="0 0 24 24" fill={isFilled ? "#F2C14E" : "rgba(255,255,255,0.22)"}>
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
                 </button>
               );
             })}
           </div>
-          <span className={`${styles.starLabel} ${value ? styles.starLabelAnim : ""}`} key={value}>
+          <span className={`${styles.starLabel} ${!value ? styles.starLabelEmpty : ""} ${value ? styles.starLabelAnim : ""}`} key={value}>
             {value ? STAR_LABELS[value - 1] : "Tap a star"}
           </span>
         </div>
@@ -1588,7 +1566,7 @@ function QuestionField({
                         onClick={() => updateGridAnswer(q.id, row, star)}
                         aria-label={`${star} star${star > 1 ? "s" : ""} for ${row}`}
                       >
-                        <svg viewBox="0 0 24 24" fill={isFilled ? "#F2A93B" : "#9BA8C4"}>
+                        <svg viewBox="0 0 24 24" fill={isFilled ? "#F2C14E" : "rgba(255,255,255,0.22)"}>
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                         </svg>
                       </button>
@@ -1683,13 +1661,13 @@ function QuestionField({
             className={styles.longTextarea}
             value={value || ""}
             onChange={(e) => updateAnswer(q.id, e.target.value)}
-            placeholder={q.placeholder || ""}
+            placeholder="Type your answer here..."
             maxLength={maxLength}
-            rows={5}
+            rows={4}
           />
-          {q.id === "story" && (
-            <p className={styles.storyHint}>Please leave out names and personal details.</p>
-          )}
+          <p className={styles.textareaHint}>
+            Please leave out names and personal details · Shift + Enter for a new line
+          </p>
           <span className={`${styles.charCount} ${!showCharCount ? styles.charCountHidden : ""}`}>
             {charCount} / {maxLength}
           </span>

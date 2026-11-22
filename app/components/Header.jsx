@@ -26,7 +26,7 @@ export default function Header() {
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>
           <Image
-            src="/Images/footer_logo_gold.png"
+            src="/Images/footer_logo_gold.webp"
             alt="Shape Your Destiny"
             width={140}
             height={47}

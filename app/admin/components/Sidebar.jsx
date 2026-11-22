@@ -220,7 +220,7 @@ export default function Sidebar({ profile, incidentCount = 0, inboxCount = 0, pa
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
           <Image
-            src="/Images/footer_logo_gold.png"
+            src="/Images/footer_logo_gold.webp"
             alt="Shape Your Destiny"
             width={120}
             height={28}
@@ -283,7 +283,7 @@ export default function Sidebar({ profile, incidentCount = 0, inboxCount = 0, pa
       {/* Mobile Top Bar */}
       <header className={styles.mobileTopBar}>
         <Image
-          src="/Images/footer_logo_gold.png"
+          src="/Images/footer_logo_gold.webp"
           alt="SYD"
           width={32}
           height={32}
