@@ -189,248 +189,438 @@
 }
 
 /* =============================================================================
-   WELCOME SCREEN
+   WELCOME SCREEN - PREMIUM DESIGN
    ============================================================================= */
 
-.welcomeScreen {
-  flex: 1;
+.welcomeContainer {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #0B1840;
+}
+
+/* Full-bleed background photo with slow zoom */
+.welcomePhoto {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  transform: scale(1.04);
+  animation: welcomeKenBurns 18s ease-out forwards;
+}
+
+@keyframes welcomeKenBurns {
+  to { transform: scale(1); }
+}
+
+@media (max-width: 820px) {
+  .welcomePhoto {
+    bottom: auto;
+    height: 46vh;
+  }
+}
+
+/* Navy gradient overlay */
+.welcomeGradient {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(90deg, rgba(11,24,64,.97) 0%, rgba(11,24,64,.93) 30%, rgba(20,44,107,.55) 55%, rgba(20,44,107,.12) 80%, rgba(20,44,107,.05) 100%),
+    linear-gradient(0deg, rgba(11,24,64,.85) 0%, rgba(11,24,64,0) 35%),
+    linear-gradient(180deg, rgba(11,24,64,.55) 0%, rgba(11,24,64,0) 22%);
+}
+
+@media (max-width: 820px) {
+  .welcomeGradient {
+    background: linear-gradient(180deg, rgba(11,24,64,.8) 0%, rgba(11,24,64,0) 16%, rgba(11,24,64,0) 28%, rgba(11,24,64,1) 46%);
+  }
+}
+
+/* Soccer field lines decoration */
+.fieldLines {
+  position: absolute;
+  z-index: -1;
+  left: -260px;
+  top: 50%;
+  width: 760px;
+  height: 760px;
+  transform: translateY(-50%);
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+@media (max-width: 820px) {
+  .fieldLines {
+    display: none;
+  }
+}
+
+/* Header */
+.welcomeHeader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
-  padding: 0 40px 40px;
-  gap: 60px;
-  overflow: hidden;
+  justify-content: space-between;
+  padding: 28px 56px;
+  z-index: 10;
 }
 
-@media (max-width: 899px) {
-  .welcomeScreen {
-    flex-direction: column;
-    padding: 0 20px 20px;
-    gap: 24px;
-    overflow-y: auto;
+@media (max-width: 820px) {
+  .welcomeHeader {
+    padding: 20px 20px;
+    padding-top: max(20px, env(safe-area-inset-top));
   }
 }
 
-/* Welcome text side */
-.welcomeText {
-  flex: 1;
-  max-width: 500px;
-}
-
-@media (max-width: 899px) {
-  .welcomeText {
-    max-width: none;
-    order: 2;
-  }
-}
-
-.welcomeLabel {
+.welcomeLogoLink {
   display: block;
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--teal-light);
-  text-transform: uppercase;
-  margin-bottom: 16px;
 }
 
-@media (max-width: 899px) {
-  .welcomeLabel {
-    font-size: 11px;
+.welcomeLogo {
+  height: 46px;
+  width: auto;
+}
+
+@media (max-width: 820px) {
+  .welcomeLogo {
+    height: 34px;
   }
 }
 
-.welcomeTitle {
-  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
-  font-size: clamp(36px, 5vw, 72px);
-  font-weight: 700;
+/* Frosted glass tag */
+.welcomeTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   color: var(--white);
-  line-height: 1.1;
-  margin: 0 0 20px;
 }
 
-.welcomeTitle .gold {
-  color: var(--gold);
-}
-
-.welcomeIntro {
-  font-size: 17px;
-  color: var(--white-85);
-  line-height: 1.6;
-  margin: 0 0 28px;
-}
-
-@media (max-width: 899px) {
-  .welcomeIntro {
-    font-size: 16px;
-    margin-bottom: 24px;
+@media (max-width: 820px) {
+  .welcomeTag {
+    height: 32px;
+    font-size: 12px;
   }
 }
 
-.welcomePromises {
+.welcomeTagDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #5BD37A;
+  box-shadow: 0 0 0 4px rgba(91, 211, 122, 0.25);
+}
+
+/* Main content area */
+.welcomeMain {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: min(640px, 52vw);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 36px;
-}
-
-@media (max-width: 899px) {
-  .welcomePromises {
-    gap: 10px;
-    margin-bottom: 28px;
-  }
-}
-
-.promiseItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 15px;
-  color: var(--white-85);
-}
-
-.promiseIcon {
-  font-size: 18px;
-  color: var(--teal-light);
-  width: 24px;
-  text-align: center;
-}
-
-.welcomeActions {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-@media (max-width: 899px) {
-  .welcomeActions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-}
-
-.startBtn {
-  padding: 18px 40px;
-  background: var(--white);
-  color: var(--navy);
-  border: none;
-  border-radius: 999px;
-  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform var(--dur-fade) var(--ease-out), box-shadow var(--dur-fade) var(--ease-out);
-}
-
-.startBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.startBtn:active {
-  transform: scale(0.97);
-}
-
-.enterHint {
-  font-size: 14px;
-  color: var(--white-75);
-}
-
-@media (max-width: 899px) {
-  .enterHint {
-    display: none;
-  }
-}
-
-/* Welcome photos side */
-.welcomePhotos {
-  flex: 1;
-  position: relative;
-  display: flex;
   justify-content: center;
+  padding: 0 0 0 88px;
+}
+
+@media (max-width: 820px) {
+  .welcomeMain {
+    width: auto;
+    right: 0;
+    justify-content: flex-end;
+    padding: 0 22px max(28px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Eyebrow */
+.welcomeEyebrow {
+  display: flex;
   align-items: center;
-  min-height: 400px;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--teal-light);
 }
 
-@media (max-width: 899px) {
-  .welcomePhotos {
-    order: 1;
-    min-height: 200px;
-    width: 100%;
-    flex: none;
-  }
-}
-
-.photoCardMain {
-  position: relative;
-  width: 420px;
-  height: 320px;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 6px solid var(--white);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  transform: rotate(3deg);
-}
-
-@media (max-width: 899px) {
-  .photoCardMain {
-    width: 100%;
-    max-width: 340px;
-    height: 180px;
-    border-width: 4px;
-    border-radius: 16px;
-    transform: rotate(-2deg);
-  }
-}
-
-.photoCardMain img {
-  object-fit: cover;
-}
-
-.photoCardSecondary {
-  position: absolute;
-  left: -60px;
-  bottom: -40px;
-  width: 180px;
-  height: 140px;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 4px solid var(--white);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
-  transform: rotate(-6deg);
-  z-index: 2;
-}
-
-@media (max-width: 899px) {
-  .photoCardSecondary {
-    display: none;
-  }
-}
-
-.photoCardSecondary img {
-  object-fit: cover;
-}
-
-.stickerBadge {
-  position: absolute;
-  top: -16px;
-  right: -16px;
-  padding: 8px 16px;
+.welcomeEyebrow::before {
+  content: "";
+  width: 28px;
+  height: 2px;
   background: var(--gold);
-  border-radius: 999px;
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--navy);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-  z-index: 3;
+  border-radius: 2px;
+}
+
+/* Headline */
+.welcomeHeadline {
+  margin: 18px 0 0;
+  font-family: var(--font-baloo), 'Baloo 2', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(48px, 5.6vw, 88px);
+  line-height: 0.95;
+  letter-spacing: -0.015em;
+  color: var(--white);
+}
+
+@media (max-width: 820px) {
+  .welcomeHeadline {
+    font-size: 44px;
+    margin-top: 12px;
+  }
+}
+
+/* Gold highlight with animated underline */
+.welcomeHighlight {
+  position: relative;
+  color: var(--gold);
   white-space: nowrap;
 }
 
-@media (max-width: 899px) {
-  .stickerBadge {
+.welcomeHighlight svg {
+  position: absolute;
+  left: -2%;
+  bottom: -0.12em;
+  width: 104%;
+  height: 0.28em;
+  overflow: visible;
+}
+
+.welcomeHighlight path {
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  animation: welcomeDrawLine 0.9s 0.5s var(--ease-out) forwards;
+}
+
+@keyframes welcomeDrawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Lead paragraph */
+.welcomeLead {
+  margin: 26px 0 0;
+  max-width: 470px;
+  font-size: 20px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+@media (max-width: 820px) {
+  .welcomeLead {
+    font-size: 17px;
+    margin-top: 16px;
+  }
+}
+
+/* Frosted glass meta strip */
+.welcomeMeta {
+  display: flex;
+  align-items: center;
+  margin-top: 30px;
+  width: max-content;
+  max-width: 100%;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+@media (max-width: 820px) {
+  .welcomeMeta {
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+
+.welcomeMetaItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+}
+
+.welcomeMetaItem + .welcomeMetaItem {
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.welcomeMetaItem svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 820px) {
+  .welcomeMetaItem {
+    flex: 1;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 6px;
+    font-size: 12.5px;
+    text-align: center;
+    white-space: normal;
+  }
+}
+
+/* CTA section */
+.welcomeCta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 36px;
+}
+
+@media (max-width: 820px) {
+  .welcomeCta {
+    margin-top: 22px;
+  }
+}
+
+/* Gold button */
+.welcomeBtn {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  height: 64px;
+  padding: 0 10px 0 30px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #0B1840;
+  font-size: 19px;
+  font-weight: 800;
+  box-shadow: 0 14px 34px rgba(242, 193, 78, 0.28), inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s var(--ease-out), box-shadow 0.15s;
+}
+
+.welcomeBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(242, 193, 78, 0.38), inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+}
+
+.welcomeBtn:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 820px) {
+  .welcomeBtn {
+    width: 100%;
+    justify-content: space-between;
+    height: 60px;
+  }
+}
+
+.welcomeBtnArrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #0B1840;
+  color: var(--gold);
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s var(--ease-out);
+}
+
+.welcomeBtn:hover .welcomeBtnArrow {
+  transform: translateX(3px);
+}
+
+/* Keyboard hint */
+.welcomeKbd {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.welcomeKbd b {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-bottom-width: 2px;
+  color: var(--white);
+  font-weight: 800;
+}
+
+@media (max-width: 820px) {
+  .welcomeKbd {
     display: none;
+  }
+}
+
+/* Footer */
+.welcomeFoot {
+  position: absolute;
+  left: 88px;
+  bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 820px) {
+  .welcomeFoot {
+    display: none;
+  }
+}
+
+/* =============================================================================
+   WELCOME SCREEN ANIMATIONS
+   ============================================================================= */
+
+.wRise {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: welcomeRise 0.7s var(--ease-out) forwards;
+}
+
+@keyframes welcomeRise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.wD1 { animation-delay: 0.05s; }
+.wD2 { animation-delay: 0.15s; }
+.wD3 { animation-delay: 0.25s; }
+.wD4 { animation-delay: 0.35s; }
+.wD5 { animation-delay: 0.45s; }
+.wD6 { animation-delay: 0.8s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .welcomePhoto {
+    transform: scale(1);
+    animation: none;
+  }
+  .wRise {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .welcomeHighlight path {
+    stroke-dashoffset: 0;
+    animation: none;
   }
 }
 

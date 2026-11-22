@@ -988,96 +988,130 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   );
 }
 
-// Welcome Screen Component
-function WelcomeScreen({ totalQuestions, onStart }) {
+// Welcome Screen Component - Premium Design
+function WelcomeScreen({ totalQuestions: _totalQuestions, onStart }) {
   return (
-    <div className={styles.surveyContainer}>
-      <header className={styles.header}>
-        <div className={styles.headerTop}>
-          <Link href="/" className={styles.logoLink}>
-            <Image
-              src="/Images/footer_logo_gold.webp"
-              alt="Shape Your Destiny"
-              width={120}
-              height={36}
-              className={styles.logo}
-              priority
-            />
-          </Link>
-        </div>
-        <div className={`${styles.progressWrapper} ${styles.progressHidden}`}>
-          <div className={styles.progressTrack}>
-            <div className={styles.progressFill} style={{ width: "8%" }} />
-          </div>
-          <span className={styles.progressLabel}>0 of {totalQuestions}</span>
+    <div className={styles.welcomeContainer}>
+      {/* Full-bleed background photo */}
+      <div className={styles.welcomePhoto}>
+        <Image
+          src="/Images/soccer-manykids.JPG.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectFit: "cover", objectPosition: "62% 40%" }}
+        />
+      </div>
+
+      {/* Navy gradient overlay */}
+      <div className={styles.welcomeGradient} />
+
+      {/* Soccer field lines decoration */}
+      <svg
+        className={styles.fieldLines}
+        viewBox="0 0 760 760"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="3"
+        aria-hidden="true"
+      >
+        <circle cx="380" cy="380" r="200" />
+        <circle cx="380" cy="380" r="8" fill="#fff" />
+        <path d="M380 0v760" />
+        <circle cx="380" cy="380" r="360" />
+      </svg>
+
+      {/* Header */}
+      <header className={`${styles.welcomeHeader} ${styles.wRise}`}>
+        <Link href="/" className={styles.welcomeLogoLink}>
+          <Image
+            src="/Images/footer_logo_gold.webp"
+            alt="Shape Your Destiny"
+            width={138}
+            height={46}
+            className={styles.welcomeLogo}
+            priority
+          />
+        </Link>
+        <div className={styles.welcomeTag}>
+          <span className={styles.welcomeTagDot} />
+          Intramural soccer feedback
         </div>
       </header>
 
-      <main className={styles.mainContent}>
-        <div className={styles.welcomeScreen}>
-          {/* Text side */}
-          <div className={styles.welcomeText}>
-            <span className={styles.welcomeLabel}>FOR OUR PARTNER SCHOOLS</span>
-            <h1 className={styles.welcomeTitle}>
-              Thanks for an <span className="gold" style={{ color: "#F2C14E" }}>amazing</span> season!
-            </h1>
-            <p className={styles.welcomeIntro}>
-              You see our program every week. Tell us how it&apos;s going for your students, and help us make next season even better.
-            </p>
+      {/* Main content */}
+      <main className={styles.welcomeMain}>
+        <div className={`${styles.welcomeEyebrow} ${styles.wRise} ${styles.wD1}`}>
+          FOR OUR PARTNER SCHOOLS
+        </div>
 
-            <div className={styles.welcomePromises}>
-              <div className={styles.promiseItem}>
-                <span className={styles.promiseIcon}>⏱</span>
-                <span>About 3 minutes</span>
-              </div>
-              <div className={styles.promiseItem}>
-                <span className={styles.promiseIcon}>📋</span>
-                <span>{totalQuestions} quick questions</span>
-              </div>
-              <div className={styles.promiseItem}>
-                <span className={styles.promiseIcon}>🔒</span>
-                <span>Anonymous is fine</span>
-              </div>
-            </div>
-
-            <div className={styles.welcomeActions}>
-              <button
-                type="button"
-                className={styles.startBtn}
-                onClick={onStart}
-              >
-                Let&apos;s go →
-              </button>
-              <span className={styles.enterHint}>or press Enter ↵</span>
-            </div>
-          </div>
-
-          {/* Photos side */}
-          <div className={styles.welcomePhotos}>
-            <div className={styles.photoCardMain}>
-              <Image
-                src="/Images/soccer-manykids.JPG.webp"
-                alt="Kids playing soccer at school"
-                fill
-                sizes="(min-width: 900px) 420px, 340px"
-                priority
+        <h1 className={`${styles.welcomeHeadline} ${styles.wRise} ${styles.wD2}`}>
+          Thanks for an{" "}
+          <span className={styles.welcomeHighlight}>
+            amazing
+            <svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true">
+              <path
+                d="M3 14 C 50 4, 120 4, 197 11"
+                stroke="#F2C14E"
+                strokeWidth="5"
+                strokeLinecap="round"
+                fill="none"
               />
-              <div className={styles.stickerBadge}>⚽ Intramural Soccer</div>
-            </div>
-            <div className={styles.photoCardSecondary}>
-              <Image
-                src="/Images/soccer-two-kids-upright.webp"
-                alt="Two kids playing soccer"
-                fill
-                sizes="180px"
-                priority
-              />
-            </div>
+            </svg>
+          </span>{" "}
+          season!
+        </h1>
+
+        <p className={`${styles.welcomeLead} ${styles.wRise} ${styles.wD3}`}>
+          You see our program every week. Tell us how it&apos;s going for your students, and help us make next season even better.
+        </p>
+
+        <div className={`${styles.welcomeMeta} ${styles.wRise} ${styles.wD4}`}>
+          <div className={styles.welcomeMetaItem}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FC7D3" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="13" r="8" />
+              <path d="M12 9v4l2.5 2M9 2h6" />
+            </svg>
+            About 3 minutes
           </div>
+          <div className={styles.welcomeMetaItem}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FC7D3" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12l4 4L19 6" />
+            </svg>
+            Mostly one tap
+          </div>
+          <div className={styles.welcomeMetaItem}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FC7D3" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z" />
+            </svg>
+            Anonymous is fine
+          </div>
+        </div>
+
+        <div className={`${styles.welcomeCta} ${styles.wRise} ${styles.wD5}`}>
+          <button type="button" className={styles.welcomeBtn} onClick={onStart}>
+            Let&apos;s go
+            <span className={styles.welcomeBtnArrow}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </span>
+          </button>
+          <span className={styles.welcomeKbd}>
+            or press <b>Enter ↵</b>
+          </span>
         </div>
       </main>
 
-      <div /> {/* Empty grid row for bottom */}
+      {/* Footer */}
+      <div className={`${styles.welcomeFoot} ${styles.wRise} ${styles.wD6}`}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+          <rect x="4" y="11" width="16" height="10" rx="2" />
+          <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+        </svg>
+        Your answers go straight to the Shape Your Destiny team.
+      </div>
     </div>
   );
 }
