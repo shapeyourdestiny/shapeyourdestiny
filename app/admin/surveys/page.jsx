@@ -18,6 +18,7 @@ export default async function SurveysPage() {
     return {
       slug: survey.slug,
       title: survey.title,
+      period: survey.period,
       responseCount: stats.totalResponses || 0,
       avgOverall: stats.avgOverall,
       districtCount: stats.districtCount || 0,

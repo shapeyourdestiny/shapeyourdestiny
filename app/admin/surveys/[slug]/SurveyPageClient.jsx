@@ -72,7 +72,10 @@ export default function SurveyPageClient({ survey, sends, allDistricts, totalRes
 
       <div className={styles.header}>
         <div>
-          <h1>{survey.title}</h1>
+          <h1>
+            {survey.title}
+            {survey.period && <span className={styles.period}>{survey.period}</span>}
+          </h1>
           <div className={styles.sub}>
             {sends.length > 0
               ? `Sent to ${sends.length} ${sends.length === 1 ? "district" : "districts"} · ${totalResponses} ${totalResponses === 1 ? "response" : "responses"}`

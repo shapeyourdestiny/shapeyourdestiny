@@ -46,6 +46,7 @@ export default async function DistrictPage({ params }) {
         survey={{
           slug: survey.slug,
           title: survey.title,
+          period: survey.period,
           sections: survey.sections,
         }}
         send={{

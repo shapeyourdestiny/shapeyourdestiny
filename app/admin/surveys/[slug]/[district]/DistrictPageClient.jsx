@@ -108,7 +108,9 @@ export default function DistrictPageClient({ survey, send, responses, stats }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${survey.slug}-${send.linkSlug}-responses.csv`;
+    // Include period in filename if present (sanitize for filename)
+    const periodPart = survey.period ? `-${survey.period.replace(/[^a-zA-Z0-9]/g, "-")}` : "";
+    a.download = `${survey.slug}${periodPart}-${send.linkSlug}-responses.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -122,7 +124,9 @@ export default function DistrictPageClient({ survey, send, responses, stats }) {
     <>
       <div className={sharedStyles.crumb}>
         <Link href="/admin/surveys">Surveys</Link> &rsaquo;{" "}
-        <Link href={`/admin/surveys/${survey.slug}`}>{survey.title}</Link> &rsaquo;
+        <Link href={`/admin/surveys/${survey.slug}`}>
+          {survey.title}{survey.period ? ` (${survey.period})` : ""}
+        </Link> &rsaquo;
       </div>
 
       <div className={sharedStyles.header}>

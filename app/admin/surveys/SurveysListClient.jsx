@@ -30,7 +30,10 @@ export default function SurveysListClient({ surveys }) {
             onClick={() => router.push(`/admin/surveys/${survey.slug}`)}
           >
             <div className={styles.itemMain}>
-              <b>{survey.title}</b>
+              <b>
+                {survey.title}
+                {survey.period && <span className={styles.period}>{survey.period}</span>}
+              </b>
               <small>
                 {survey.districtCount > 0
                   ? `Sent to ${survey.districtCount} ${survey.districtCount === 1 ? "district" : "districts"}`

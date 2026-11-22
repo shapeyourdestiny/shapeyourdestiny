@@ -53,6 +53,7 @@ export default async function SurveyPage({ params }) {
         survey={{
           slug: survey.slug,
           title: survey.title,
+          period: survey.period,
         }}
         sends={sendsWithStats}
         allDistricts={allDistricts}
