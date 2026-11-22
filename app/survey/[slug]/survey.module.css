@@ -193,12 +193,24 @@
    ============================================================================= */
 
 .welcomeContainer {
+  /* Color tokens */
+  --navy: #1F3168;
+  --navy-mid: #142C6B;
+  --navy-deep: #0B1840;
+  --teal: #007B93;
+  --teal-light: #7FC7D3;
+  --gold: #F2C14E;
+  --white: #ffffff;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
   position: relative;
   min-height: 100vh;
   min-height: 100dvh;
   overflow: hidden;
   isolation: isolate;
   background: #0B1840;
+  font-family: 'Nunito', system-ui, sans-serif;
+  color: var(--white);
 }
 
 /* Full-bleed background photo with slow zoom */
