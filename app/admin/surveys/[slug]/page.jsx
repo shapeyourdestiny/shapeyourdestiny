@@ -1,17 +1,24 @@
 import { notFound } from "next/navigation";
-import { getSurvey, getSurveyStatus, countRequiredQuestions } from "@/lib/surveys";
-import { getSurveyStats, getSurveyResponses } from "@/lib/surveys/queries";
-import SurveyResultsClient from "./SurveyResultsClient";
-import styles from "./page.module.css";
+import { getSurvey } from "@/lib/surveys";
+import { getSurveyStats } from "@/lib/surveys/queries";
+import { getSurveySends, getAllDistricts } from "@/lib/surveys/sends";
+import SurveyPageClient from "./SurveyPageClient";
+import styles from "../page.module.css";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const survey = getSurvey(slug);
-  if (!survey) return { title: "Survey Not Found" };
-  return { title: `${survey.title} | Admin | Shape Your Destiny` };
+
+  if (!survey) {
+    return { title: "Survey Not Found" };
+  }
+
+  return {
+    title: `${survey.title} | Surveys | Admin`,
+  };
 }
 
-export default async function SurveyResultsPage({ params }) {
+export default async function SurveyPage({ params }) {
   const { slug } = await params;
   const survey = getSurvey(slug);
 
@@ -19,25 +26,37 @@ export default async function SurveyResultsPage({ params }) {
     notFound();
   }
 
-  const status = getSurveyStatus(survey);
-  const questionCount = countRequiredQuestions(survey);
-  const [stats, responses] = await Promise.all([
+  const [stats, sends, allDistricts] = await Promise.all([
     getSurveyStats(slug, survey),
-    getSurveyResponses(slug),
+    getSurveySends(slug),
+    getAllDistricts(),
   ]);
 
-  const enrichedSurvey = {
-    ...survey,
-    status,
-    questionCount,
-  };
+  // Calculate stats per send
+  const sendsWithStats = sends.map((send) => {
+    const districtStats = stats.districtStats?.[send.district_id] || {};
+    return {
+      id: send.id,
+      districtId: send.district_id,
+      districtName: send.districts?.name || send.link_slug,
+      linkSlug: send.link_slug,
+      schools: send.schools || [],
+      createdAt: send.created_at,
+      responseCount: districtStats.count || 0,
+      avgOverall: districtStats.avgOverall,
+    };
+  });
 
   return (
     <div className={styles.page}>
-      <SurveyResultsClient
-        survey={enrichedSurvey}
-        stats={stats}
-        responses={responses}
+      <SurveyPageClient
+        survey={{
+          slug: survey.slug,
+          title: survey.title,
+        }}
+        sends={sendsWithStats}
+        allDistricts={allDistricts}
+        totalResponses={stats.totalResponses}
       />
     </div>
   );

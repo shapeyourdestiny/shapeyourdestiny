@@ -4,6 +4,7 @@ import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { hashIP, getClientIP, checkRateLimit } from "@/lib/security/rate-limit";
 import { sendSurveyFeedbackNotification } from "@/lib/email";
 import { getSurvey, isSurveyOpen, getQuestionMap, getRequiredQuestionIds } from "@/lib/surveys";
+import { getSendByLinkSlug, isSendOpen } from "@/lib/surveys/sends";
 
 const MIN_SUBMIT_TIME_MS = 3000; // 3 seconds
 const RATE_LIMIT_COUNT = 5;
@@ -24,7 +25,7 @@ export async function POST(request, { params }) {
 
   try {
     const body = await request.json();
-    const { answers, _plt, _hp, "cf-turnstile-response": turnstileToken } = body;
+    const { answers, send: sendSlug, _plt, _hp, "cf-turnstile-response": turnstileToken } = body;
 
     // Check honeypot
     if (_hp) {
@@ -39,6 +40,27 @@ export async function POST(request, { params }) {
         return NextResponse.json({ success: true });
       }
     }
+
+    // District link is required - no general submissions allowed
+    if (!sendSlug) {
+      return NextResponse.json(
+        { error: "This survey requires a district link" },
+        { status: 400 }
+      );
+    }
+
+    // Look up district send
+    const sendData = await getSendByLinkSlug(slug, sendSlug);
+    if (!sendData) {
+      return NextResponse.json({ error: "Invalid survey link" }, { status: 400 });
+    }
+    if (!isSendOpen(sendData)) {
+      return NextResponse.json({ error: "This survey is not accepting responses" }, { status: 400 });
+    }
+
+    const districtId = sendData.district_id;
+    const districtName = sendData.districts?.name;
+    const allowedSchools = sendData.schools || [];
 
     // Get client IP
     const ip = getClientIP(request);
@@ -107,6 +129,14 @@ export async function POST(request, { params }) {
     const schoolAnswer = cleanedAnswers.school;
     const school = schoolAnswer && schoolAnswer !== "Prefer not to say" ? schoolAnswer : null;
 
+    // Validate school against allowed list for this district
+    if (school && !allowedSchools.includes(school)) {
+      return NextResponse.json(
+        { errors: { school: "Please pick a school from this district" } },
+        { status: 400 }
+      );
+    }
+
     // Check if anonymous (name is blank)
     const isAnonymous = !cleanedAnswers.name || cleanedAnswers.name.trim() === "";
 
@@ -120,6 +150,8 @@ export async function POST(request, { params }) {
         answers: cleanedAnswers,
         school,
         is_anonymous: isAnonymous,
+        district_id: districtId,
+        send_id: sendData.id,
       })
       .select("id")
       .single();
@@ -157,6 +189,7 @@ export async function POST(request, { params }) {
         await sendSurveyFeedbackNotification({
           surveySlug: slug,
           school: school || "Anonymous school",
+          district: districtName,
           overall: cleanedAnswers.overall,
           recommend: cleanedAnswers.recommend,
           attendance: cleanedAnswers.attendance,

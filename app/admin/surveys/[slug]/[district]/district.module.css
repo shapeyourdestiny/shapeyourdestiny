@@ -1,0 +1,373 @@
+/* =============================================================================
+   DISTRICT PAGE STYLES
+   ============================================================================= */
+
+/* =============================================================================
+   AVERAGES CARD
+   ============================================================================= */
+
+.avgCard {
+  background: var(--paper);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 14px;
+}
+
+.avgTop {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .avgTop {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+.avgItem {
+  text-align: center;
+}
+
+.avgItem small {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+
+.avgItem b {
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 24px;
+  color: var(--ink);
+}
+
+.star {
+  color: var(--gold);
+  font-size: 18px;
+  margin-left: 2px;
+}
+
+.muted {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+}
+
+/* =============================================================================
+   RATING ROWS
+   ============================================================================= */
+
+.ratingRows {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--tint);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ratingRow span:first-child {
+  flex: 0 0 160px;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+@media (max-width: 500px) {
+  .ratingRow span:first-child {
+    flex: 0 0 100px;
+    font-size: 13px;
+  }
+}
+
+.ratingTrack {
+  flex: 1;
+  height: 8px;
+  background: var(--tint);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ratingBar {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.ratingRow b {
+  flex: 0 0 32px;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--ink);
+  text-align: right;
+}
+
+/* =============================================================================
+   RESPONSES CARD
+   ============================================================================= */
+
+.responsesCard {
+  background: var(--paper);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 6px 22px 10px;
+}
+
+.responsesHeader {
+  padding: 14px 0;
+}
+
+.responsesHeader h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.responsesHeader h2 .muted {
+  font-weight: 600;
+  font-size: 17px;
+}
+
+/* =============================================================================
+   SEARCH ROW
+   ============================================================================= */
+
+.searchRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 500px) {
+  .searchRow {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.searchInput {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--tint-deep);
+  border-radius: 10px;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+.searchInput::placeholder {
+  color: var(--ink-soft);
+}
+
+.schoolSelect {
+  flex: 0 0 180px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--tint-deep);
+  border-radius: 10px;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+}
+
+@media (max-width: 500px) {
+  .schoolSelect {
+    flex: none;
+    width: 100%;
+  }
+}
+
+.schoolSelect:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+/* =============================================================================
+   RESPONSE ROW
+   ============================================================================= */
+
+.responsesList {
+  display: flex;
+  flex-direction: column;
+}
+
+.responseRow {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--tint);
+}
+
+.responseRow:last-child {
+  border-bottom: none;
+}
+
+.responseTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.responseWho {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.responseWho span {
+  display: block;
+  font-weight: 500;
+  color: var(--ink-soft);
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.responseStars {
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+/* =============================================================================
+   ANSWER CHIPS
+   ============================================================================= */
+
+.responseChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.chip {
+  padding: 4px 10px;
+  background: var(--tint);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+/* =============================================================================
+   RESPONSE QUOTE
+   ============================================================================= */
+
+.responseQuote {
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.5;
+  margin: 0 0 8px;
+  font-style: italic;
+}
+
+/* =============================================================================
+   TOGGLE BUTTON
+   ============================================================================= */
+
+.toggleBtn {
+  all: unset;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  padding: 4px 0;
+}
+
+.toggleBtn:hover {
+  text-decoration: underline;
+}
+
+/* =============================================================================
+   FULL ANSWERS
+   ============================================================================= */
+
+.fullAnswers {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 24px;
+  margin: 16px 0 12px;
+  padding: 16px;
+  background: var(--tint);
+  border-radius: 10px;
+}
+
+@media (max-width: 600px) {
+  .fullAnswers {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.answerItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.answerItem small {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.answerItem span {
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.noAnswer {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+/* =============================================================================
+   NO RESULTS
+   ============================================================================= */
+
+.noResults {
+  padding: 32px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+/* =============================================================================
+   SHOW MORE
+   ============================================================================= */
+
+.showMoreBtn {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  border-top: 1px solid var(--tint);
+  margin-top: 8px;
+}
+
+.showMoreBtn:hover {
+  background: var(--tint);
+}

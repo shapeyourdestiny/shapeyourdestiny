@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import SurveyClient from "./SurveyClient";
-import { getSurvey, getSurveyStatus } from "@/lib/surveys";
+import { getSurvey } from "@/lib/surveys";
+import styles from "./survey.module.css";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -25,9 +25,18 @@ export default async function SurveyPage({ params }) {
     notFound();
   }
 
-  const status = getSurveyStatus(survey);
-  const isDraft = status === "draft";
-  const isClosed = status === "closed";
-
-  return <SurveyClient survey={survey} isClosed={isClosed} isDraft={isDraft} />;
+  // Base URL without district - show message to use district link
+  return (
+    <div className={styles.surveyContainer}>
+      <div className={styles.districtRequired}>
+        <div className={styles.districtRequiredCard}>
+          <h1>Survey Link Required</h1>
+          <p>This survey is shared by link. Please use the link from your school district.</p>
+          <p className={styles.districtRequiredSmall}>
+            If you received a link and it&apos;s not working, please contact your school administrator.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }

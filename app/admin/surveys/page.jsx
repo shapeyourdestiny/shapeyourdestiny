@@ -1,6 +1,5 @@
-import { listSurveys, getSurveyStatus } from "@/lib/surveys";
+import { listSurveys } from "@/lib/surveys";
 import { getAllSurveysStats } from "@/lib/surveys/queries";
-import { countRequiredQuestions } from "@/lib/surveys";
 import SurveysListClient from "./SurveysListClient";
 import styles from "./page.module.css";
 
@@ -15,17 +14,13 @@ export default async function SurveysPage() {
   // Enrich surveys with stats
   const enrichedSurveys = surveys.map((survey) => {
     const stats = allStats[survey.slug] || {};
-    const status = getSurveyStatus(survey);
-    const questionCount = countRequiredQuestions(survey);
 
     return {
-      ...survey,
-      status,
+      slug: survey.slug,
+      title: survey.title,
       responseCount: stats.totalResponses || 0,
       avgOverall: stats.avgOverall,
-      avgRecommend: stats.avgRecommend,
-      lastResponseAt: stats.lastResponseAt,
-      questionCount,
+      districtCount: stats.districtCount || 0,
     };
   });
 

@@ -230,9 +230,11 @@ function loadSavedState(storageKey) {
   return null;
 }
 
-export default function SurveyClient({ survey, isClosed, isDraft }) {
-  // Storage key for this survey
-  const storageKey = `${STORAGE_KEY_PREFIX}${survey.slug}`;
+export default function SurveyClient({ survey, isClosed, isDraft, districtInfo = null }) {
+  // Storage key for this survey (include district if present)
+  const storageKey = districtInfo
+    ? `${STORAGE_KEY_PREFIX}${survey.slug}-${districtInfo.linkSlug}`
+    : `${STORAGE_KEY_PREFIX}${survey.slug}`;
 
   // Core state - initialize empty to avoid hydration mismatch, load from storage in effect
   const [currentStep, setCurrentStep] = useState(0);
@@ -617,6 +619,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           answers: buildFinalAnswers(),
+          send: districtInfo?.linkSlug || null,
           _plt: pageLoadTime,
           _hp: honeypotRef.current?.value || "",
           "cf-turnstile-response": turnstileToken,
@@ -642,7 +645,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
       setErrors({ form: "Something went wrong. Please try again." });
       setSubmitting(false);
     }
-  }, [validateCurrentStep, survey.slug, buildFinalAnswers, pageLoadTime, turnstileToken]);
+  }, [validateCurrentStep, survey.slug, buildFinalAnswers, pageLoadTime, turnstileToken, districtInfo]);
 
   // Keyboard navigation - fixed to allow Enter in textareas
   useEffect(() => {
@@ -848,6 +851,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
       <WelcomeScreen
         totalQuestions={totalQuestions}
         onStart={() => goToStep(1)}
+        districtInfo={districtInfo}
       />
     );
   }
@@ -989,7 +993,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
 }
 
 // Welcome Screen Component - Premium Design
-function WelcomeScreen({ totalQuestions: _totalQuestions, onStart }) {
+function WelcomeScreen({ totalQuestions: _totalQuestions, onStart, districtInfo }) {
   return (
     <div className={styles.welcomeContainer}>
       {/* Full-bleed background photo */}
@@ -1045,6 +1049,12 @@ function WelcomeScreen({ totalQuestions: _totalQuestions, onStart }) {
         <div className={`${styles.welcomeEyebrow} ${styles.wRise} ${styles.wD1}`}>
           FOR OUR PARTNER SCHOOLS
         </div>
+
+        {districtInfo?.name && (
+          <div className={`${styles.welcomeDistrict} ${styles.wRise} ${styles.wD1}`}>
+            {districtInfo.name}
+          </div>
+        )}
 
         <h1 className={`${styles.welcomeHeadline} ${styles.wRise} ${styles.wD2}`}>
           Thanks for an{" "}

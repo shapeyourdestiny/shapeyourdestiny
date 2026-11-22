@@ -379,6 +379,14 @@
   border-radius: 2px;
 }
 
+/* District name line */
+.welcomeDistrict {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+
 /* Headline */
 .welcomeHeadline {
   margin: 18px 0 0;
@@ -2287,4 +2295,47 @@
   left: -9999px;
   opacity: 0;
   pointer-events: none;
+}
+
+/* =============================================================================
+   DISTRICT REQUIRED MESSAGE
+   ============================================================================= */
+
+.districtRequired {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.districtRequiredCard {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 48px 40px;
+  max-width: 480px;
+  text-align: center;
+}
+
+.districtRequiredCard h1 {
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 16px;
+}
+
+.districtRequiredCard p {
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.districtRequiredSmall {
+  margin-top: 24px !important;
+  font-size: 14px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
 }
