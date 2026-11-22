@@ -12,6 +12,9 @@ const AUTO_ADVANCE_DELAY = 350;
 // Star labels for display
 const STAR_LABELS = ["Not great", "Okay", "Good", "Great", "Amazing!"];
 
+// Detect Mac for keyboard hints
+const isMac = typeof window !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+
 // Haptic feedback helper - Android only
 const hapticFeedback = () => {
   if (typeof navigator !== "undefined" && navigator.vibrate) {
@@ -37,12 +40,13 @@ function buildSteps(survey) {
     const allOptional = questions.every((q) => !q.required);
 
     if (isFirstSection && allOptional) {
-      // Group all questions in the first optional section
+      // Group all questions in the first optional section - but name goes to final step
+      const aboutQuestions = questions.filter((q) => q.id !== "name");
       steps.push({
         type: "about",
         sectionTitle: section.title,
         sectionHelp: section.help,
-        questions: questions,
+        questions: aboutQuestions,
         stepNumber: ++stepIndex,
       });
     } else {
@@ -96,6 +100,16 @@ function buildSteps(survey) {
   });
 
   return steps;
+}
+
+// Find name question for final step
+function findNameQuestion(survey) {
+  for (const section of survey.sections) {
+    for (const q of section.questions) {
+      if (q.id === "name") return q;
+    }
+  }
+  return null;
 }
 
 // Count total questions for welcome screen
@@ -157,6 +171,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   const [turnstileToken, setTurnstileToken] = useState("");
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = back
   const [isAnimating, setIsAnimating] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // Animation states
   const [selectedChoice, setSelectedChoice] = useState(null);
@@ -176,6 +191,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   const steps = useMemo(() => buildSteps(survey), [survey]);
   const totalQuestions = useMemo(() => countTotalQuestions(survey), [survey]);
   const consentQuestion = useMemo(() => findConsentQuestion(survey), [survey]);
+  const nameQuestion = useMemo(() => findNameQuestion(survey), [survey]);
 
   // Set theme-color meta tag for this route
   useEffect(() => {
@@ -538,24 +554,36 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
     }
   }, [validateCurrentStep, survey.slug, buildFinalAnswers, pageLoadTime, turnstileToken]);
 
-  // Keyboard navigation
+  // Keyboard navigation - fixed to allow Enter in textareas
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (isAnimating) return;
+      if (isAnimating || dropdownOpen) return;
 
-      // Don't handle keys when in text inputs
+      // Ignore events while IME is composing
+      if (e.isComposing) return;
+
       const target = e.target;
-      const isTextInput =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable;
+      const isTextarea = target.tagName === "TEXTAREA";
+      const isContentEditable = target.isContentEditable;
+      const isTextInput = target.tagName === "INPUT" && (target.type === "text" || target.type === "search");
 
-      if (isTextInput && e.key !== "Escape") {
-        // Allow Shift+Enter to advance from text inputs
-        if (e.key === "Enter" && e.shiftKey) {
+      // In textareas: Enter adds new line, Ctrl/Cmd+Enter continues
+      if (isTextarea || isContentEditable) {
+        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
           e.preventDefault();
           handleNext();
         }
+        // Regular Enter in textarea = new line (default behavior)
+        return;
+      }
+
+      // In text inputs: Enter goes to next step (unless it's the dropdown search)
+      if (isTextInput) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleNext();
+        }
+        // Don't trigger letter/number shortcuts while typing
         return;
       }
 
@@ -575,7 +603,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
 
         case "Escape":
         case "Backspace":
-          if (currentStep > 0 && !isTextInput) {
+          if (currentStep > 0) {
             e.preventDefault();
             goBack();
           }
@@ -642,32 +670,35 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentStep, steps, goNext, goBack, handleNext, handleSubmit, updateAnswer, isAnimating]);
+  }, [currentStep, steps, goNext, goBack, handleNext, handleSubmit, updateAnswer, isAnimating, dropdownOpen]);
 
   // Get current step data
   const stepData = currentStep > 0 && currentStep <= steps.length ? steps[currentStep - 1] : null;
 
   // Calculate progress
   const progress = currentStep === 0 ? 0 : (currentStep / steps.length) * 100;
+  const isLastStep = currentStep === steps.length;
+
+  // Progress label
+  const progressLabel = isLastStep ? "Last one!" : `${currentStep} of ${steps.length}`;
 
   // Render closed/draft states
   if (isDraft) {
     return (
       <div className={styles.surveyContainer}>
-        <div className={styles.progressBarTop}>
-          <div className={styles.progressFillTop} style={{ width: "0%" }} />
-        </div>
         <header className={styles.header}>
-          <Link href="/" className={styles.logoLink}>
-            <Image
-              src="/Images/footer_logo_gold.webp"
-              alt="Shape Your Destiny"
-              width={160}
-              height={40}
-              className={styles.logo}
-              priority
-            />
-          </Link>
+          <div className={styles.headerTop}>
+            <Link href="/" className={styles.logoLink}>
+              <Image
+                src="/Images/footer_logo_gold.webp"
+                alt="Shape Your Destiny"
+                width={120}
+                height={36}
+                className={styles.logo}
+                priority
+              />
+            </Link>
+          </div>
         </header>
         <div className={styles.closedScreen}>
           <div className={styles.closedIcon}>
@@ -678,6 +709,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
           </div>
           <p className={styles.closedText}>This survey isn&apos;t open yet.</p>
         </div>
+        <div /> {/* Empty grid row for bottom */}
       </div>
     );
   }
@@ -685,20 +717,19 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   if (isClosed) {
     return (
       <div className={styles.surveyContainer}>
-        <div className={styles.progressBarTop}>
-          <div className={styles.progressFillTop} style={{ width: "100%" }} />
-        </div>
         <header className={styles.header}>
-          <Link href="/" className={styles.logoLink}>
-            <Image
-              src="/Images/footer_logo_gold.webp"
-              alt="Shape Your Destiny"
-              width={160}
-              height={40}
-              className={styles.logo}
-              priority
-            />
-          </Link>
+          <div className={styles.headerTop}>
+            <Link href="/" className={styles.logoLink}>
+              <Image
+                src="/Images/footer_logo_gold.webp"
+                alt="Shape Your Destiny"
+                width={120}
+                height={36}
+                className={styles.logo}
+                priority
+              />
+            </Link>
+          </div>
         </header>
         <div className={styles.closedScreen}>
           <div className={styles.closedIcon}>
@@ -709,6 +740,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
           </div>
           <p className={styles.closedText}>This survey is closed. Thank you!</p>
         </div>
+        <div /> {/* Empty grid row for bottom */}
       </div>
     );
   }
@@ -716,7 +748,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   // Thank you screen
   if (submitted) {
     return (
-      <ThankYouScreen />
+      <ThankYouScreen steps={steps} />
     );
   }
 
@@ -743,25 +775,32 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
         className={styles.honeypot}
       />
 
-      {/* Progress bar */}
-      <div className={styles.progressBarTop}>
-        <div className={styles.progressFillTop} style={{ width: `${progress}%` }} />
-      </div>
-
-      {/* Header */}
+      {/* Header with progress bar */}
       <header className={styles.header}>
-        <Link href="/" className={styles.logoLink}>
-          <Image
-            src="/Images/footer_logo_gold.webp"
-            alt="Shape Your Destiny"
-            width={160}
-            height={40}
-            className={styles.logo}
-          />
-        </Link>
-        <span className={styles.stepCounter}>
-          {currentStep} / {steps.length}
-        </span>
+        <div className={styles.headerTop}>
+          <Link href="/" className={styles.logoLink}>
+            <Image
+              src="/Images/footer_logo_gold.webp"
+              alt="Shape Your Destiny"
+              width={120}
+              height={36}
+              className={styles.logo}
+            />
+          </Link>
+        </div>
+        <div
+          className={styles.progressWrapper}
+          role="progressbar"
+          aria-valuenow={currentStep}
+          aria-valuemin={1}
+          aria-valuemax={steps.length}
+          aria-label="Survey progress"
+        >
+          <div className={styles.progressTrack}>
+            <div className={styles.progressFill} style={{ width: `${Math.max(8, progress)}%` }} />
+          </div>
+          <span className={styles.progressLabel}>{progressLabel}</span>
+        </div>
       </header>
 
       {/* Main content */}
@@ -783,6 +822,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
                 updateOtherText={updateOtherText}
                 questionTitleRef={questionTitleRef}
                 consentQuestion={consentQuestion}
+                nameQuestion={nameQuestion}
                 submitting={submitting}
                 onSubmit={handleSubmit}
                 setTurnstileToken={setTurnstileToken}
@@ -795,63 +835,65 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
                 setTappedScale={setTappedScale}
                 shakeField={shakeField}
                 isAnimating={isAnimating}
+                setDropdownOpen={setDropdownOpen}
               />
             )}
           </div>
         </div>
+      </main>
 
-        {/* Bottom actions - OK button */}
-        {stepData?.type !== "final" && (
-          <div className={styles.bottomActions}>
-            <div className={styles.bottomActionsInner}>
-              {canSkip() && (
-                <button
-                  type="button"
-                  className={styles.skipBtn}
-                  onClick={goNext}
-                  disabled={isAnimating}
-                >
-                  Skip
-                </button>
-              )}
-              <button
-                type="button"
-                className={`${styles.okBtn} ${isCurrentStepAnswered() ? styles.okBtnReady : ""} ${okBtnReady ? styles.okBtnNudge : ""}`}
-                onClick={handleNext}
-                disabled={isAnimating}
-              >
-                <span>OK</span>
-                {isCurrentStepAnswered() && <span>✓</span>}
-              </button>
-              {wasAnswered && isCurrentStepAnswered() && (
-                <span className={styles.enterPill}>press Enter ↵</span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Navigation arrows */}
-        <div className={styles.navArrows}>
+      {/* Bottom actions - OK button (in grid row, not fixed) */}
+      {stepData?.type !== "final" && (
+        <div className={`${styles.bottomActions} ${dropdownOpen ? styles.bottomActionsHidden : ""}`}>
           <button
             type="button"
-            className={styles.navArrowBtn}
-            onClick={goBack}
-            disabled={currentStep <= 1 || isAnimating}
-            aria-label="Previous question"
-          >
-            ↑
-          </button>
-          <button
-            type="button"
-            className={styles.navArrowBtn}
+            className={`${styles.okBtn} ${isCurrentStepAnswered() ? styles.okBtnReady : ""} ${okBtnReady ? styles.okBtnNudge : ""}`}
             onClick={handleNext}
             disabled={isAnimating}
-            aria-label="Next question"
           >
-            ↓
+            <span>OK</span>
+            {isCurrentStepAnswered() && <span>✓</span>}
           </button>
+          {wasAnswered && isCurrentStepAnswered() && (
+            <span className={styles.enterHintAction}>press Enter ↵</span>
+          )}
+          {canSkip() && (
+            <button
+              type="button"
+              className={styles.skipBtn}
+              onClick={goNext}
+              disabled={isAnimating}
+            >
+              Skip
+            </button>
+          )}
         </div>
-      </main>
+      )}
+
+      {/* Empty div for final step to maintain grid */}
+      {stepData?.type === "final" && <div />}
+
+      {/* Navigation arrows */}
+      <div className={`${styles.navArrows} ${dropdownOpen ? styles.navArrowsHidden : ""}`}>
+        <button
+          type="button"
+          className={styles.navArrowBtn}
+          onClick={goBack}
+          disabled={currentStep <= 1 || isAnimating}
+          aria-label="Previous question"
+        >
+          ↑
+        </button>
+        <button
+          type="button"
+          className={styles.navArrowBtn}
+          onClick={handleNext}
+          disabled={isAnimating}
+          aria-label="Next question"
+        >
+          ↓
+        </button>
+      </div>
     </div>
   );
 }
@@ -860,21 +902,25 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
 function WelcomeScreen({ totalQuestions, onStart }) {
   return (
     <div className={styles.surveyContainer}>
-      <div className={styles.progressBarTop}>
-        <div className={styles.progressFillTop} style={{ width: "0%" }} />
-      </div>
-
       <header className={styles.header}>
-        <Link href="/" className={styles.logoLink}>
-          <Image
-            src="/Images/footer_logo_gold.webp"
-            alt="Shape Your Destiny"
-            width={160}
-            height={40}
-            className={styles.logo}
-            priority
-          />
-        </Link>
+        <div className={styles.headerTop}>
+          <Link href="/" className={styles.logoLink}>
+            <Image
+              src="/Images/footer_logo_gold.webp"
+              alt="Shape Your Destiny"
+              width={120}
+              height={36}
+              className={styles.logo}
+              priority
+            />
+          </Link>
+        </div>
+        <div className={`${styles.progressWrapper} ${styles.progressHidden}`}>
+          <div className={styles.progressTrack}>
+            <div className={styles.progressFill} style={{ width: "8%" }} />
+          </div>
+          <span className={styles.progressLabel}>0 of {totalQuestions}</span>
+        </div>
       </header>
 
       <main className={styles.mainContent}>
@@ -940,12 +986,14 @@ function WelcomeScreen({ totalQuestions, onStart }) {
           </div>
         </div>
       </main>
+
+      <div /> {/* Empty grid row for bottom */}
     </div>
   );
 }
 
 // Thank You Screen Component
-function ThankYouScreen() {
+function ThankYouScreen({ steps: _steps }) {
   const [copied, setCopied] = useState(false);
   const canvasRef = useRef(null);
 
@@ -1064,20 +1112,24 @@ function ThankYouScreen() {
 
   return (
     <div className={styles.surveyContainer}>
-      <div className={styles.progressBarTop}>
-        <div className={styles.progressFillTop} style={{ width: "100%" }} />
-      </div>
-
       <header className={styles.header}>
-        <Link href="/" className={styles.logoLink}>
-          <Image
-            src="/Images/footer_logo_gold.webp"
-            alt="Shape Your Destiny"
-            width={160}
-            height={40}
-            className={styles.logo}
-          />
-        </Link>
+        <div className={styles.headerTop}>
+          <Link href="/" className={styles.logoLink}>
+            <Image
+              src="/Images/footer_logo_gold.webp"
+              alt="Shape Your Destiny"
+              width={120}
+              height={36}
+              className={styles.logo}
+            />
+          </Link>
+        </div>
+        <div className={`${styles.progressWrapper} ${styles.progressFadeOut}`}>
+          <div className={styles.progressTrack}>
+            <div className={styles.progressFill} style={{ width: "100%" }} />
+          </div>
+          <span className={styles.progressLabel}>Done!</span>
+        </div>
       </header>
 
       <main className={styles.mainContent}>
@@ -1111,6 +1163,8 @@ function ThankYouScreen() {
           </p>
         </div>
       </main>
+
+      <div /> {/* Empty grid row for bottom */}
     </div>
   );
 }
@@ -1127,6 +1181,7 @@ function QuestionStep({
   updateOtherText,
   questionTitleRef,
   consentQuestion,
+  nameQuestion,
   submitting,
   onSubmit,
   setTurnstileToken,
@@ -1139,6 +1194,7 @@ function QuestionStep({
   setTappedScale,
   shakeField,
   isAnimating,
+  setDropdownOpen,
 }) {
   // Final step - recap and submit
   if (step.type === "final") {
@@ -1146,6 +1202,7 @@ function QuestionStep({
       <FinalStep
         answers={answers}
         consentQuestion={consentQuestion}
+        nameQuestion={nameQuestion}
         updateAnswer={updateAnswer}
         errors={errors}
         submitting={submitting}
@@ -1166,6 +1223,7 @@ function QuestionStep({
         updateAnswer={updateAnswer}
         updateOtherText={updateOtherText}
         questionTitleRef={questionTitleRef}
+        setDropdownOpen={setDropdownOpen}
       />
     );
   }
@@ -1234,11 +1292,10 @@ function QuestionStep({
   );
 }
 
-// About Step Component
-function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, questionTitleRef }) {
+// About Step Component - without name field (name moved to final step)
+function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, questionTitleRef, setDropdownOpen }) {
   const schoolQ = step.questions.find((q) => q.id === "school");
   const roleQ = step.questions.find((q) => q.id === "role");
-  const nameQ = step.questions.find((q) => q.id === "name");
 
   return (
     <div className={styles.questionWrapper}>
@@ -1262,33 +1319,38 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
       <div className={`${styles.aboutFields} ${styles.staggerContent}`}>
         {schoolQ && (
           <div className={styles.aboutField}>
-            <label className={styles.aboutLabel}>YOUR SCHOOL</label>
+            <label className={styles.aboutLabel}>Your school</label>
             <SearchableDropdown
               options={schoolQ.options}
               value={answers[schoolQ.id] || ""}
               onChange={(v) => updateAnswer(schoolQ.id, v)}
-              placeholder="Select or search..."
+              placeholder="Pick your school, or type to search"
+              setDropdownOpen={setDropdownOpen}
             />
           </div>
         )}
 
         {roleQ && (
           <div className={styles.aboutField}>
-            <label className={styles.aboutLabel}>YOUR ROLE</label>
+            <label className={styles.aboutLabel}>Your role</label>
             <div className={styles.roleChips}>
-              {roleQ.options.map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  className={`${styles.roleChip} ${answers[roleQ.id] === opt ? styles.roleChipActive : ""}`}
-                  onClick={() => {
-                    hapticFeedback();
-                    updateAnswer(roleQ.id, opt);
-                  }}
-                >
-                  {opt}
-                </button>
-              ))}
+              {roleQ.options.map((opt) => {
+                const isActive = answers[roleQ.id] === opt;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    className={`${styles.roleChip} ${isActive ? styles.roleChipActive : ""}`}
+                    onClick={() => {
+                      hapticFeedback();
+                      updateAnswer(roleQ.id, opt);
+                    }}
+                  >
+                    {isActive && <span className={styles.roleChipCheck}>✓</span>}
+                    {opt}
+                  </button>
+                );
+              })}
             </div>
             {roleQ.hasOtherText && answers[roleQ.id] === "Other" && (
               <input
@@ -1300,21 +1362,6 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
                 maxLength={100}
               />
             )}
-          </div>
-        )}
-
-        {nameQ && (
-          <div className={styles.aboutField}>
-            <label className={styles.aboutLabel}>YOUR NAME · OPTIONAL</label>
-            <input
-              type="text"
-              className={styles.nameInput}
-              value={answers[nameQ.id] || ""}
-              onChange={(e) => updateAnswer(nameQ.id, e.target.value)}
-              placeholder=""
-              maxLength={nameQ.maxLength || 100}
-            />
-            <span className={styles.nameHint}>Leave blank to stay anonymous.</span>
           </div>
         )}
       </div>
@@ -1363,8 +1410,8 @@ function GroupedStep({ step, answers, otherText, errors, updateAnswer, toggleChe
   );
 }
 
-// Final Step Component
-function FinalStep({ answers, consentQuestion, updateAnswer, errors, submitting, onSubmit, questionTitleRef, setTurnstileToken }) {
+// Final Step Component - now includes name field
+function FinalStep({ answers, consentQuestion, nameQuestion, updateAnswer, errors, submitting, onSubmit, questionTitleRef, setTurnstileToken }) {
   // Get recap values
   const overall = answers.overall;
   const attendance = answers.attendance;
@@ -1411,6 +1458,22 @@ function FinalStep({ answers, consentQuestion, updateAnswer, errors, submitting,
           <span className={styles.recapValue}>{school}</span>
         </div>
       </div>
+
+      {/* Name field - moved from About step */}
+      {nameQuestion && (
+        <div className={styles.nameFieldFinal}>
+          <label className={styles.aboutLabel}>Add your name? (optional)</label>
+          <input
+            type="text"
+            className={styles.filledInput}
+            value={answers[nameQuestion.id] || ""}
+            onChange={(e) => updateAnswer(nameQuestion.id, e.target.value)}
+            placeholder="Type your name"
+            maxLength={nameQuestion.maxLength || 100}
+          />
+          <span className={styles.fieldHint}>Leave blank to stay anonymous.</span>
+        </div>
+      )}
 
       {consentQuestion && (
         <label className={styles.consentCard}>
@@ -1654,6 +1717,7 @@ function QuestionField({
       const charCount = (value || "").length;
       const maxLength = q.maxLength || 1000;
       const showCharCount = charCount >= 800;
+      const hintText = isMac ? "Press ⌘ Enter to continue" : "Press Ctrl + Enter to continue";
 
       return (
         <div className={styles.longWrapper}>
@@ -1666,7 +1730,7 @@ function QuestionField({
             rows={4}
           />
           <p className={styles.textareaHint}>
-            Please leave out names and personal details · Shift + Enter for a new line
+            Please leave out names and personal details · {hintText}
           </p>
           <span className={`${styles.charCount} ${!showCharCount ? styles.charCountHidden : ""}`}>
             {charCount} / {maxLength}
@@ -1680,11 +1744,18 @@ function QuestionField({
 }
 
 // Searchable Dropdown Component
-function SearchableDropdown({ options, value, onChange, placeholder }) {
+function SearchableDropdown({ options, value, onChange, placeholder, setDropdownOpen }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
+  const listRef = useRef(null);
+
+  // Notify parent when dropdown opens/closes
+  useEffect(() => {
+    setDropdownOpen?.(isOpen);
+  }, [isOpen, setDropdownOpen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -1701,12 +1772,54 @@ function SearchableDropdown({ options, value, onChange, placeholder }) {
     opt.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+    setHighlightedIndex(0);
+  };
+
   const handleSelect = (opt) => {
     hapticFeedback();
     onChange(opt);
     setIsOpen(false);
     setSearch("");
   };
+
+  // Keyboard navigation
+  const handleKeyDown = (e) => {
+    if (!isOpen) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setHighlightedIndex((prev) => Math.min(prev + 1, filtered.length - 1));
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setHighlightedIndex((prev) => Math.max(prev - 1, 0));
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (filtered[highlightedIndex]) {
+          handleSelect(filtered[highlightedIndex]);
+        }
+        break;
+      case "Escape":
+        e.preventDefault();
+        setIsOpen(false);
+        setSearch("");
+        break;
+    }
+  };
+
+  // Scroll highlighted option into view
+  useEffect(() => {
+    if (listRef.current && isOpen) {
+      const highlighted = listRef.current.children[highlightedIndex];
+      if (highlighted) {
+        highlighted.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }, [highlightedIndex, isOpen]);
 
   return (
     <div ref={wrapperRef} className={styles.dropdown}>
@@ -1723,38 +1836,44 @@ function SearchableDropdown({ options, value, onChange, placeholder }) {
         <span className={value ? styles.dropdownValue : styles.dropdownPlaceholder}>
           {value || placeholder}
         </span>
-        <svg className={styles.dropdownArrow} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg className={`${styles.dropdownArrow} ${isOpen ? styles.dropdownArrowOpen : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
 
       {isOpen && (
-        <div className={styles.dropdownMenu}>
-          <input
-            ref={inputRef}
-            type="text"
-            className={styles.dropdownSearch}
-            placeholder="Type to search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <div className={styles.dropdownOptions}>
-            {filtered.length === 0 ? (
-              <div className={styles.dropdownEmpty}>No matches</div>
-            ) : (
-              filtered.map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  className={`${styles.dropdownOption} ${value === opt ? styles.dropdownOptionActive : ""}`}
-                  onClick={() => handleSelect(opt)}
-                >
-                  {opt}
-                </button>
-              ))
-            )}
+        <>
+          <div className={styles.dropdownOverlay} onClick={() => { setIsOpen(false); setSearch(""); }} />
+          <div className={styles.dropdownMenu}>
+            <input
+              ref={inputRef}
+              type="text"
+              className={styles.dropdownSearch}
+              placeholder="Type to search..."
+              value={search}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+            />
+            <div className={styles.dropdownOptions} ref={listRef}>
+              {filtered.length === 0 ? (
+                <div className={styles.dropdownEmpty}>No matches</div>
+              ) : (
+                filtered.map((opt, idx) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    className={`${styles.dropdownOption} ${value === opt ? styles.dropdownOptionActive : ""} ${idx === highlightedIndex ? styles.dropdownOptionActive : ""}`}
+                    onClick={() => handleSelect(opt)}
+                    onMouseEnter={() => setHighlightedIndex(idx)}
+                  >
+                    <span>{opt}</span>
+                    {value === opt && <span className={styles.dropdownOptionCheck}>✓</span>}
+                  </button>
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
