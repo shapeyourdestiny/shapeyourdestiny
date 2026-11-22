@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { formatRelativeTime, formatDateTime } from "@/lib/surveys/queries";
+import { formatRelativeTime, formatDateTime, hasLowRating } from "@/lib/surveys/queries";
 import styles from "./page.module.css";
 
 export default function SurveyResultsClient({ survey, stats, responses }) {
   const [activeTab, setActiveTab] = useState("summary");
   const [expandedResponse, setExpandedResponse] = useState(null);
+  const [filterLowRating, setFilterLowRating] = useState(false);
 
   const statusLabel =
     survey.status === "open"
@@ -100,6 +101,8 @@ export default function SurveyResultsClient({ survey, stats, responses }) {
           survey={survey}
           expandedResponse={expandedResponse}
           setExpandedResponse={setExpandedResponse}
+          filterLowRating={filterLowRating}
+          setFilterLowRating={setFilterLowRating}
         />
       )}
     </>
@@ -273,7 +276,7 @@ function SummaryTab({ stats, survey }) {
   );
 }
 
-function ResponsesTab({ responses, survey, expandedResponse, setExpandedResponse }) {
+function ResponsesTab({ responses, survey, expandedResponse, setExpandedResponse, filterLowRating, setFilterLowRating }) {
   if (responses.length === 0) {
     return (
       <div className={styles.emptyState}>
@@ -292,80 +295,117 @@ function ResponsesTab({ responses, survey, expandedResponse, setExpandedResponse
     }
   }
 
+  // Filter responses if needed
+  const filteredResponses = filterLowRating
+    ? responses.filter((r) => hasLowRating(r.answers || {}).hasLow)
+    : responses;
+
+  const lowRatingCount = responses.filter((r) => hasLowRating(r.answers || {}).hasLow).length;
+
   return (
-    <div className={styles.responsesList}>
-      {responses.map((response) => {
-        const isExpanded = expandedResponse === response.id;
-        const answers = response.answers || {};
+    <div>
+      {/* Filter chips */}
+      <div className={styles.filterChips}>
+        <button
+          className={`${styles.filterChip} ${filterLowRating ? styles.filterChipActive : ""}`}
+          onClick={() => setFilterLowRating(!filterLowRating)}
+        >
+          Low rating ({lowRatingCount})
+        </button>
+      </div>
 
-        return (
-          <div key={response.id} className={styles.responseCard}>
-            <button
-              className={styles.responseHeader}
-              onClick={() => setExpandedResponse(isExpanded ? null : response.id)}
-            >
-              <div className={styles.responseInfo}>
-                <span className={styles.responseName}>
-                  {answers.name || "Anonymous"}
-                </span>
-                <span className={styles.responseSchool}>
-                  {response.school || "No school"}
-                </span>
-                <span className={styles.responseDate}>
-                  {formatDateTime(response.submitted_at)}
-                </span>
-              </div>
-              <div className={styles.responseQuickStats}>
-                {answers.overall && (
-                  <span className={styles.quickStat}>
-                    Overall: {answers.overall}/5
+      <div className={styles.responsesList}>
+        {filteredResponses.map((response) => {
+          const isExpanded = expandedResponse === response.id;
+          const answers = response.answers || {};
+          const lowRating = hasLowRating(answers);
+          const improveWasFollowUp = lowRating.hasLow && answers.improve;
+
+          return (
+            <div key={response.id} className={styles.responseCard}>
+              <button
+                className={styles.responseHeader}
+                onClick={() => setExpandedResponse(isExpanded ? null : response.id)}
+              >
+                <div className={styles.responseInfo}>
+                  <span className={styles.responseName}>
+                    {answers.name || "Anonymous"}
                   </span>
-                )}
-                {answers.recommend !== undefined && (
-                  <span className={styles.quickStat}>
-                    Recommend: {answers.recommend}/10
+                  <span className={styles.responseSchool}>
+                    {response.school || "No school"}
                   </span>
-                )}
-              </div>
-              <span className={styles.expandIcon}>{isExpanded ? "−" : "+"}</span>
-            </button>
+                  {lowRating.hasLow && (
+                    <span className={styles.lowRatingTag}>Low rating</span>
+                  )}
+                  <span className={styles.responseDate}>
+                    {formatDateTime(response.submitted_at)}
+                  </span>
+                </div>
+                <div className={styles.responseQuickStats}>
+                  {answers.overall && (
+                    <span className={`${styles.quickStat} ${answers.overall <= 2 ? styles.quickStatLow : ""}`}>
+                      Overall: {answers.overall}/5
+                    </span>
+                  )}
+                  {answers.recommend !== undefined && (
+                    <span className={styles.quickStat}>
+                      Recommend: {answers.recommend}/10
+                    </span>
+                  )}
+                </div>
+                <span className={styles.expandIcon}>{isExpanded ? "−" : "+"}</span>
+              </button>
 
-            {isExpanded && (
-              <div className={styles.responseBody}>
-                {questions.map((q) => {
-                  const value = answers[q.id];
-                  if (value === undefined || value === null || value === "") {
-                    return null;
-                  }
-
-                  return (
-                    <div key={q.id} className={styles.answerRow}>
-                      <span className={styles.answerLabel}>{q.label}</span>
-                      <span className={styles.answerValue}>
-                        {formatAnswer(q, value)}
-                      </span>
+              {isExpanded && (
+                <div className={styles.responseBody}>
+                  {/* Show improve first if it was a follow-up */}
+                  {improveWasFollowUp && (
+                    <div className={styles.answerRow}>
+                      <span className={styles.answerLabel}>What could we do better?</span>
+                      <span className={styles.answerValue}>{answers.improve}</span>
                     </div>
-                  );
-                })}
+                  )}
 
-                {/* Grid ratings */}
-                {answers.ratings && (
-                  <div className={styles.answerRow}>
-                    <span className={styles.answerLabel}>Ratings</span>
-                    <div className={styles.gridRatings}>
-                      {Object.entries(answers.ratings).map(([row, val]) => (
-                        <span key={row} className={styles.gridRating}>
-                          {row}: {val}/5
+                  {questions.map((q) => {
+                    const value = answers[q.id];
+                    if (value === undefined || value === null || value === "") {
+                      return null;
+                    }
+
+                    // Skip improve if already shown as follow-up
+                    if (q.id === "improve" && improveWasFollowUp) {
+                      return null;
+                    }
+
+                    return (
+                      <div key={q.id} className={styles.answerRow}>
+                        <span className={styles.answerLabel}>{q.label}</span>
+                        <span className={styles.answerValue}>
+                          {formatAnswer(q, value)}
                         </span>
-                      ))}
+                      </div>
+                    );
+                  })}
+
+                  {/* Grid ratings */}
+                  {answers.ratings && (
+                    <div className={styles.answerRow}>
+                      <span className={styles.answerLabel}>Ratings</span>
+                      <div className={styles.gridRatings}>
+                        {Object.entries(answers.ratings).map(([row, val]) => (
+                          <span key={row} className={`${styles.gridRating} ${val <= 2 ? styles.gridRatingLow : ""}`}>
+                            {row}: {val}/5
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

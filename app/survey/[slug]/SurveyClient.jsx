@@ -26,10 +26,53 @@ const hapticFeedback = () => {
   }
 };
 
-// Build steps from survey config
-function buildSteps(survey) {
+// Check if any rating is low (1 or 2 stars)
+function hasLowRating(answers) {
+  const result = { hasLow: false, lowItems: [], overallLow: false };
+
+  // Check overall rating
+  if (typeof answers.overall === "number" && answers.overall <= 2) {
+    result.hasLow = true;
+    result.overallLow = true;
+  }
+
+  // Check grid ratings
+  if (answers.ratings && typeof answers.ratings === "object") {
+    for (const [row, value] of Object.entries(answers.ratings)) {
+      if (typeof value === "number" && value <= 2) {
+        result.hasLow = true;
+        result.lowItems.push({ row, value });
+      }
+    }
+  }
+
+  return result;
+}
+
+// Find a question with followUpFor config
+function findFollowUpQuestion(survey) {
+  for (const section of survey.sections) {
+    for (const q of section.questions) {
+      if (q.followUpFor) {
+        return { question: q, sectionTitle: section.title };
+      }
+    }
+  }
+  return null;
+}
+
+// Build steps from survey config (answers-aware for follow-up logic)
+function buildSteps(survey, answers = {}) {
   const steps = [];
   let stepIndex = 0;
+
+  // Find follow-up question config
+  const followUpInfo = findFollowUpQuestion(survey);
+  const lowRatingInfo = hasLowRating(answers, survey);
+  const shouldShowFollowUpEarly = followUpInfo && lowRatingInfo.hasLow;
+
+  // Track if we've inserted the follow-up early
+  let followUpInsertedEarly = false;
 
   for (let sIdx = 0; sIdx < survey.sections.length; sIdx++) {
     const section = survey.sections[sIdx];
@@ -57,6 +100,11 @@ function buildSteps(survey) {
         // Skip share_ok - it goes on the final step
         if (q.type === "consent") continue;
 
+        // Skip the follow-up question in its normal place if we're showing it early
+        if (followUpInfo && q.id === followUpInfo.question.id && shouldShowFollowUpEarly && followUpInsertedEarly) {
+          continue;
+        }
+
         // Check if this question should be grouped with the next one
         // (parent_requests + bring_next pattern)
         const nextQ = questions[qIdx + 1];
@@ -73,11 +121,20 @@ function buildSteps(survey) {
 
         // Long answer questions get their own step
         if (q.type === "long") {
+          // Check if this is the follow-up question being shown in normal place
+          const isFollowUpQuestion = followUpInfo && q.id === followUpInfo.question.id;
+
+          // Skip if follow-up was already shown early
+          if (isFollowUpQuestion && followUpInsertedEarly) {
+            continue;
+          }
+
           steps.push({
             type: "long",
             sectionTitle: section.title,
             question: q,
             stepNumber: ++stepIndex,
+            isFollowUp: false,
           });
           continue;
         }
@@ -89,6 +146,32 @@ function buildSteps(survey) {
           question: q,
           stepNumber: ++stepIndex,
         });
+
+        // Insert follow-up right after the ratings grid if needed
+        if (q.type === "grid" && q.id === "ratings" && shouldShowFollowUpEarly && !followUpInsertedEarly) {
+          // Build custom help text with low-rated items
+          let helpText = followUpInfo.question.followUpFor.help;
+          if (lowRatingInfo.lowItems.length > 0) {
+            const itemNames = lowRatingInfo.lowItems.map(item => item.row).join(" and ");
+            const starText = lowRatingInfo.lowItems.length === 1
+              ? `${lowRatingInfo.lowItems[0].value} stars`
+              : lowRatingInfo.lowItems.map(item => `${item.value} stars`).join(" and ");
+            helpText = `You rated ${itemNames} ${lowRatingInfo.lowItems.length === 1 ? starText : "low"}. ${followUpInfo.question.followUpFor.help}`;
+          }
+
+          steps.push({
+            type: "long",
+            sectionTitle: followUpInfo.sectionTitle,
+            question: {
+              ...followUpInfo.question,
+              label: followUpInfo.question.followUpFor.title,
+            },
+            customHelp: helpText,
+            stepNumber: ++stepIndex,
+            isFollowUp: true,
+          });
+          followUpInsertedEarly = true;
+        }
       }
     }
   }
@@ -151,19 +234,11 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   // Storage key for this survey
   const storageKey = `${STORAGE_KEY_PREFIX}${survey.slug}`;
 
-  // Core state - initialize from sessionStorage if available
-  const [currentStep, setCurrentStep] = useState(() => {
-    const saved = loadSavedState(storageKey);
-    return saved?.step ?? 0;
-  });
-  const [answers, setAnswers] = useState(() => {
-    const saved = loadSavedState(storageKey);
-    return saved?.answers ?? {};
-  });
-  const [otherText, setOtherText] = useState(() => {
-    const saved = loadSavedState(storageKey);
-    return saved?.otherText ?? {};
-  });
+  // Core state - initialize empty to avoid hydration mismatch, load from storage in effect
+  const [currentStep, setCurrentStep] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [otherText, setOtherText] = useState({});
+  const [hasLoadedSaved, setHasLoadedSaved] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -187,8 +262,8 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
   const honeypotRef = useRef(null);
   const prevAnsweredRef = useRef(false);
 
-  // Build steps from config
-  const steps = useMemo(() => buildSteps(survey), [survey]);
+  // Build steps from config (reactive to rating answers for follow-up logic)
+  const steps = useMemo(() => buildSteps(survey, answers), [survey, answers]);
   const totalQuestions = useMemo(() => countTotalQuestions(survey), [survey]);
   const consentQuestion = useMemo(() => findConsentQuestion(survey), [survey]);
   const nameQuestion = useMemo(() => findNameQuestion(survey), [survey]);
@@ -212,8 +287,23 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
     };
   }, []);
 
-  // Save state to sessionStorage
+  // Load saved state from sessionStorage after mount (avoids hydration mismatch)
   useEffect(() => {
+    // Use requestAnimationFrame to defer state updates and satisfy linter
+    requestAnimationFrame(() => {
+      const saved = loadSavedState(storageKey);
+      if (saved) {
+        if (saved.step !== undefined) setCurrentStep(saved.step);
+        if (saved.answers) setAnswers(saved.answers);
+        if (saved.otherText) setOtherText(saved.otherText);
+      }
+      setHasLoadedSaved(true);
+    });
+  }, [storageKey]);
+
+  // Save state to sessionStorage (only after initial load to avoid overwriting)
+  useEffect(() => {
+    if (!hasLoadedSaved) return; // Don't save until we've loaded initial state
     if (submitted) {
       try {
         sessionStorage.removeItem(storageKey);
@@ -230,7 +320,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
     } catch {
       // Ignore storage errors
     }
-  }, [currentStep, answers, otherText, storageKey, submitted]);
+  }, [currentStep, answers, otherText, storageKey, submitted, hasLoadedSaved]);
 
   // Handle browser back button
   useEffect(() => {
@@ -879,7 +969,7 @@ export default function SurveyClient({ survey, isClosed, isDraft }) {
           type="button"
           className={styles.navArrowBtn}
           onClick={goBack}
-          disabled={currentStep <= 1 || isAnimating}
+          disabled={currentStep < 1 || isAnimating}
           aria-label="Previous question"
         >
           ↑
@@ -1263,7 +1353,7 @@ function QuestionStep({
         {q.label}
       </h2>
 
-      {q.help && <p className={`${styles.questionHelp} ${styles.staggerTitle}`}>{q.help}</p>}
+      {(step.customHelp || q.help) && <p className={`${styles.questionHelp} ${styles.staggerTitle}`}>{step.customHelp || q.help}</p>}
 
       <div className={`${styles.questionField} ${styles.staggerContent} ${shakeField === q.id ? styles.shake : ""}`}>
         <QuestionField

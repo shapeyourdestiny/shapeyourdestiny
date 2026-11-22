@@ -711,3 +711,67 @@
   padding: 4px 10px;
   border-radius: 6px;
 }
+
+.gridRatingLow {
+  background: rgba(217, 119, 6, 0.12);
+  color: #B45309;
+}
+
+/* =============================================================================
+   FILTER CHIPS
+   ============================================================================= */
+
+.filterChips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filterChip {
+  padding: 8px 14px;
+  background: var(--paper);
+  border: 1px solid var(--tint-deep);
+  border-radius: 999px;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filterChip:hover {
+  background: var(--tint);
+  color: var(--ink);
+}
+
+.filterChipActive {
+  background: rgba(217, 119, 6, 0.12);
+  border-color: rgba(217, 119, 6, 0.3);
+  color: #B45309;
+}
+
+.filterChipActive:hover {
+  background: rgba(217, 119, 6, 0.18);
+}
+
+/* =============================================================================
+   LOW RATING TAG
+   ============================================================================= */
+
+.lowRatingTag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #B45309;
+  background: rgba(217, 119, 6, 0.12);
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.quickStatLow {
+  background: rgba(217, 119, 6, 0.12) !important;
+  color: #B45309 !important;
+}
