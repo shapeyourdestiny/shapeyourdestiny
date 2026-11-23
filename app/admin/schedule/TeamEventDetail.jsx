@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./TeamEventDetail.module.css";
 import BottomSheet from "../components/BottomSheet";
-import { cancelTeamEvent, duplicateTeamEvent } from "@/lib/team-events/actions";
+import { cancelTeamEvent, duplicateTeamEvent, deletePublicRsvp } from "@/lib/team-events/actions";
 
 const TYPE_LABELS = {
   meeting: "Team Meeting",
@@ -52,8 +52,55 @@ export default function TeamEventDetail({
 }) {
   const [loading, setLoading] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [publicRsvps, setPublicRsvps] = useState([]);
+  const [loadingRsvps, setLoadingRsvps] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  // Fetch public RSVPs when event has public_rsvp
+  useEffect(() => {
+    if (!open || !event?.id || !event?.public_rsvp) return;
+
+    let cancelled = false;
+
+    // Schedule loading state for next tick
+    const loadingTimer = setTimeout(() => {
+      if (!cancelled) setLoadingRsvps(true);
+    }, 0);
+
+    fetch(`/api/admin/team-events/${event.id}/rsvps`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch RSVPs");
+        return res.json();
+      })
+      .then((rsvps) => {
+        if (!cancelled) {
+          setPublicRsvps(rsvps || []);
+          setLoadingRsvps(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching public RSVPs:", err);
+        if (!cancelled) setLoadingRsvps(false);
+      });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(loadingTimer);
+    };
+  }, [open, event?.id, event?.public_rsvp]);
 
   if (!event) return null;
+
+  // Public RSVP counts
+  const publicComing = publicRsvps.filter((r) => r.attending);
+  const publicNotComing = publicRsvps.filter((r) => !r.attending);
+  const publicTotal = publicComing.reduce(
+    (sum, r) => sum + 1 + (r.guest_adults || 0) + (r.guest_kids || 0),
+    0
+  );
+  const publicAdults = publicComing.reduce((sum, r) => sum + (r.guest_adults || 0), 0);
+  const publicKids = publicComing.reduce((sum, r) => sum + (r.guest_kids || 0), 0);
 
   const typeColor = TYPE_COLORS[event.type] || TYPE_COLORS.meeting;
   const typeLabel = TYPE_LABELS[event.type] || "Team Event";
@@ -119,6 +166,79 @@ export default function TeamEventDetail({
     }
   };
 
+  // Copy public link
+  const handleCopyLink = async () => {
+    if (!event.public_slug) return;
+    const url = `${window.location.origin}/party/${event.public_slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  // Copy RSVP list
+  const handleCopyList = async () => {
+    const comingList = publicComing.map((r) => {
+      const parts = [r.name];
+      if (r.guest_adults > 0) parts.push(`+${r.guest_adults} adult${r.guest_adults > 1 ? "s" : ""}`);
+      if (r.guest_kids > 0) parts.push(`+${r.guest_kids} kid${r.guest_kids > 1 ? "s" : ""}`);
+      return parts.join(" ");
+    }).join(", ");
+
+    const notComingList = publicNotComing.map((r) => r.name).join(", ");
+
+    let text = `Coming (${publicComing.length}, ${publicTotal} people total): ${comingList || "none"}`;
+    if (publicNotComing.length > 0) {
+      text += `\n\nCan't make it: ${notComingList}`;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  // Export CSV
+  const handleExportCSV = () => {
+    const rows = [["Name", "Attending", "Adults", "Kids", "Total", "Note", "Replied"]];
+    publicRsvps.forEach((r) => {
+      const total = r.attending ? 1 + (r.guest_adults || 0) + (r.guest_kids || 0) : 0;
+      const replied = new Date(r.created_at).toLocaleDateString();
+      rows.push([
+        r.name,
+        r.attending ? "Yes" : "No",
+        r.guest_adults || 0,
+        r.guest_kids || 0,
+        total,
+        r.note || "",
+        replied + (r.updated_at !== r.created_at ? " (edited)" : ""),
+      ]);
+    });
+    const csv = rows.map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${event.title.replace(/[^a-z0-9]/gi, "-")}-rsvps.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Delete RSVP
+  const handleDeleteRsvp = async (rsvpId) => {
+    try {
+      await deletePublicRsvp(rsvpId);
+      setPublicRsvps((prev) => prev.filter((r) => r.id !== rsvpId));
+      setDeleteConfirm(null);
+    } catch (err) {
+      console.error("Failed to delete RSVP:", err);
+    }
+  };
+
   const content = (
     <div className={styles.content}>
       {/* Header */}
@@ -175,47 +295,142 @@ export default function TeamEventDetail({
         </div>
       </div>
 
-      {/* RSVP Summary */}
-      <div className={styles.rsvpSummary}>
-        <span className={styles.rsvpItem}>
-          <span className={styles.rsvpCount}>{yesCount}</span> coming
-        </span>
-        <span className={styles.rsvpDot} />
-        <span className={styles.rsvpItem}>
-          <span className={styles.rsvpCount}>{noCount}</span> can&apos;t
-        </span>
-        <span className={styles.rsvpDot} />
-        <span className={styles.rsvpItem}>
-          <span className={styles.rsvpCount}>{pendingCount}</span> no answer
-        </span>
-      </div>
-
-      {/* People List */}
-      <div className={styles.peopleSection}>
-        <h3 className={styles.sectionTitle}>People</h3>
-        <div className={styles.peopleList}>
-          {people.map((person) => (
-            <div key={person.profile_id} className={styles.personRow}>
-              <div className={styles.personAvatar}>
-                {person.profile?.avatar_url ? (
-                  <Image src={person.profile.avatar_url} alt="" width={36} height={36} />
-                ) : (
-                  <span>{person.profile?.full_name?.charAt(0) || "?"}</span>
-                )}
-              </div>
-              <div className={styles.personInfo}>
-                <span className={styles.personName}>{person.profile?.full_name}</span>
-                {person.rsvp === "no" && person.rsvp_reason && (
-                  <span className={styles.personReason}>{person.rsvp_reason}</span>
-                )}
-              </div>
-              <span className={`${styles.rsvpStatus} ${styles[`rsvp_${person.rsvp || "pending"}`]}`}>
-                {person.rsvp === "yes" ? "Coming" : person.rsvp === "no" ? "Can't" : "No answer"}
-              </span>
+      {/* Public RSVP Section (when public_rsvp is on) */}
+      {event.public_rsvp && (
+        <div className={styles.publicRsvpSection}>
+          <div className={styles.publicRsvpHeader}>
+            <h3 className={styles.sectionTitle}>RSVPs</h3>
+            <div className={styles.publicRsvpActions}>
+              <button className={styles.smallBtn} onClick={handleCopyLink}>
+                {linkCopied ? "Copied!" : "Copy link"}
+              </button>
+              <button className={styles.smallBtn} onClick={handleCopyList}>
+                Copy list
+              </button>
+              <button className={styles.smallBtn} onClick={handleExportCSV}>
+                Export CSV
+              </button>
             </div>
-          ))}
+          </div>
+
+          {/* Summary tiles */}
+          <div className={styles.rsvpTiles}>
+            <div className={`${styles.rsvpTile} ${styles.tilePrimary}`}>
+              <span className={styles.tileValue}>{publicTotal}</span>
+              <span className={styles.tileLabel}>Total headcount</span>
+            </div>
+            <div className={styles.rsvpTile}>
+              <span className={styles.tileValue}>{publicComing.length}</span>
+              <span className={styles.tileLabel}>Coming</span>
+            </div>
+            <div className={styles.rsvpTile}>
+              <span className={styles.tileValue}>{publicAdults}</span>
+              <span className={styles.tileLabel}>Adult guests</span>
+            </div>
+            <div className={styles.rsvpTile}>
+              <span className={styles.tileValue}>{publicKids}</span>
+              <span className={styles.tileLabel}>Kids</span>
+            </div>
+          </div>
+
+          {/* RSVP table */}
+          {loadingRsvps ? (
+            <p className={styles.loading}>Loading RSVPs...</p>
+          ) : publicRsvps.length === 0 ? (
+            <p className={styles.emptyRsvp}>No RSVPs yet</p>
+          ) : (
+            <div className={styles.rsvpTable}>
+              {publicRsvps.map((rsvp) => (
+                <div key={rsvp.id} className={styles.rsvpRow}>
+                  <div className={styles.rsvpRowMain}>
+                    <span className={styles.rsvpName}>{rsvp.name}</span>
+                    <span className={`${styles.rsvpPill} ${rsvp.attending ? styles.pillYes : styles.pillNo}`}>
+                      {rsvp.attending ? "Coming" : "Can't make it"}
+                    </span>
+                  </div>
+                  {rsvp.attending && (rsvp.guest_adults > 0 || rsvp.guest_kids > 0) && (
+                    <div className={styles.rsvpGuests}>
+                      {rsvp.guest_adults > 0 && (
+                        <span>+{rsvp.guest_adults} adult{rsvp.guest_adults > 1 ? "s" : ""}</span>
+                      )}
+                      {rsvp.guest_kids > 0 && (
+                        <span>+{rsvp.guest_kids} kid{rsvp.guest_kids > 1 ? "s" : ""}</span>
+                      )}
+                      <span className={styles.rsvpGroupTotal}>
+                        = {1 + rsvp.guest_adults + rsvp.guest_kids} people
+                      </span>
+                    </div>
+                  )}
+                  {rsvp.note && <div className={styles.rsvpNote}>{rsvp.note}</div>}
+                  <div className={styles.rsvpMeta}>
+                    <span>{new Date(rsvp.created_at).toLocaleDateString()}</span>
+                    {rsvp.updated_at !== rsvp.created_at && <span> (edited)</span>}
+                    <button
+                      className={styles.deleteBtn}
+                      onClick={() => setDeleteConfirm(rsvp.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  {deleteConfirm === rsvp.id && (
+                    <div className={styles.deleteConfirm}>
+                      <span>Delete this RSVP?</span>
+                      <button onClick={() => handleDeleteRsvp(rsvp.id)}>Yes</button>
+                      <button onClick={() => setDeleteConfirm(null)}>No</button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
+
+      {/* Regular RSVP Summary (when NOT public_rsvp) */}
+      {!event.public_rsvp && (
+        <>
+          <div className={styles.rsvpSummary}>
+            <span className={styles.rsvpItem}>
+              <span className={styles.rsvpCount}>{yesCount}</span> coming
+            </span>
+            <span className={styles.rsvpDot} />
+            <span className={styles.rsvpItem}>
+              <span className={styles.rsvpCount}>{noCount}</span> can&apos;t
+            </span>
+            <span className={styles.rsvpDot} />
+            <span className={styles.rsvpItem}>
+              <span className={styles.rsvpCount}>{pendingCount}</span> no answer
+            </span>
+          </div>
+
+          {/* People List */}
+          <div className={styles.peopleSection}>
+            <h3 className={styles.sectionTitle}>People</h3>
+            <div className={styles.peopleList}>
+              {people.map((person) => (
+                <div key={person.profile_id} className={styles.personRow}>
+                  <div className={styles.personAvatar}>
+                    {person.profile?.avatar_url ? (
+                      <Image src={person.profile.avatar_url} alt="" width={36} height={36} />
+                    ) : (
+                      <span>{person.profile?.full_name?.charAt(0) || "?"}</span>
+                    )}
+                  </div>
+                  <div className={styles.personInfo}>
+                    <span className={styles.personName}>{person.profile?.full_name}</span>
+                    {person.rsvp === "no" && person.rsvp_reason && (
+                      <span className={styles.personReason}>{person.rsvp_reason}</span>
+                    )}
+                  </div>
+                  <span className={`${styles.rsvpStatus} ${styles[`rsvp_${person.rsvp || "pending"}`]}`}>
+                    {person.rsvp === "yes" ? "Coming" : person.rsvp === "no" ? "Can't" : "No answer"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Cancel confirmation */}
       {showCancelConfirm && (

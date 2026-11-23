@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getTeamEventsForWeek } from "@/lib/team-events/queries";
+import { getTeamEventsForWeek, getPublicRsvpCounts } from "@/lib/team-events/queries";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
@@ -35,7 +35,29 @@ export async function GET(request) {
 
   try {
     const events = await getTeamEventsForWeek(startDate, endDate);
-    return NextResponse.json(events);
+
+    // Get public RSVP counts for events with public_rsvp enabled
+    const publicRsvpEventIds = events
+      .filter((e) => e.public_rsvp)
+      .map((e) => e.id);
+
+    let publicRsvpCounts = {};
+    if (publicRsvpEventIds.length > 0) {
+      publicRsvpCounts = await getPublicRsvpCounts(publicRsvpEventIds);
+    }
+
+    // Attach counts to events
+    const eventsWithCounts = events.map((e) => {
+      if (e.public_rsvp && publicRsvpCounts[e.id]) {
+        return {
+          ...e,
+          publicRsvpCounts: publicRsvpCounts[e.id],
+        };
+      }
+      return e;
+    });
+
+    return NextResponse.json(eventsWithCounts);
   } catch (error) {
     console.error("Error fetching team events:", error);
     return NextResponse.json({ error: "Failed to fetch team events" }, { status: 500 });

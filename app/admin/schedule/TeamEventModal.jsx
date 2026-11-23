@@ -11,6 +11,17 @@ const EVENT_TYPES = [
   { value: "social", label: "Social", color: "#F2A65E" },
 ];
 
+// Generate a URL slug from title and year
+function generateSlug(title, date) {
+  if (!title) return "";
+  const year = date ? new Date(date + "T12:00:00").getFullYear() : new Date().getFullYear();
+  const base = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `${base}-${year}`;
+}
+
 // Get form values from event or defaults
 function getFormValues(event, initialDate) {
   if (event) {
@@ -28,6 +39,13 @@ function getFormValues(event, initialDate) {
       audienceType: event.audience?.type || "all",
       selectedProfiles: event.audience?.profileIds || [],
       sendEmail: false, // Don't re-send emails on edit
+      // Public RSVP fields
+      publicRsvp: event.public_rsvp || false,
+      publicSlug: event.public_slug || "",
+      allowGuests: event.allow_guests || false,
+      note: event.note || "",
+      highlight: event.highlight || "",
+      locationUrl: event.location_url || "",
     };
   }
   return {
@@ -44,6 +62,13 @@ function getFormValues(event, initialDate) {
     audienceType: "all",
     selectedProfiles: [],
     sendEmail: true,
+    // Public RSVP fields
+    publicRsvp: false,
+    publicSlug: "",
+    allowGuests: false,
+    note: "",
+    highlight: "",
+    locationUrl: "",
   };
 }
 
@@ -75,6 +100,13 @@ export default function TeamEventModal({
   const [audienceType, setAudienceType] = useState(defaults.audienceType);
   const [selectedProfiles, setSelectedProfiles] = useState(defaults.selectedProfiles);
   const [sendEmail, setSendEmail] = useState(defaults.sendEmail);
+  // Public RSVP fields
+  const [publicRsvp, setPublicRsvp] = useState(defaults.publicRsvp);
+  const [publicSlug, setPublicSlug] = useState(defaults.publicSlug);
+  const [allowGuests, setAllowGuests] = useState(defaults.allowGuests);
+  const [note, setNote] = useState(defaults.note);
+  const [highlight, setHighlight] = useState(defaults.highlight);
+  const [locationUrl, setLocationUrl] = useState(defaults.locationUrl);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -95,6 +127,12 @@ export default function TeamEventModal({
     setAudienceType(vals.audienceType);
     setSelectedProfiles(vals.selectedProfiles);
     setSendEmail(vals.sendEmail);
+    setPublicRsvp(vals.publicRsvp);
+    setPublicSlug(vals.publicSlug);
+    setAllowGuests(vals.allowGuests);
+    setNote(vals.note);
+    setHighlight(vals.highlight);
+    setLocationUrl(vals.locationUrl);
     setError(null);
   }
 
@@ -147,6 +185,13 @@ export default function TeamEventModal({
           ? { type: "all" }
           : { type: "specific", profileIds: selectedProfiles },
         sendEmail: isEdit ? false : sendEmail,
+        // Public RSVP fields (only for social events)
+        publicRsvp: type === "social" ? publicRsvp : false,
+        publicSlug: type === "social" && publicRsvp ? (publicSlug.trim() || generateSlug(title, eventDate)) : null,
+        allowGuests: type === "social" ? allowGuests : false,
+        note: type === "social" ? (note.trim() || null) : null,
+        highlight: type === "social" ? (highlight.trim() || null) : null,
+        locationUrl: type === "social" ? (locationUrl.trim() || null) : null,
       };
 
       if (isEdit) {
@@ -263,6 +308,96 @@ export default function TeamEventModal({
           maxLength={1000}
         />
       </div>
+
+      {/* Social event: Public RSVP settings */}
+      {type === "social" && (
+        <>
+          {/* Maps link */}
+          <div className={styles.field}>
+            <label className={styles.label}>Maps link (optional)</label>
+            <input
+              type="url"
+              className={styles.input}
+              value={locationUrl}
+              onChange={(e) => setLocationUrl(e.target.value)}
+              placeholder="https://maps.apple.com/..."
+            />
+          </div>
+
+          {/* Note to the team */}
+          <div className={styles.field}>
+            <label className={styles.label}>Note to the team (optional)</label>
+            <textarea
+              className={styles.textarea}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="A personal message for your team..."
+              rows={4}
+              maxLength={3000}
+            />
+          </div>
+
+          {/* Highlight */}
+          <div className={styles.field}>
+            <label className={styles.label}>Highlight (optional)</label>
+            <input
+              type="text"
+              className={styles.input}
+              value={highlight}
+              onChange={(e) => setHighlight(e.target.value)}
+              placeholder="e.g., Everyone gets a Christmas bonus!"
+              maxLength={150}
+            />
+          </div>
+
+          {/* Public RSVP toggle */}
+          <div className={styles.toggleRow}>
+            <label className={styles.toggleLabel}>
+              <span>Public RSVP link (no sign in)</span>
+              <span className={styles.toggleHint}>People type their name to RSVP</span>
+            </label>
+            <button
+              type="button"
+              className={`${styles.toggle} ${publicRsvp ? styles.on : ""}`}
+              onClick={() => setPublicRsvp(!publicRsvp)}
+            >
+              <span className={styles.toggleThumb} />
+            </button>
+          </div>
+
+          {/* Slug (when public RSVP is on) */}
+          {publicRsvp && (
+            <div className={styles.field}>
+              <label className={styles.label}>Link slug</label>
+              <input
+                type="text"
+                className={styles.input}
+                value={publicSlug || generateSlug(title, eventDate)}
+                onChange={(e) => setPublicSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                placeholder="christmas-2026"
+              />
+              <span className={styles.toggleHint}>
+                Link: /party/{publicSlug || generateSlug(title, eventDate)}
+              </span>
+            </div>
+          )}
+
+          {/* Allow guests toggle */}
+          <div className={styles.toggleRow}>
+            <label className={styles.toggleLabel}>
+              <span>Let people bring guests</span>
+              <span className={styles.toggleHint}>Partners, spouses, and kids</span>
+            </label>
+            <button
+              type="button"
+              className={`${styles.toggle} ${allowGuests ? styles.on : ""}`}
+              onClick={() => setAllowGuests(!allowGuests)}
+            >
+              <span className={styles.toggleThumb} />
+            </button>
+          </div>
+        </>
+      )}
 
       {/* Paid toggle */}
       <div className={styles.toggleRow}>

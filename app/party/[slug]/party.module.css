@@ -1,0 +1,786 @@
+/* =============================================================================
+   PARTY RSVP PAGE
+   Mobile-first design (390px), desktop (900px+)
+   ============================================================================= */
+
+/* Page wrapper */
+.page {
+  min-height: 100dvh;
+  background: #F4F7FC;
+  font-family: 'Nunito', system-ui, sans-serif;
+  color: #141C3A;
+}
+
+/* =============================================================================
+   HERO
+   ============================================================================= */
+.hero {
+  position: relative;
+  padding: 48px 22px 32px;
+  color: #fff;
+  background: radial-gradient(500px 300px at 90% -10%, rgba(232, 169, 58, 0.35), transparent 60%),
+              linear-gradient(160deg, #1F3168, #142C6B 55%, #0E1F52);
+  overflow: hidden;
+}
+
+.snow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 90px 80px, #fff, transparent),
+    radial-gradient(2px 2px at 160px 40px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 240px 110px, #fff, transparent),
+    radial-gradient(2px 2px at 320px 60px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 60px 150px, #fff, transparent),
+    radial-gradient(2px 2px at 280px 170px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 200px 200px, #fff, transparent);
+  background-size: 360px 220px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.heroTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 32px;
+  line-height: 1.08;
+  margin: 14px 0 0;
+  font-weight: 700;
+}
+
+.goldText {
+  color: #E8A93A;
+}
+
+.heroDetails {
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ornament {
+  position: absolute;
+  right: 22px;
+  top: 36px;
+  opacity: 0.9;
+  width: 46px;
+  height: 60px;
+}
+
+/* =============================================================================
+   INFO CARD
+   ============================================================================= */
+.infoCard {
+  margin: -16px 16px 0;
+  position: relative;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(20, 44, 107, 0.12);
+  padding: 6px 16px;
+}
+
+.infoRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #E3E9F5;
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #F1F4FB;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.infoIcon svg {
+  width: 18px;
+  height: 18px;
+  stroke: #1F3168;
+}
+
+.infoRow b {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.infoRow span {
+  font-size: 13px;
+  color: #5A6385;
+}
+
+.directionsBtn {
+  margin-left: auto;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: #1F3168;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.directionsBtn:hover {
+  background: #2a3f7d;
+}
+
+/* =============================================================================
+   NOTE SECTION
+   ============================================================================= */
+.section {
+  padding: 20px 18px 0;
+}
+
+.sectionTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 20px;
+  margin: 0;
+  font-weight: 700;
+}
+
+.noteCard {
+  margin-top: 10px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #FFF9F0;
+  border: 1px solid #F5E3C3;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #3B3324;
+}
+
+.noteCard b {
+  color: #8A4A12;
+}
+
+.notePreview {
+  overflow: hidden;
+}
+
+.notePreview p {
+  margin: 0 0 12px;
+}
+
+.notePreview p:last-child {
+  margin-bottom: 0;
+}
+
+.moreBtn {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1F3168;
+  margin-top: 8px;
+  display: inline-block;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.bonus {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #E6F3EA;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1F4D30;
+}
+
+.bonus svg {
+  width: 22px;
+  height: 22px;
+  stroke: #2F7A4A;
+  flex-shrink: 0;
+}
+
+/* =============================================================================
+   FORM SECTION
+   ============================================================================= */
+.formSection {
+  padding: 20px 18px 100px;
+}
+
+.formTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 20px;
+  margin: 0 0 16px;
+  font-weight: 700;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.fieldLabel {
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.fieldHint {
+  font-weight: 600;
+  color: #5A6385;
+}
+
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1.5px solid #E3E9F5;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 16px;
+  color: #141C3A;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #1F3168;
+}
+
+.input::placeholder {
+  color: #5A6385;
+}
+
+/* Yes/No buttons */
+.ynButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ynBtn {
+  height: 56px;
+  border-radius: 16px;
+  border: 2px solid #E3E9F5;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 15px;
+  color: #141C3A;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ynBtn:hover {
+  border-color: #1F3168;
+}
+
+.ynBtn.on {
+  background: #1F3168;
+  border-color: #1F3168;
+  color: #fff;
+}
+
+.ynBtn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+
+/* Guest stepper */
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1.5px solid #E3E9F5;
+  border-radius: 16px;
+  margin-top: 10px;
+  background: #fff;
+}
+
+.stepperInfo b {
+  display: block;
+  font-size: 15px;
+}
+
+.stepperInfo span {
+  font-size: 12.5px;
+  color: #5A6385;
+}
+
+.stepperControls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stepperBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid #E3E9F5;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1F3168;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.stepperBtn:hover:not(:disabled) {
+  border-color: #1F3168;
+}
+
+.stepperBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepperBtn.plus {
+  background: #1F3168;
+  border-color: #1F3168;
+  color: #fff;
+}
+
+.stepperValue {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 22px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Total summary */
+.totalSummary {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #F1F4FB;
+  font-size: 14px;
+  font-weight: 700;
+  color: #3B4467;
+  text-align: center;
+}
+
+/* Optional note textarea */
+.textarea {
+  width: 100%;
+  min-height: 70px;
+  border: 1.5px solid #E3E9F5;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 15px;
+  resize: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #1F3168;
+}
+
+.textarea::placeholder {
+  color: #5A6385;
+}
+
+/* Submit button (sticky on mobile) */
+.submitFooter {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px 24px;
+  border-top: 1px solid #E3E9F5;
+  background: #fff;
+}
+
+.submitBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  border-radius: 16px;
+  background: #C8443A;
+  color: #fff;
+  font-weight: 800;
+  font-size: 17px;
+  box-shadow: 0 10px 24px rgba(200, 68, 58, 0.3);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #b53d33;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =============================================================================
+   CONFIRMATION
+   ============================================================================= */
+.confirmation {
+  padding: 30px 22px;
+  text-align: center;
+}
+
+.checkCircle {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  margin: 10px auto 0;
+  background: #E6F3EA;
+  display: grid;
+  place-items: center;
+}
+
+.checkCircle svg {
+  width: 38px;
+  height: 38px;
+  stroke: #2F7A4A;
+}
+
+.confirmTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 28px;
+  margin: 14px 0 4px;
+  font-weight: 700;
+}
+
+.confirmSubtitle {
+  color: #5A6385;
+  font-size: 15px;
+}
+
+.chips {
+  margin-top: 14px;
+}
+
+.chip {
+  display: inline-flex;
+  margin: 4px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #F1F4FB;
+  font-weight: 800;
+  font-size: 13px;
+  align-items: center;
+}
+
+.ghostBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  border-radius: 14px;
+  border: 1.5px solid #E3E9F5;
+  background: #fff;
+  font-weight: 800;
+  font-size: 15px;
+  color: #141C3A;
+  margin-top: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.ghostBtn:hover {
+  border-color: #1F3168;
+}
+
+.ghostBtn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+
+.confirmNote {
+  font-size: 13px;
+  color: #5A6385;
+  margin-top: 16px;
+}
+
+/* Declined confirmation */
+.declinedConfirm {
+  padding: 40px 22px;
+  text-align: center;
+}
+
+.declinedTitle {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 24px;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+/* Closed/cancelled states */
+.closedMessage {
+  padding: 40px 22px;
+  text-align: center;
+}
+
+.closedMessage h2 {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 24px;
+  margin: 0 0 8px;
+}
+
+.closedMessage p {
+  color: #5A6385;
+}
+
+/* Error message */
+.error {
+  padding: 12px 14px;
+  background: #FBEDEB;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #C8443A;
+  margin-bottom: 16px;
+}
+
+/* Name conflict dialog */
+.conflictDialog {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #FFF4E0;
+  border-radius: 14px;
+}
+
+.conflictDialog p {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.conflictButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.conflictBtn {
+  flex: 1;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.conflictBtn.primary {
+  background: #1F3168;
+  color: #fff;
+}
+
+.conflictBtn.secondary {
+  background: #fff;
+  border: 1.5px solid #E3E9F5;
+  color: #141C3A;
+}
+
+/* =============================================================================
+   FOOTER
+   ============================================================================= */
+.pageFooter {
+  padding: 20px 18px 30px;
+  text-align: center;
+  font-size: 13px;
+  color: #5A6385;
+}
+
+/* =============================================================================
+   DESKTOP LAYOUT (900px+)
+   ============================================================================= */
+@media (min-width: 900px) {
+  .page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .hero {
+    padding: 60px 40px;
+    min-height: 280px;
+  }
+
+  .heroInner {
+    max-width: 1120px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .heroTitle {
+    font-size: 56px;
+  }
+
+  .heroDetails {
+    font-size: 17px;
+    max-width: 600px;
+  }
+
+  .ornament {
+    width: 90px;
+    height: 120px;
+    right: 0;
+    top: 0;
+  }
+
+  .mainContent {
+    flex: 1;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 40px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .leftColumn {
+    padding-top: 0;
+  }
+
+  .infoCard {
+    margin: -40px 0 0;
+    padding: 16px 20px;
+  }
+
+  .infoCardDesktop {
+    display: flex;
+    gap: 32px;
+  }
+
+  .infoRow {
+    flex: 1;
+    padding: 0;
+    border: none;
+  }
+
+  .section {
+    padding: 24px 0 0;
+  }
+
+  .noteCard {
+    padding: 20px;
+  }
+
+  /* Right column - sticky form */
+  .rightColumn {
+    position: sticky;
+    top: 24px;
+  }
+
+  .formCard {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(20, 44, 107, 0.12);
+    padding: 24px;
+    margin-top: -60px;
+  }
+
+  .formSection {
+    padding: 0;
+  }
+
+  .submitFooter {
+    position: static;
+    padding: 16px 0 0;
+    border: none;
+    background: transparent;
+  }
+
+  .submitBtn {
+    box-shadow: none;
+  }
+
+  /* Confirmation in card */
+  .confirmation {
+    padding: 24px 0;
+  }
+
+  .pageFooter {
+    padding: 30px 40px 40px;
+  }
+}
+
+/* Tablet (600-899px) - single column, centered */
+@media (min-width: 600px) and (max-width: 899px) {
+  .hero {
+    padding: 50px 30px 40px;
+  }
+
+  .heroTitle {
+    font-size: 40px;
+  }
+
+  .infoCard {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .section {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .formSection {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}

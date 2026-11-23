@@ -520,7 +520,11 @@ export default function InboxClient({ inboxData, profile }) {
             <p className={styles.teamEventDescription}>{item.details}</p>
           )}
           {/* RSVP Buttons or Status */}
-          {!item.rsvp ? (
+          {item.publicRsvp ? (
+            <div className={styles.teamEventPublicRsvp}>
+              RSVP with the link Heather sent
+            </div>
+          ) : !item.rsvp ? (
             <div className={styles.teamEventRsvp}>
               <button
                 className={styles.teamEventRsvpYes}

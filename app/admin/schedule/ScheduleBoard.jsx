@@ -713,6 +713,8 @@ export default function ScheduleBoard({ initialData }) {
                   {/* Show team events */}
                   {dayTeamEvents.map((event) => {
                     const typeColor = TEAM_EVENT_COLORS[event.type] || TEAM_EVENT_COLORS.meeting;
+                    // Show public RSVP counts if available, otherwise show in-app RSVP counts
+                    const hasPublicRsvp = event.public_rsvp && event.publicRsvpCounts;
                     const yesCount = event.people?.filter((p) => p.rsvp === "yes").length || 0;
                     const pendingCount = event.people?.filter((p) => !p.rsvp).length || 0;
                     return (
@@ -730,7 +732,15 @@ export default function ScheduleBoard({ initialData }) {
                         </div>
                         <div className={styles.teamEventTitle}>{event.title}</div>
                         <div className={styles.teamEventRsvp}>
-                          {yesCount} coming{pendingCount > 0 && ` · ${pendingCount} pending`}
+                          {hasPublicRsvp ? (
+                            <>
+                              {event.publicRsvpCounts.coming} coming{event.publicRsvpCounts.total > event.publicRsvpCounts.coming && ` · ${event.publicRsvpCounts.total} people`}
+                            </>
+                          ) : (
+                            <>
+                              {yesCount} coming{pendingCount > 0 && ` · ${pendingCount} pending`}
+                            </>
+                          )}
                         </div>
                       </button>
                     );

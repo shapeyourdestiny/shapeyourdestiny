@@ -353,3 +353,214 @@
 .actionBtn:first-child:hover {
   background: rgba(211, 47, 47, 0.1);
 }
+
+/* Public RSVP Section */
+.publicRsvpSection {
+  margin-bottom: 20px;
+}
+
+.publicRsvpHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.publicRsvpActions {
+  display: flex;
+  gap: 8px;
+}
+
+.smallBtn {
+  padding: 6px 12px;
+  background: var(--tint);
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.smallBtn:hover {
+  background: var(--tint-deep);
+  color: var(--ink);
+}
+
+.rsvpTiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.rsvpTile {
+  padding: 14px;
+  background: var(--paper);
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
+}
+
+.tilePrimary {
+  background: var(--navy);
+  grid-column: span 2;
+}
+.tilePrimary .tileValue {
+  color: #fff;
+  font-size: 36px;
+}
+.tilePrimary .tileLabel {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tileValue {
+  display: block;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.tileLabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+.loading,
+.emptyRsvp {
+  padding: 20px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.rsvpTable {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rsvpRow {
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 8px rgba(20, 44, 107, 0.06);
+}
+
+.rsvpRowMain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rsvpName {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.rsvpPill {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.pillYes {
+  background: rgba(47, 122, 74, 0.15);
+  color: #2F7A4A;
+}
+.pillNo {
+  background: rgba(200, 68, 58, 0.1);
+  color: #C8443A;
+}
+
+.rsvpGuests {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.rsvpGroupTotal {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rsvpNote {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--tint);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.rsvpMeta {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.deleteBtn {
+  margin-left: auto;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #c62828;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+.deleteBtn:hover {
+  opacity: 1;
+}
+
+.deleteConfirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(211, 47, 47, 0.1);
+  border-radius: 8px;
+  font-size: 13px;
+}
+.deleteConfirm span {
+  flex: 1;
+  color: #c62828;
+}
+.deleteConfirm button {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.deleteConfirm button:first-of-type {
+  background: #c62828;
+  color: #fff;
+}
+.deleteConfirm button:last-of-type {
+  background: var(--tint);
+  color: var(--ink);
+}

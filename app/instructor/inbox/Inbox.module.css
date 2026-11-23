@@ -1168,3 +1168,14 @@
   font-weight: 400;
   color: var(--ink-soft);
 }
+
+.teamEventPublicRsvp {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--tint);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-align: center;
+}
