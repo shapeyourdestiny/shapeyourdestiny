@@ -1660,6 +1660,12 @@
   margin-bottom: 24px;
 }
 
+.turnstileExpired {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #F2C14E;
+}
+
 .submitBtn {
   width: 100%;
   padding: 20px 32px;

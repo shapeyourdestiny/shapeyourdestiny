@@ -246,6 +246,7 @@ export default function SurveyClient({ survey, isClosed, isDraft, districtInfo =
   const [submitted, setSubmitted] = useState(false);
   const [pageLoadTime] = useState(() => Date.now());
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileExpired, setTurnstileExpired] = useState(false);
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = back
   const [isAnimating, setIsAnimating] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -1345,6 +1346,8 @@ function QuestionStep({
         onSubmit={onSubmit}
         questionTitleRef={questionTitleRef}
         setTurnstileToken={setTurnstileToken}
+        turnstileExpired={turnstileExpired}
+        setTurnstileExpired={setTurnstileExpired}
       />
     );
   }
@@ -1553,7 +1556,7 @@ function GroupedStep({ step, answers, otherText, errors, updateAnswer, toggleChe
 }
 
 // Final Step Component - now includes name field
-function FinalStep({ answers, consentQuestion, nameQuestion, updateAnswer, errors, submitting, onSubmit, questionTitleRef, setTurnstileToken }) {
+function FinalStep({ answers, consentQuestion, nameQuestion, updateAnswer, errors, submitting, onSubmit, questionTitleRef, setTurnstileToken, turnstileExpired, setTurnstileExpired }) {
   // Get recap values
   const overall = answers.overall;
   const attendance = answers.attendance;
@@ -1637,7 +1640,19 @@ function FinalStep({ answers, consentQuestion, nameQuestion, updateAnswer, error
       )}
 
       <div className={styles.turnstileWrapper}>
-        <Turnstile onVerify={setTurnstileToken} />
+        <Turnstile
+          onVerify={(token) => {
+            setTurnstileToken(token);
+            setTurnstileExpired(false);
+          }}
+          onExpire={() => {
+            setTurnstileToken("");
+            setTurnstileExpired(true);
+          }}
+        />
+        {turnstileExpired && (
+          <p className={styles.turnstileExpired}>Verification expired. Please verify again above.</p>
+        )}
       </div>
 
       <button
