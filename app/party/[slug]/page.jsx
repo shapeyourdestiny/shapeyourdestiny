@@ -57,6 +57,24 @@ async function getEventBySlug(slug) {
   return data;
 }
 
+async function getRsvps(eventId) {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("team_event_public_rsvps")
+    .select("id, name, attending, guest_adults, guest_kids")
+    .eq("event_id", eventId)
+    .eq("attending", true)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching RSVPs:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
 export default async function PartyPage({ params }) {
   const { slug } = await params;
   const event = await getEventBySlug(slug);
@@ -79,6 +97,9 @@ export default async function PartyPage({ params }) {
   // Get creator's first name
   const creatorFirstName = event.creator?.full_name?.split(" ")[0] || "the team";
 
+  // Get RSVPs for "Who's Coming" section
+  const rsvps = await getRsvps(event.id);
+
   return (
     <PartyClient
       event={event}
@@ -86,6 +107,7 @@ export default async function PartyPage({ params }) {
       creatorFirstName={creatorFirstName}
       isCancelled={isCancelled}
       hasStarted={hasStarted}
+      initialRsvps={rsvps}
     />
   );
 }

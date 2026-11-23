@@ -112,7 +112,18 @@ function CheckIcon() {
   );
 }
 
-export default function PartyClient({ event, slug, creatorFirstName, isCancelled, hasStarted }) {
+// Users icon
+function UsersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+
+export default function PartyClient({ event, slug, creatorFirstName, isCancelled, hasStarted, initialRsvps = [] }) {
   // Form state
   const [name, setName] = useState("");
   const [attending, setAttending] = useState(null);
@@ -126,6 +137,9 @@ export default function PartyClient({ event, slug, creatorFirstName, isCancelled
   const [error, setError] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
+
+  // RSVPs list (for "Who's Coming")
+  const [rsvps, setRsvps] = useState(initialRsvps);
 
   // Conflict state (name already exists)
   const [showConflict, setShowConflict] = useState(false);
@@ -175,6 +189,11 @@ export default function PartyClient({ event, slug, creatorFirstName, isCancelled
 
   // Calculate group total
   const groupTotal = attending ? 1 + adults + kids : 0;
+
+  // Calculate total headcount from all RSVPs
+  const totalHeadcount = rsvps.reduce((sum, r) => {
+    return sum + 1 + (r.guest_adults || 0) + (r.guest_kids || 0);
+  }, 0);
 
   // Build group summary text
   const buildGroupSummary = () => {
@@ -249,6 +268,29 @@ export default function PartyClient({ event, slug, creatorFirstName, isCancelled
         // Ignore localStorage errors
       }
 
+      // Update RSVPs list if attending
+      if (attending) {
+        const newRsvp = {
+          id: data.id,
+          name: name.trim(),
+          attending: true,
+          guest_adults: adults,
+          guest_kids: kids,
+        };
+        // Check if updating existing or adding new
+        const existingIdx = rsvps.findIndex(r => r.name.toLowerCase().trim() === name.trim().toLowerCase());
+        if (existingIdx >= 0) {
+          const updated = [...rsvps];
+          updated[existingIdx] = newRsvp;
+          setRsvps(updated);
+        } else {
+          setRsvps([...rsvps, newRsvp]);
+        }
+      } else {
+        // If declining, remove from list
+        setRsvps(rsvps.filter(r => r.name.toLowerCase().trim() !== name.trim().toLowerCase()));
+      }
+
       setSubmittedData(rsvpData);
       setSubmitted(true);
     } catch (err) {
@@ -278,6 +320,36 @@ export default function PartyClient({ event, slug, creatorFirstName, isCancelled
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  // Render "Who's Coming" section
+  const renderGuestList = () => {
+    if (rsvps.length === 0) return null;
+
+    return (
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>Who is Coming</h2>
+        <div className={styles.guestList}>
+          <div className={styles.guestListHeader}>
+            <UsersIcon />
+            <span>{totalHeadcount} {totalHeadcount === 1 ? "person" : "people"} attending</span>
+          </div>
+          <div className={styles.guestListNames}>
+            {rsvps.map((r) => {
+              const guestCount = (r.guest_adults || 0) + (r.guest_kids || 0);
+              return (
+                <div key={r.id} className={styles.guestItem}>
+                  <span className={styles.guestName}>{r.name}</span>
+                  {guestCount > 0 && (
+                    <span className={styles.guestPlus}>+{guestCount}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Render cancelled state
   if (isCancelled) {
@@ -619,6 +691,9 @@ export default function PartyClient({ event, slug, creatorFirstName, isCancelled
           </div>
         )}
 
+        {/* Who's Coming */}
+        {renderGuestList()}
+
         {/* Form */}
         {renderForm()}
 
@@ -700,6 +775,9 @@ export default function PartyClient({ event, slug, creatorFirstName, isCancelled
                 )}
               </div>
             )}
+
+            {/* Who's Coming */}
+            {renderGuestList()}
           </div>
 
           {/* Right column - Form card */}

@@ -623,6 +623,62 @@
 }
 
 /* =============================================================================
+   GUEST LIST (Who's Coming)
+   ============================================================================= */
+.guestList {
+  margin-top: 10px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #E3E9F5;
+  overflow: hidden;
+}
+
+.guestListHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #F1F4FB;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1F3168;
+}
+
+.guestListHeader svg {
+  width: 18px;
+  height: 18px;
+  stroke: #1F3168;
+}
+
+.guestListNames {
+  padding: 8px 16px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guestItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #F4F7FC;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.guestName {
+  font-weight: 600;
+  color: #141C3A;
+}
+
+.guestPlus {
+  font-weight: 700;
+  color: #5A6385;
+  font-size: 12px;
+}
+
+/* =============================================================================
    FOOTER
    ============================================================================= */
 .pageFooter {
