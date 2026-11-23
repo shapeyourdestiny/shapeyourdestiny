@@ -22,6 +22,18 @@ export default function Turnstile({
   const containerRef = useRef(null);
   const widgetIdRef = useRef(null);
 
+  // Use refs for callbacks to avoid re-rendering the widget
+  const onVerifyRef = useRef(onVerify);
+  const onErrorRef = useRef(onError);
+  const onExpireRef = useRef(onExpire);
+
+  // Keep refs up to date
+  useEffect(() => {
+    onVerifyRef.current = onVerify;
+    onErrorRef.current = onError;
+    onExpireRef.current = onExpire;
+  }, [onVerify, onError, onExpire]);
+
   useEffect(() => {
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
@@ -50,13 +62,13 @@ export default function Turnstile({
         theme,
         size,
         callback: (token) => {
-          onVerify?.(token);
+          onVerifyRef.current?.(token);
         },
         "error-callback": () => {
-          onError?.();
+          onErrorRef.current?.();
         },
         "expired-callback": () => {
-          onExpire?.();
+          onExpireRef.current?.();
           // Auto-refresh the widget
           if (widgetIdRef.current !== null) {
             window.turnstile.reset(widgetIdRef.current);
@@ -71,7 +83,7 @@ export default function Turnstile({
         widgetIdRef.current = null;
       }
     };
-  }, [onVerify, onError, onExpire, theme, size]);
+  }, [theme, size]); // Only re-render if theme or size changes
 
   return <div ref={containerRef} />;
 }
