@@ -23,7 +23,7 @@ INSERT INTO team_events (
   highlight
 ) VALUES (
   'social',
-  '🎄 Shape Your Destiny Christmas Celebration! 🎄',
+  'Shape Your Destiny Christmas Celebration',
   '2026-12-05',
   '12:30:00',
   '15:00:00',
