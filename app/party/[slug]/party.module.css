@@ -59,10 +59,13 @@
   line-height: 1.08;
   margin: 14px 0 0;
   font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .goldText {
-  color: #E8A93A;
+  color: #F5C04A;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .heroDetails {
