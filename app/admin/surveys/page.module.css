@@ -308,9 +308,20 @@
     display: none;
   }
 
-  .districtItem .copyBtn {
+  .districtItem .copyBtn,
+  .districtItem .deleteBtn {
     display: none;
   }
+}
+
+.deleteBtn {
+  color: #888;
+  padding: 6px 8px !important;
+}
+
+.deleteBtn:hover {
+  color: #c00 !important;
+  background: #fee !important;
 }
 
 /* =============================================================================

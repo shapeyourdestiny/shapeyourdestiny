@@ -23,11 +23,27 @@ function formatDate(dateStr) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+const TrashIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+  </svg>
+);
+
+const RefreshIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+    <path d="M21 3v5h-5" />
+    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+    <path d="M3 21v-5h5" />
+  </svg>
+);
+
 export default function SurveyPageClient({ survey, sends, allDistricts, totalResponses }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showSendModal, setShowSendModal] = useState(false);
   const [editingSend, setEditingSend] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   // Open send modal if ?send=1 in URL
   const shouldOpenSend = searchParams.get("send") === "1";
@@ -62,6 +78,30 @@ export default function SurveyPageClient({ survey, sends, allDistricts, totalRes
   const handleOpenSend = (existingSend = null) => {
     setEditingSend(existingSend);
     setShowSendModal(true);
+  };
+
+  const handleDelete = async (e, send) => {
+    e.stopPropagation();
+    if (!confirm(`Delete survey link for ${send.districtName}? This cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingId(send.id);
+    try {
+      const res = await fetch(`/api/admin/surveys/${survey.slug}/sends/${send.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to delete");
+      }
+
+      window.location.reload();
+    } catch (err) {
+      alert(err.message);
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -149,6 +189,16 @@ export default function SurveyPageClient({ survey, sends, allDistricts, totalRes
                 Copy link
               </button>
 
+              <button
+                type="button"
+                className={`${styles.btnGhost} ${styles.btnSm} ${styles.deleteBtn}`}
+                onClick={(e) => handleDelete(e, send)}
+                disabled={deletingId === send.id}
+                title="Delete this survey link"
+              >
+                <TrashIcon />
+              </button>
+
               <ChevronIcon />
             </div>
           ))
@@ -234,6 +284,25 @@ function SendModal({ survey, sends, allDistricts, editingSend, onClose }) {
       clearTimeout(timer);
     };
   }, [selectedDistrictId, isEditing]);
+
+  // Refresh schools from database (for editing)
+  const handleRefreshSchools = async () => {
+    if (!selectedDistrictId) return;
+
+    setLoadingSchools(true);
+    try {
+      const res = await fetch(`/api/admin/districts/${selectedDistrictId}/schools`);
+      const data = await res.json();
+      const schools = data.schools || [];
+      setDistrictSchools(schools);
+      // Select all fetched schools
+      setSelectedSchools(schools.map((s) => s.name));
+    } catch (err) {
+      console.error("Failed to fetch schools:", err);
+    } finally {
+      setLoadingSchools(false);
+    }
+  };
 
   const handleDistrictChange = (e) => {
     const districtId = e.target.value;
@@ -374,20 +443,30 @@ function SendModal({ survey, sends, allDistricts, editingSend, onClose }) {
 
                   {loadingSchools ? (
                     <p className={styles.formNote}>Loading schools...</p>
-                  ) : existingSendForDistrict ? (
+                  ) : existingSendForDistrict && districtSchools.length === 0 ? (
                     // Editing existing - show current schools as checkboxes
-                    <div className={styles.checks}>
-                      {existingSendForDistrict.schools.map((school) => (
-                        <label key={school} className={styles.checkLabel}>
-                          <input
-                            type="checkbox"
-                            checked={selectedSchools.includes(school)}
-                            onChange={() => handleSchoolToggle(school)}
-                          />
-                          {school}
-                        </label>
-                      ))}
-                    </div>
+                    <>
+                      <div className={styles.checks}>
+                        {existingSendForDistrict.schools.map((school) => (
+                          <label key={school} className={styles.checkLabel}>
+                            <input
+                              type="checkbox"
+                              checked={selectedSchools.includes(school)}
+                              onChange={() => handleSchoolToggle(school)}
+                            />
+                            {school}
+                          </label>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        className={`${styles.btnGhost} ${styles.btnSm}`}
+                        onClick={handleRefreshSchools}
+                        style={{ marginTop: 8 }}
+                      >
+                        <RefreshIcon /> Refresh schools from database
+                      </button>
+                    </>
                   ) : districtSchools.length > 0 ? (
                     <div className={styles.checks}>
                       {districtSchools.map((school) => (
