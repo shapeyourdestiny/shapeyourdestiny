@@ -46,15 +46,15 @@ function hasChristmas(title) {
 }
 
 // Render title with Christmas styling
-function renderTitle(title) {
+function renderTitle(title, stylesRef) {
   if (!hasChristmas(title)) return title;
 
   const parts = title.split(/(\bChristmas\b)/i);
   return parts.map((part, i) =>
     /christmas/i.test(part) ? (
-      <span key={i} className={styles.goldText}>{part}</span>
+      <span key={i} className={stylesRef.goldText}>{part}</span>
     ) : (
-      <span key={i}>{part}</span>
+      <span key={i} className={stylesRef.whiteText}>{part}</span>
     )
   );
 }
@@ -358,7 +358,7 @@ export default function PartyClient({ event, slug, creatorFirstName, isCancelled
         <div className={styles.hero}>
           <div className={styles.snow} />
           <div className={styles.eyebrow}>TEAM PARTY</div>
-          <h1 className={styles.heroTitle}>{renderTitle(event.title)}</h1>
+          <h1 className={styles.heroTitle}>{renderTitle(event.title, styles)}</h1>
         </div>
         <div className={styles.closedMessage}>
           <h2>This event was cancelled.</h2>
@@ -374,7 +374,7 @@ export default function PartyClient({ event, slug, creatorFirstName, isCancelled
         <div className={styles.hero}>
           <div className={styles.snow} />
           <div className={styles.eyebrow}>TEAM PARTY</div>
-          <h1 className={styles.heroTitle}>{renderTitle(event.title)}</h1>
+          <h1 className={styles.heroTitle}>{renderTitle(event.title, styles)}</h1>
         </div>
         <div className={styles.closedMessage}>
           <h2>RSVPs are closed.</h2>
@@ -628,7 +628,7 @@ export default function PartyClient({ event, slug, creatorFirstName, isCancelled
           <div className={styles.snow} />
           {hasChristmas(event.title) && <OrnamentSVG className={styles.ornament} />}
           <div className={styles.eyebrow}>TEAM PARTY</div>
-          <h1 className={styles.heroTitle}>{renderTitle(event.title)}</h1>
+          <h1 className={styles.heroTitle}>{renderTitle(event.title, styles)}</h1>
           <p className={styles.heroDetails}>{event.details}</p>
         </div>
 
@@ -714,7 +714,7 @@ export default function PartyClient({ event, slug, creatorFirstName, isCancelled
         <div className={styles.heroInner}>
           {hasChristmas(event.title) && <OrnamentSVG className={styles.ornament} />}
           <div className={styles.eyebrow}>TEAM PARTY</div>
-          <h1 className={styles.heroTitle}>{renderTitle(event.title)}</h1>
+          <h1 className={styles.heroTitle}>{renderTitle(event.title, styles)}</h1>
           <p className={styles.heroDetails}>{event.details}</p>
         </div>
       </div>
