@@ -930,6 +930,7 @@ export default function SurveyClient({ survey, isClosed, isDraft, districtInfo =
                 shakeField={shakeField}
                 isAnimating={isAnimating}
                 setDropdownOpen={setDropdownOpen}
+                districtSchools={districtInfo?.schools}
               />
             )}
           </div>
@@ -1329,6 +1330,7 @@ function QuestionStep({
   shakeField,
   isAnimating,
   setDropdownOpen,
+  districtSchools,
 }) {
   // Final step - recap and submit
   if (step.type === "final") {
@@ -1358,6 +1360,7 @@ function QuestionStep({
         updateOtherText={updateOtherText}
         questionTitleRef={questionTitleRef}
         setDropdownOpen={setDropdownOpen}
+        districtSchools={districtSchools}
       />
     );
   }
@@ -1427,9 +1430,14 @@ function QuestionStep({
 }
 
 // About Step Component - without name field (name moved to final step)
-function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, questionTitleRef, setDropdownOpen }) {
+function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, questionTitleRef, setDropdownOpen, districtSchools }) {
   const schoolQ = step.questions.find((q) => q.id === "school");
   const roleQ = step.questions.find((q) => q.id === "role");
+
+  // Use district-specific schools if available, otherwise fall back to survey defaults
+  const schoolOptions = districtSchools && districtSchools.length > 0
+    ? ["Prefer not to say", ...districtSchools]
+    : schoolQ?.options || [];
 
   return (
     <div className={styles.questionWrapper}>
@@ -1455,7 +1463,7 @@ function AboutStep({ step, answers, otherText, updateAnswer, updateOtherText, qu
           <div className={styles.aboutField}>
             <label className={styles.aboutLabel}>Your school</label>
             <SearchableDropdown
-              options={schoolQ.options}
+              options={schoolOptions}
               value={answers[schoolQ.id] || ""}
               onChange={(v) => updateAnswer(schoolQ.id, v)}
               placeholder="Pick your school, or type to search"
