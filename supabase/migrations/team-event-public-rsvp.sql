@@ -89,6 +89,8 @@ CREATE POLICY "Admins can manage team_event_public_rsvps" ON team_event_public_r
 -- 4. UPDATE my_team_events FUNCTION TO INCLUDE public_rsvp
 -- =============================================================================
 
+DROP FUNCTION IF EXISTS my_team_events(date, date);
+
 CREATE OR REPLACE FUNCTION my_team_events(
   p_start_date DATE DEFAULT NULL,
   p_end_date DATE DEFAULT NULL
