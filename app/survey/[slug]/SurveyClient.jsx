@@ -932,6 +932,8 @@ export default function SurveyClient({ survey, isClosed, isDraft, districtInfo =
                 isAnimating={isAnimating}
                 setDropdownOpen={setDropdownOpen}
                 districtSchools={districtInfo?.schools}
+                turnstileExpired={turnstileExpired}
+                setTurnstileExpired={setTurnstileExpired}
               />
             )}
           </div>
@@ -1332,6 +1334,8 @@ function QuestionStep({
   isAnimating,
   setDropdownOpen,
   districtSchools,
+  turnstileExpired,
+  setTurnstileExpired,
 }) {
   // Final step - recap and submit
   if (step.type === "final") {
